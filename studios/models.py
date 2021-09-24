@@ -11,7 +11,7 @@ class Studio(models.Model):
     class Status(models.IntegerChoices):
         OPEN = 0, _("Open")
         CLOSED = 1, _("Closed")
-        
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="studio_user")
     name = models.CharField(max_length=254, unique=True)
     slug = models.SlugField(unique=True)
     status = models.PositiveSmallIntegerField(choices=Status.choices, default=0)
@@ -41,13 +41,13 @@ class Studio(models.Model):
     
     
 class StudioModerator(models.Model):
-    user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name="studio_moderator_user")
-    studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_moderator_studios")
+    user = models.OneToOneField(get_user_model(),related_name='studio_moderator',on_delete=models.CASCADE)
+    studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="Studio")
     slug = models.SlugField(unique=True)
     contact = models.CharField(max_length=30, blank=True, null=True)
     address = models.CharField(max_length=254, blank=True, null=True)
-    is_admin = models.BooleanField(default=False)
-    is_staff = models.BooleanField(default=False)
+    # is_admin = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -57,7 +57,7 @@ class StudioModerator(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return self.user.get_dynamic_username()
+        return self.slug
 
 
 """
@@ -84,7 +84,7 @@ def update_studio_moderator_slug_on_pre_save(sender, instance, **kwargs):
 def delete_moderator_users_on_studio_pre_delete(sender, instance, **kwargs):
     """ Deletes Studio Moderator Users on `Studio` pre_delete hook """
     try:
-        user_qs = get_user_model().objects.filter(studio_moderator_user__studio_id=instance.id)
+        user_qs = get_user_model().objects.filter(id=instance.user.id)
         if user_qs:
             user_qs.delete()
     except Exception as E:

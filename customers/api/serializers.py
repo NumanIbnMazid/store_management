@@ -35,7 +35,6 @@ class CustomerSerializer(serializers.ModelSerializer):
         representation = super(CustomerSerializer, self).to_representation(instance)
         representation['user'] = UserCustomerSerializer(instance.user).data
         return representation
-    
 
     @transaction.atomic
     def save_base_user(self, request):
