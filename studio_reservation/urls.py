@@ -55,6 +55,7 @@ INTERNAL_APP_URL_PATTERNS = [
     path("studio/", include(("studios.api.urls", "studios"), namespace="studios")),
     path("store/", include(("stores.api.urls", "stores"), namespace="stores")),
     path("space/", include(("spaces.api.urls", "spaces"), namespace="spaces")),
+    path("plan/", include(("plans.api.urls", "plans"), namespace="plans")),
 ]
 
 """ URL Patterns - Main """
