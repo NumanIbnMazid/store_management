@@ -1,7 +1,7 @@
 from django.db import models
 from stores.models import Store
 from spaces.models import Space
-from utils.snippets import simple_random_string
+from utils.snippets import simple_random_string, unique_slug_generator
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
@@ -16,7 +16,7 @@ class Category(models.Model):
  
     class Meta:
         verbose_name = 'Category'
-        verbose_name_plural = 'Category'
+        verbose_name_plural = 'Categories'
         ordering = ["-created_at"]
     
     def __str__(self):
@@ -93,16 +93,25 @@ class Product(models.Model):
 def update_category_slug_on_pre_save(sender, instance, **kwargs):
     """ Generates and updates category slug on category pre_save hook """
     if not instance.slug:
-        instance.slug = simple_random_string()
+        try:
+            instance.slug = unique_slug_generator(instance=instance, field=instance.category_name)
+        except Exception as E:
+            instance.slug = simple_random_string()
 
 @receiver(pre_save, sender=Option)
 def update_option_slug_on_pre_save(sender, instance, **kwargs):
     """ Generates and updates option slug on option pre_save hook """
     if not instance.slug:
-        instance.slug = simple_random_string()
+        try:
+            instance.slug = unique_slug_generator(instance=instance, field=instance.option_name)
+        except Exception as E:
+            instance.slug = simple_random_string()
 
 @receiver(pre_save, sender=Product)
 def update_product_slug_on_pre_save(sender, instance, **kwargs):
     """ Generates and updates product slug on product pre_save hook """
     if not instance.slug:
-        instance.slug = simple_random_string()
+        try:
+            instance.slug = unique_slug_generator(instance=instance, field=instance.product_name)
+        except Exception as E:
+            instance.slug = simple_random_string()
