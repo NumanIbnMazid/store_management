@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .category_views import OptionCategoryManagerViewSet
+from .option_category_views import OptionCategoryManagerViewSet
 from .option_views import OptionManagerViewSet
 from .plan_views import PlanManagerViewSet
 

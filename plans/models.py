@@ -1,5 +1,5 @@
 from django.db import models
-from stores.models import Store
+from studios.models import Studio
 from spaces.models import Space
 from utils.snippets import simple_random_string, unique_slug_generator
 from utils.image_upload_helper import upload_plan_image_path, upload_category_image_path, upload_option_image_path
@@ -9,7 +9,7 @@ from django.dispatch import receiver
 
 class OptionCategory(models.Model):
     number = models.IntegerField(unique=True)
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name="store_categories")
+    studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_option_categories")
     title = models.CharField(max_length=150)
     slug = models.SlugField(unique=True)
     icon = models.ImageField(upload_to=upload_category_image_path, blank=True, null=True)
