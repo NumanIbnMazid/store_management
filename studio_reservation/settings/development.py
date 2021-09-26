@@ -19,16 +19,16 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 #     }
 
 
-# ======= ELEPHANT POSTGRESQL =======
+# ======= HEROKU POSTGRESQL =======
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         # 'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': env.str('ELEPHANT_DB_NAME'),
-        'USER': env.str('ELEPHANT_DB_USER'),
-        'PASSWORD': env.str('ELEPHANT_DB_PASSWORD'),
-        'HOST': env.str('ELEPHANT_DB_HOST'),
-        'PORT': env.int('ELEPHANT_DB_PORT'),
+        'NAME': env.str('HEROKU_DB_NAME'),
+        'USER': env.str('HEROKU_DB_USER'),
+        'PASSWORD': env.str('HEROKU_DB_PASSWORD'),
+        'HOST': env.str('HEROKU_DB_HOST'),
+        'PORT': env.int('HEROKU_DB_PORT'),
         # 'OPTIONS': {
         #     'charset': 'utf8mb4',
         #     'autocommit': True,
