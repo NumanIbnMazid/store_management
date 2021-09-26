@@ -1,17 +1,17 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .category_views import CategoryManagerViewSet
+from .category_views import OptionCategoryManagerViewSet
 from .option_views import OptionManagerViewSet
-from .product_views import ProductManagerViewSet
+from .plan_views import PlanManagerViewSet
 
 router = DefaultRouter()
 
 urlpatterns = [
-    # ==============================*** Category URLS ***==============================
-    path("category/create/", CategoryManagerViewSet.as_view({'post': 'create'}, name='create_category')),
-    path("category/retrieve/<slug>/", CategoryManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_category")),
-    path("category/update/<slug>/", CategoryManagerViewSet.as_view({"patch": "update"}, name="update_category")),
-    path("category/delete/<slug>/", CategoryManagerViewSet.as_view({"delete": "destroy"}, name="delete_category")),
+    # ==============================*** Option Category URLS ***==============================
+    path("option-category/create/", OptionCategoryManagerViewSet.as_view({'post': 'create'}, name='create_option_category')),
+    path("option-category/retrieve/<slug>/", OptionCategoryManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_option_category")),
+    path("option-category/update/<slug>/", OptionCategoryManagerViewSet.as_view({"patch": "update"}, name="update_option_category")),
+    path("option-category/delete/<slug>/", OptionCategoryManagerViewSet.as_view({"delete": "destroy"}, name="delete_option_category")),
 
     # ==============================*** Option URLS ***==============================
     path("option/create/", OptionManagerViewSet.as_view({'post': 'create'}, name='create_option')),
@@ -19,11 +19,11 @@ urlpatterns = [
     path("option/update/<slug>/", OptionManagerViewSet.as_view({"patch": "update"}, name="update_option")),
     path("option/delete/<slug>/", OptionManagerViewSet.as_view({"delete": "destroy"}, name="delete_option")),
 
-    # ==============================*** Product URLS ***==============================
-    path("product/create/", ProductManagerViewSet.as_view({'post': 'create'}, name='create_product')),
-    path("product/retrieve/<slug>/", ProductManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_product")),
-    path("product/update/<slug>/", ProductManagerViewSet.as_view({"patch": "update"}, name="update_product")),
-    path("product/delete/<slug>/", ProductManagerViewSet.as_view({"delete": "destroy"}, name="delete_product")),
+    # ==============================*** Plan URLS ***==============================
+    path("create/", PlanManagerViewSet.as_view({'post': 'create'}, name='create_plan')),
+    path("retrieve/<slug>/", PlanManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_plan")),
+    path("update/<slug>/", PlanManagerViewSet.as_view({"patch": "update"}, name="update_plan")),
+    path("delete/<slug>/", PlanManagerViewSet.as_view({"delete": "destroy"}, name="delete_plan")),
 ]
 
 

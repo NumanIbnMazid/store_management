@@ -1,20 +1,20 @@
-from .serializers import (CategorySerializer, CategoryUpdateSerializer)
-from plans.models import Category
+from .serializers import (OptionCategorySerializer, OptionCategoryUpdateSerializer)
+from plans.models import OptionCategory
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
 
-class CategoryManagerViewSet(LoggingMixin, CustomViewSet):
+class OptionCategoryManagerViewSet(LoggingMixin, CustomViewSet):
     
     logging_methods = ["GET", "POST", "PATCH", "DELETE"]
-    queryset = Category.objects.all()
+    queryset = OptionCategory.objects.all()
     lookup_field = "slug"
     
     def get_serializer_class(self):
         if self.action in ["update"]:
-            self.serializer_class = CategoryUpdateSerializer
+            self.serializer_class = OptionCategoryUpdateSerializer
         else:
-            self.serializer_class = CategorySerializer
+            self.serializer_class = OptionCategorySerializer
         return self.serializer_class
     
     def get_permissions(self):
