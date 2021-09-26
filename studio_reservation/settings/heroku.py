@@ -1,8 +1,8 @@
 """ # Production Environment Configurations # """
 # import common configurations
 from studio_reservation.settings.common import *
-import django_heroku
-import dj_database_url
+# import django_heroku
+# import dj_database_url
 
 """ *** Application Allowed Hosts *** """
 ALLOWED_HOSTS = ["studio-reservation.herokuapp.com"]
@@ -46,4 +46,4 @@ DATABASES = {
 
 
 # Activate Django-Heroku.
-django_heroku.settings(locals())
+# django_heroku.settings(locals())
