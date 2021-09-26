@@ -1,20 +1,21 @@
 from rest_framework import serializers
-from plans.models import Category, Option, Product
+from plans.models import OptionCategory, Option, Plan
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class OptionCategorySerializer(serializers.ModelSerializer):
     
     class Meta:
-        model = Category
+        model = OptionCategory
         fields = "__all__"
         read_only_fields = ("slug",)
 
-class CategoryUpdateSerializer(serializers.ModelSerializer):
+
+class OptionCategoryUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
-        model = Category
+        model = OptionCategory
         fields = "__all__"
-        read_only_fields = ("slug","category_number", "store",)
+        read_only_fields = ("slug","number", "store",)
 
 
 
@@ -30,19 +31,19 @@ class OptionUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
         fields = "__all__"
-        read_only_fields = ("slug","category","option_number",)
+        read_only_fields = ("slug","category","number",)
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class PlanSerializer(serializers.ModelSerializer):
     
     class Meta:
-        model = Product
+        model = Plan
         fields = "__all__"
         read_only_fields = ("slug",)
 
-class ProductUpdateSerializer(serializers.ModelSerializer):
+class PlanUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
-        model = Product
+        model = Plan
         fields = "__all__"
-        read_only_fields = ("slug","store","space","option", "category","reservation",)
+        read_only_fields = ("slug", "space", "option")

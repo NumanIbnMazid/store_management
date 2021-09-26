@@ -1,15 +1,16 @@
 from django.contrib import admin
 from utils.mixins import CustomModelAdminMixin
-from .models import Category, Option, Time, Product
+from .models import OptionCategory, Option, Plan
 
 
-class CategoryAdmin(CustomModelAdminMixin, admin.ModelAdmin):
+class OptionCategoryAdmin(CustomModelAdminMixin, admin.ModelAdmin):
     pass
 
     class Meta:
-        model = Category
+        model = OptionCategory
         
-admin.site.register(Category, CategoryAdmin)
+
+admin.site.register(OptionCategory, OptionCategoryAdmin)
 
 
 class OptionAdmin(CustomModelAdminMixin, admin.ModelAdmin):
@@ -20,15 +21,8 @@ class OptionAdmin(CustomModelAdminMixin, admin.ModelAdmin):
 admin.site.register(Option, OptionAdmin)
 
 
-class ProductAdmin(CustomModelAdminMixin, admin.ModelAdmin):
+class PlanAdmin(CustomModelAdminMixin, admin.ModelAdmin):
     pass
     class Meta:
-        model = Product
-admin.site.register(Product, ProductAdmin)
-
-
-class TimeAdmin(CustomModelAdminMixin, admin.ModelAdmin):
-    pass
-    class Meta:
-        model = Time
-admin.site.register(Time, TimeAdmin)
+        model = Plan
+admin.site.register(Plan, PlanAdmin)
