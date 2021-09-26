@@ -11,6 +11,4 @@
 
 # TODO: API - StudioStaff CRUD
 
-# Heroku Database URL: postgresql-concentric-32516
-
-# Created postgresql-colorful-30177 as HEROKU_POSTGRESQL_GREEN_URL
+# Created postgresql-defined-08212 as DATABASE_URL
