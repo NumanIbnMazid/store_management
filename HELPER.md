@@ -9,12 +9,8 @@
 
 ## User Level Tokens
 
-<<<<<<< HEAD
-## SuperAdmin
-=======
 * SuperAdmin
   * Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM1MjY3MTU2LCJqdGkiOiJhYWE2ZmYwODFmNWI0MWJmYjFjZTQzMzI0MzhkM2RmNiIsInVzZXJfaWQiOjF9.pyMEn6AGBJKdFFKGbO7sklHqxgdL2ZadZ1KVhZbmGxk
->>>>>>> 40b5ecba2b1e03a4731b88ab31ccd558b2a3ac63
 
 * Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjM1MDE1OTE3LCJqdGkiOiI1MjcyOTg3ZmZhYzM0MDU5ODIxYTJiYmRiNTMzZDEwZiIsInVzZXJfaWQiOjF9.amymoxUuOuidB6OZDDvhJ_bQbv8c6VTNO8B0SR1ZLuA
   
