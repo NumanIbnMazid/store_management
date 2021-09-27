@@ -1,0 +1,22 @@
+from django.db.models import fields
+from rest_framework import serializers
+from studio_calendar.models import StudioCalendar
+
+class StudioCalendarSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = StudioCalendar
+        fields = "__all__"
+        read_only_fields = ("slug", "country_code")
+
+
+class StudioCalendarUpdateSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = StudioCalendar
+        fields = "__all__"
+        read_only_fields = ("slug", "country_code", "studio")
+        
+class SingleHolidayCheckerSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    studio = serializers.IntegerField()
