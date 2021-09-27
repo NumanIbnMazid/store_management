@@ -18,7 +18,6 @@ class OptionCategoryUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ("slug","number", "store",)
 
 
-
 class OptionSerializer(serializers.ModelSerializer):
     
     class Meta:
