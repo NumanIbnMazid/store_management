@@ -57,9 +57,9 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
     
     def check_studio_holidays_exists_for_year(self, year, studio_obj):
         qs = StudioCalendar.objects.filter(year=year, studio=studio_obj)
-        if not qs.exists():
-            return False, None
-        return True, qs
+        if qs.exists():
+            return True
+        return False
     
     def get_single_holiday(self, date, studio_obj):
         date_obj = parser.parse(date)
@@ -71,6 +71,7 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
         
     
     def check_single_holiday(self, request, *args, **kwargs):
+        """ *** Parent Method for checking Single Holiday *** """
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(data=request.data, partial=True)
         if serializer.is_valid():
@@ -80,10 +81,9 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             if studio_qs.exists():
                 studio_obj = studio_qs.first()
             else:
-                raise Exception(f"Studio {studio} not exists!")
-            date = request.data.get("date", "")
+                return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg=f"Studio {studio} does not exists!", status=400)
             
-            date_obj = parser.parse(date)
+            date_obj = parser.parse(request.data.get("date", ""))
             year = date_obj.year
             formatted_date_str = date_obj.strftime("%Y-%m-%d")
             
@@ -104,17 +104,17 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             
             # check if studio holidays exists
             holiday_existance_result = self.check_studio_holidays_exists_for_year(year=year, studio_obj=studio_obj)
-            if holiday_existance_result[0] == True:
-                holiday_model_instance = self.get_single_holiday(date=formatted_date_str, studio_obj=studio_obj)
-                if holiday_model_instance[0] == True:
-                    prepare_holiday_data(holiday_instance=holiday_model_instance[1])
+            if holiday_existance_result == True:
+                holiday_filter_result = self.get_single_holiday(date=formatted_date_str, studio_obj=studio_obj)
+                if holiday_filter_result[0] == True:
+                    prepare_holiday_data(holiday_instance=holiday_filter_result[1])
                 else:
                     result["is_holiday"] = False
             else:
                 self.create_studio_holidays_for_year(year=str(year), studio_obj=studio_obj)
-                holiday_model_instance = self.get_single_holiday(date=formatted_date_str, studio_obj=studio_obj)
-                if holiday_model_instance[0] == True:
-                    prepare_holiday_data(holiday_instance=holiday_model_instance[1])
+                holiday_filter_result = self.get_single_holiday(date=formatted_date_str, studio_obj=studio_obj)
+                if holiday_filter_result[0] == True:
+                    prepare_holiday_data(holiday_instance=holiday_filter_result[1])
                 else:
                     result["is_holiday"] = False
                     
