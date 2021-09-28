@@ -27,7 +27,7 @@ class ResponseWrapper(Response):
             "error": {"code": error_code, "error_details": error_msg},
             "data": data,
             "status": response_success,
-            "status_code": status_by_default_for_gz,
+            "status_code": error_code if not error_code == "" and not error_code == None else status_by_default_for_gz,
             "message": msg if msg else str(error_msg) if error_msg else "Success" if response_success else "Failed",
         }
         if data_type is not None:
