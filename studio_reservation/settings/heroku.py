@@ -8,12 +8,6 @@ import dj_database_url
 ALLOWED_HOSTS = ["studio-reservation.herokuapp.com"]
 
 """ *** Database Configuration *** """
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 
 # ======= HEROKU POSTGRESQL =======
 DATABASES = {
@@ -25,13 +19,6 @@ DATABASES = {
         'PASSWORD': env.str('HEROKU_DB_PASSWORD'),
         'HOST': env.str('HEROKU_DB_HOST'),
         'PORT': env.int('HEROKU_DB_PORT'),
-        # 'OPTIONS': {
-        #     'charset': 'utf8mb4',
-        #     'autocommit': True,
-        #     'use_unicode': True,
-        #     'init_command': 'SET storage_engine=INNODB,character_set_connection=utf8mb4,collation_connection=utf8mb4_unicode_ci',
-        #     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
-        # },
     }
 }
 

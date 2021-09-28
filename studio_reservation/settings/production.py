@@ -6,7 +6,7 @@ from studio_reservation.settings.common import *
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
 """ *** Database Configuration *** """
-if env.str('DATABASE_URL', default=''):
+if env.str('PRODUCTION_DATABASE_URL', default=''):
     DATABASES = {
         'default': env.db(),
     }
