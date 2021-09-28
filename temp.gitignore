@@ -130,7 +130,6 @@ venv.bak/
 /site
 # static
 /static/media/
-/static_cdn/media_root/
 # mypy
 .mypy_cache/
 .dmypy.json
