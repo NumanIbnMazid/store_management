@@ -38,5 +38,9 @@ DATABASES = {
 prod_db = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(prod_db)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> e402aa9778f86d399884036dd8ec56a6c0f94efd
 # Activate Django-Heroku.
 django_heroku.settings(locals())
