@@ -210,3 +210,4 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
 
 # def check_holiday_from_list():
 # def check_holidays_for_year():
+# def get_all_holidays():
