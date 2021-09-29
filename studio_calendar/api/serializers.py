@@ -20,3 +20,10 @@ class StudioCalendarUpdateSerializer(serializers.ModelSerializer):
 class SingleHolidayCheckerSerializer(serializers.Serializer):
     date = serializers.DateField()
     studio = serializers.IntegerField()
+
+
+class RangeHolidayCheckerSerializer(serializers.Serializer):
+    start_date = serializers.DateField()
+    end_date = serializers.DateField()
+    studio = serializers.IntegerField()
+     

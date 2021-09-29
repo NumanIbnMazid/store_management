@@ -8,4 +8,6 @@ router = DefaultRouter()
 urlpatterns = [
     # ==============================*** Studio Calendar URLS ***==============================
     path("get-single-holiday-status/", StudioCalendarManagerViewSet.as_view({"post": "check_single_holiday"}, name="check_single_holiday")),
+    path("get-holiday-from-range/", StudioCalendarManagerViewSet.as_view({"post": "check_holiday_between_range"}, name="check_holiday_between_range")),
+
 ]

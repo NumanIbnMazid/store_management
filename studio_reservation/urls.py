@@ -2,6 +2,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import url
+from django.views.static import serve
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
@@ -61,6 +62,9 @@ INTERNAL_APP_URL_PATTERNS = [
 
 """ URL Patterns - Main """
 urlpatterns = [
+    # For handling Static Files in Debug False Mode
+    url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    url(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
     path('admin/', admin.site.urls),
 ] + THIRD_PARTY_URL_PATTERNS + INTERNAL_APP_URL_PATTERNS
 
