@@ -14,6 +14,7 @@ from rest_framework_simplejwt.views import (
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from utils.decorators import has_staff_permission_required
+from .views import HomeView
 
 
 # Define Rest Framework Router
@@ -66,6 +67,7 @@ urlpatterns = [
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
     url(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
     path('admin/', admin.site.urls),
+    path("", HomeView.as_view(), name="home"),
 ] + THIRD_PARTY_URL_PATTERNS + INTERNAL_APP_URL_PATTERNS
 
 if settings.DEBUG:

@@ -10,18 +10,6 @@ from utils.helpers import ResponseWrapper
 from dateutil import parser
 
 
-# Select country
-# jp_holidays = holidays.JP()
-
-# base_holidays = holidays.HolidayBase()
-
-# print('26-01-2019' in base_holidays)
-
-# base_holidays.append('26-01-2019')
-
-# print('26-01-2019' in base_holidays)
-
-
 class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
 
     logging_methods = ["GET", "POST", "PATCH", "DELETE"]

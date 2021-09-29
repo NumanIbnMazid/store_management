@@ -1,0 +1,72 @@
+{% load static %}
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="{% static 'images/icon.png' %}" type="image/x-icon">
+    <link rel="stylesheet" href="{% static 'styles/style.css' %}">
+    <title>Studio Reservation System</title>
+
+</head>
+
+<body>
+
+
+    <header class="site__header">
+
+        <div class="grid">
+
+            <div class="site__logo">
+
+                <a href="{% url 'home' %}">
+                    <img src="{% static 'images/icon.png' %}" alt="">
+                </a>
+
+            </div>
+
+            <nav class="navigation navigation--inline navigation--main">
+                <ul>
+                    <li>
+                        <a href="{% url 'schema-swagger-ui' %}" class="button button--primary button--rounded">VIEW API</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'schema-redoc' %}" class="button button--primary button--rounded">VIEW API RE-DOC</a>
+                    </li>
+                    {% if not request.user.is_authenticated %}
+                    <li>
+                        <a href="{% url 'rest_login' %}" class="button button--rounded" style="background-color:rgb(0, 165, 49); color:rgb(255, 255, 255);">
+                            LOGIN
+                        </a>
+                    </li>
+                    {% else %}
+                    <li>
+                        <a href="{% url 'rest_logout' %}" class="button button--rounded" style="background-color:rgb(255, 47, 47); color:rgb(255, 255, 255);">
+                            LOGOUT
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+
+        </div>
+
+    </header>
+
+    <main class="site__main">
+
+        <section class="site__section site__section--start align text--center">
+
+            <div class="grid site-grid">
+                <h1>STUDIO RESERVATION SYSTEM</h1>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script src="{% static 'scripts/script.js' %}"></script>
+</body>
+
+</html>
