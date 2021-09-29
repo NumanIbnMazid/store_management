@@ -99,7 +99,7 @@ class IsStudioStaff(permissions.BasePermission):
         if request.user.is_superuser:
             return True
         # Base Permission
-        if request.user.studio_moderator_user.is_staff == True or request.user.is_studio_staff == True:
+        if request.user.is_studio_admin == True or request.user.is_studio_staff == True or request.user.studio_moderator_user.is_staff == True:
             return True
         return False
 
@@ -109,6 +109,6 @@ class IsStudioStaff(permissions.BasePermission):
         if request.user.is_superuser:
             return True
         # Base Permission
-        if request.user.studio_moderator_user.is_staff == True or request.user.is_studio_staff == True:
+        if request.user.is_studio_admin == True or request.user.is_studio_staff == True or request.user.studio_moderator_user.is_staff == True:
             return True
         return False

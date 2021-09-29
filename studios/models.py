@@ -41,7 +41,7 @@ class Studio(models.Model):
     
     
 class StudioModerator(models.Model):
-    user = models.OneToOneField(get_user_model(),related_name='studio_moderator_user',on_delete=models.CASCADE)
+    user = models.OneToOneField(get_user_model(), related_name='studio_moderator_user', on_delete=models.CASCADE)
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="Studio")
     slug = models.SlugField(unique=True)
     contact = models.CharField(max_length=30, blank=True, null=True)
