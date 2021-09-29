@@ -49,7 +49,7 @@ class Option(models.Model):
 class Plan(models.Model):
     space = models.ForeignKey(Space, on_delete=models.CASCADE, related_name="space_plans")
     option = models.ManyToManyField(Option, blank=True, related_name='plan_options')
-    title = models.CharField(max_length=254)
+    title = models.CharField(max_length=254, unique=True)
     slug = models.SlugField(unique=True)
     hourly_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     daily_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -69,8 +69,8 @@ class Plan(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
  
     class Meta:
-        verbose_name = 'Product'
-        verbose_name_plural = 'Products'
+        verbose_name = 'Plan'
+        verbose_name_plural = 'Plans'
         ordering = ["-created_at"]
     
     def __str__(self):
