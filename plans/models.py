@@ -33,8 +33,8 @@ class Option(models.Model):
     icon = models.ImageField(upload_to=upload_option_image_path, blank=True, null=True)
     comment = models.CharField(max_length=254, blank=True, null=True)
     specification_url = models.URLField(blank=True, null=True)
-    hourly_price = models.DecimalField(max_digits=6, decimal_places=2, default=0)
-    daily_price = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    hourly_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    daily_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -48,11 +48,11 @@ class Option(models.Model):
 
 class Plan(models.Model):
     space = models.ForeignKey(Space, on_delete=models.CASCADE, related_name="space_plans")
-    option = models.ForeignKey(Option, blank=True, null=True, on_delete=models.CASCADE, related_name='plan_options')
+    option = models.ManyToManyField(Option, blank=True, related_name='plan_options')
     title = models.CharField(max_length=254)
     slug = models.SlugField(unique=True)
-    hourly_price = models.DecimalField(max_digits=6, decimal_places=2, default=0)
-    daily_price = models.DecimalField(max_digits=6, decimal_places=2, default=0)
+    hourly_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    daily_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     image_1 = models.ImageField(upload_to=upload_plan_image_path, blank=True, null=True)
     image_1_reference = models.CharField(max_length=254, blank=True, null=True)
     image_1_comment = models.CharField(max_length=254, blank=True, null=True)
