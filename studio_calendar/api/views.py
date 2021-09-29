@@ -59,22 +59,20 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             return True, qs.first()
         return False, None
     
-    def get_holiday_from_range(self, start_date, end_date, studio_obj):
-        date_start = parser.parse(start_date)
-        end_start = parser.parse(end_date)
+    def get_holidays_from_range(self, start_date, end_date, studio_obj):
+        start_date = parser.parse(start_date)
+        end_date = parser.parse(end_date)
         
-        start_year = date_start.year
-        end_year = date_start.year
+        start_year = start_date.year
+        end_year = end_date.year
 
-        qs = StudioCalendar.objects.filter(year=start_year, date__range=[date_start,end_start], studio=studio_obj)
-        date_obj = []
+        qs = StudioCalendar.objects.filter(year__range=[start_year, end_year], date__range=[start_date, end_date], studio=studio_obj)
+        date_objects = []
         if qs.exists():
             for instance in qs:
-                date_obj.append((True, instance))
-            return date_obj
-        else:
-            date_obj.append((False, None))
-            return date_obj
+                date_objects.append(instance)
+            return True, date_objects
+        return False, date_objects
 
     # def get_holiday_from_list():
 
@@ -106,7 +104,6 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             }
             
             def prepare_holiday_data(holiday_instance=None):
-                result["is_holiday"] = True
                 result["holiday"]["title"] = holiday_instance.title
                 result["holiday"]["comments"] = holiday_instance.comments
                 result["holiday"]["country_code"] = holiday_instance.country_code
@@ -119,6 +116,7 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
                 holiday_filter_result = self.get_single_holiday(date=formatted_date_str, studio_obj=studio_obj)
                 if holiday_filter_result[0] == True:
                     prepare_holiday_data(holiday_instance=holiday_filter_result[1])
+                    result["is_holiday"] = True
                 else:
                     result["is_holiday"] = False
             else:
@@ -126,6 +124,7 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
                 holiday_filter_result = self.get_single_holiday(date=formatted_date_str, studio_obj=studio_obj)
                 if holiday_filter_result[0] == True:
                     prepare_holiday_data(holiday_instance=holiday_filter_result[1])
+                    result["is_holiday"] = True
                 else:
                     result["is_holiday"] = False
                     
@@ -140,6 +139,7 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             studio = int(request.data.get("studio", None))
             studio_qs = Studio.objects.filter(id=studio)
             studio_obj = None
+            
             if studio_qs.exists():
                 studio_obj = studio_qs.first()
             else:
@@ -158,47 +158,52 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
                 "end_date": formatted_end_date_str,
                 "studio": studio,
                 "is_holiday":None,
-                "data":{}
+                "total_holidays": None,
+                "holidays": []
             }
             
-            def prepare_holiday_data(holiday_instance=None):
-                instance_list = []
-                for instance in holiday_instance:
-                    data = {
-                    "holiday": {}
-                    }
-                    instance_field = instance[1]
-                    data["holiday"]["title"] = instance_field.title
-                    data["holiday"]["comments"] = instance_field.comments
-                    data["holiday"]["country_code"] = instance_field.country_code
-                    data["holiday"]["year"] = instance_field.year
-                    data["holiday"]["date"] = instance_field.date
-                    data["holiday"]["is_holiday"] = True
-                    instance_list.append(data)
-                result['data']=instance_list
-                result['is_holiday']=True
+            def prepare_holiday_data(holiday_qs=None):
+                
+                holiday_list = []
+                
+                for holiday in holiday_qs:
+                    
+                    data = {}
+                    data["title"] = holiday.title
+                    data["comments"] = holiday.comments
+                    data["country_code"] = holiday.country_code
+                    data["year"] = holiday.year
+                    data["date"] = holiday.date
+                    
+                    holiday_list.append(data)
+                    
+                result['holidays'] = holiday_list
+                result['total_holidays'] = len(holiday_list)
+                
                 return result
             
-            # check if studio holidays exists
+            # check if studio holidays exists for start and end year
             holiday_existance_result_for_start = self.check_studio_holidays_exists_for_year(year=start_year, studio_obj=studio_obj)
             holiday_existance_result_for_end = self.check_studio_holidays_exists_for_year(year=end_year, studio_obj=studio_obj)
 
             if holiday_existance_result_for_start == True and holiday_existance_result_for_end == True:
-                holiday_filter_result = self.get_holiday_from_range(start_date=formatted_start_date_str, end_date=formatted_end_date_str, studio_obj=studio_obj)
-                for instance in holiday_filter_result:
-                    if instance[0] == True:
-                        prepare_holiday_data(holiday_instance=holiday_filter_result)
-                    else:
-                        result["is_holiday"] = False 
+                holiday_filter_result = self.get_holidays_from_range(start_date=formatted_start_date_str, end_date=formatted_end_date_str, studio_obj=studio_obj)
+                
+                if holiday_filter_result[0] == True:
+                    prepare_holiday_data(holiday_qs=holiday_filter_result[1])
+                    result["is_holiday"] = True
+                else:
+                    result["is_holiday"] = False
             else:
                 self.create_studio_holidays_for_year(year=str(start_year), studio_obj=studio_obj)
                 self.create_studio_holidays_for_year(year=str(end_year), studio_obj=studio_obj)
-                holiday_filter_result = self.get_holiday_from_range(start_date=formatted_start_date_str, end_date=formatted_end_date_str, studio_obj=studio_obj)
-                for instance in holiday_filter_result:
-                    if instance[0] == True:
-                        prepare_holiday_data(holiday_instance=holiday_filter_result)
-                    else:
-                        result["is_holiday"] = False 
+                holiday_filter_result = self.get_holidays_from_range(start_date=formatted_start_date_str, end_date=formatted_end_date_str, studio_obj=studio_obj)
+                
+                if holiday_filter_result[0] == True:
+                    prepare_holiday_data(holiday_qs=holiday_filter_result[1])
+                    result["is_holiday"] = True
+                else:
+                    result["is_holiday"] = False
                     
             return ResponseWrapper(data=result, status=200)
         return ResponseWrapper(error_msg=serializer.errors, error_code=400)
