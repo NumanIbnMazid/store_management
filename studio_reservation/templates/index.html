@@ -33,10 +33,10 @@
             <nav class="navigation navigation--inline navigation--main">
                 <ul>
                     <li>
-                        <a href="{% url 'schema-swagger-ui' %}" class="button button--primary button--rounded">VIEW API</a>
+                        <a href="{% url 'schema-swagger-ui' %}" class="button button--primary button--rounded" target="_blank">VIEW API</a>
                     </li>
                     <li>
-                        <a href="{% url 'schema-redoc' %}" class="button button--primary button--rounded">VIEW API RE-DOC</a>
+                        <a href="{% url 'schema-redoc' %}" class="button button--primary button--rounded" target="_blank">VIEW API RE-DOC</a>
                     </li>
                     {% if not request.user.is_authenticated %}
                     <li>

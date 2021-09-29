@@ -2,7 +2,6 @@
 
 # imports
 from datetime import timedelta
-from django.conf import settings
 import environ
 import os
 from pathlib import Path
