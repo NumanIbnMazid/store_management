@@ -9,5 +9,5 @@ urlpatterns = [
     # ==============================*** Studio Calendar URLS ***==============================
     path("get-single-holiday-status/", StudioCalendarManagerViewSet.as_view({"post": "check_single_holiday"}, name="check_single_holiday")),
     path("get-holiday-from-range/", StudioCalendarManagerViewSet.as_view({"post": "check_holiday_between_range"}, name="check_holiday_between_range")),
-    path("get-all-holidays-of-the-year/", StudioCalendarManagerViewSet.as_view({"post": "check_holidays_for_year"}, name="check_holidays_for_year")),
+    path("get-all-holidays-for-a-year/", StudioCalendarManagerViewSet.as_view({"post": "check_holidays_for_year"}, name="check_holidays_for_year")),
 ]
