@@ -1,7 +1,7 @@
 from datetime import date
 from studios.models import Studio
 import holidays
-from .serializers import StudioCalendarSerializer, StudioCalendarUpdateSerializer, SingleHolidayCheckerSerializer, RangeHolidayCheckerSerializer
+from .serializers import StudioCalendarSerializer, StudioCalendarUpdateSerializer, SingleHolidayCheckerSerializer, RangeHolidayCheckerSerializer,AllHolidayCheckerSerializer
 from studio_calendar.models import StudioCalendar
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
@@ -28,6 +28,8 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             self.serializer_class = SingleHolidayCheckerSerializer
         elif self.action in ['check_holiday_between_range']:
             self.serializer_class = RangeHolidayCheckerSerializer
+        elif self.action in ['get_all_holidays']:
+            self.serializer_class = AllHolidayCheckerSerializer
         else:
             self.serializer_class = StudioCalendarSerializer
         return self.serializer_class
@@ -67,6 +69,18 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
         end_year = end_date.year
 
         qs = StudioCalendar.objects.filter(year__range=[start_year, end_year], date__range=[start_date, end_date], studio=studio_obj)
+        date_objects = []
+        if qs.exists():
+            for instance in qs:
+                date_objects.append(instance)
+            return True, date_objects
+        return False, date_objects
+    
+    def all_holidays(self, year, studio_obj):
+        one_year = parser.parse(year)
+        year = one_year.year
+
+        qs = StudioCalendar.objects.filter(year=year, studio=studio_obj)
         date_objects = []
         if qs.exists():
             for instance in qs:
@@ -198,6 +212,79 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
                 self.create_studio_holidays_for_year(year=str(start_year), studio_obj=studio_obj)
                 self.create_studio_holidays_for_year(year=str(end_year), studio_obj=studio_obj)
                 holiday_filter_result = self.get_holidays_from_range(start_date=formatted_start_date_str, end_date=formatted_end_date_str, studio_obj=studio_obj)
+                
+                if holiday_filter_result[0] == True:
+                    prepare_holiday_data(holiday_qs=holiday_filter_result[1])
+                    result["is_holiday"] = True
+                else:
+                    result["is_holiday"] = False
+                    
+            return ResponseWrapper(data=result, status=200)
+        return ResponseWrapper(error_msg=serializer.errors, error_code=400)
+
+
+    def get_all_holidays(self, request, *args, **kwargs):
+        """ *** Parent Method for checking all holidays of the year *** """
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(data=request.data, partial=True)
+        if serializer.is_valid():
+            studio = int(request.data.get("studio", None))
+            studio_qs = Studio.objects.filter(id=studio)
+            studio_obj = None
+            
+            if studio_qs.exists():
+                studio_obj = studio_qs.first()
+            else:
+                return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg=f"Studio {studio} does not exists!", status=400)
+            
+            date = parser.parse(request.data.get("date", ""))
+            year = date.year
+            formatted_year_str = date.strftime("%Y")
+ 
+            
+            result = {
+                "year":formatted_year_str,
+                "studio": studio,
+                "is_holiday":None,
+                "total_holidays": None,
+                "holidays": []
+            }
+            
+            def prepare_holiday_data(holiday_qs=None):
+                
+                holiday_list = []
+                
+                for holiday in holiday_qs:
+                    
+                    data = {}
+                    data["title"] = holiday.title
+                    data["comments"] = holiday.comments
+                    data["country_code"] = holiday.country_code
+                    data["year"] = holiday.year
+                    data["date"] = holiday.date
+                    
+                    holiday_list.append(data)
+                    
+                result['holidays'] = holiday_list
+                result['total_holidays'] = len(holiday_list)
+                
+                return result
+            
+            # check if studio holidays exists for start and end year
+            holiday_existance_result_for_start = self.check_studio_holidays_exists_for_year(year=year, studio_obj=studio_obj)
+ 
+            if holiday_existance_result_for_start == True:
+                holiday_filter_result = self.all_holidays(year=formatted_year_str,studio_obj=studio_obj)
+                
+                if holiday_filter_result[0] == True:
+                    prepare_holiday_data(holiday_qs=holiday_filter_result[1])
+                    result["is_holiday"] = True
+                else:
+                    result["is_holiday"] = False
+            else:
+                self.create_studio_holidays_for_year(year=str(year), studio_obj=studio_obj)
+               
+                holiday_filter_result = self.all_holidays(year=formatted_year_str,studio_obj=studio_obj)
                 
                 if holiday_filter_result[0] == True:
                     prepare_holiday_data(holiday_qs=holiday_filter_result[1])
