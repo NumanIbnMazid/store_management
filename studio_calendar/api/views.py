@@ -1,7 +1,7 @@
 from datetime import date
 from studios.models import Studio
 import holidays
-from .serializers import StudioCalendarSerializer, StudioCalendarUpdateSerializer, SingleHolidayCheckerSerializer, RangeHolidayCheckerSerializer,AllHolidayCheckerSerializer
+from .serializers import StudioCalendarSerializer, StudioCalendarUpdateSerializer, SingleHolidayCheckerSerializer, RangeHolidayCheckerSerializer,AllHolidaysCheckerSerializer
 from studio_calendar.models import StudioCalendar
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
@@ -28,8 +28,8 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             self.serializer_class = SingleHolidayCheckerSerializer
         elif self.action in ['check_holiday_between_range']:
             self.serializer_class = RangeHolidayCheckerSerializer
-        elif self.action in ['get_all_holidays']:
-            self.serializer_class = AllHolidayCheckerSerializer
+        elif self.action in ['check_holidays_for_year']:
+            self.serializer_class = AllHolidaysCheckerSerializer
         else:
             self.serializer_class = StudioCalendarSerializer
         return self.serializer_class
@@ -223,7 +223,7 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
         return ResponseWrapper(error_msg=serializer.errors, error_code=400)
 
 
-    def get_all_holidays(self, request, *args, **kwargs):
+    def check_holidays_for_year(self, request, *args, **kwargs):
         """ *** Parent Method for checking all holidays of the year *** """
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(data=request.data, partial=True)
@@ -237,13 +237,9 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             else:
                 return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg=f"Studio {studio} does not exists!", status=400)
             
-            date = parser.parse(request.data.get("date", ""))
-            year = date.year
-            formatted_year_str = date.strftime("%Y")
- 
-            
+            year = request.data.get("year", "")
             result = {
-                "year":formatted_year_str,
+                "year":year,
                 "studio": studio,
                 "is_holiday":None,
                 "total_holidays": None,
@@ -274,7 +270,7 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             holiday_existance_result_for_start = self.check_studio_holidays_exists_for_year(year=year, studio_obj=studio_obj)
  
             if holiday_existance_result_for_start == True:
-                holiday_filter_result = self.all_holidays(year=formatted_year_str,studio_obj=studio_obj)
+                holiday_filter_result = self.all_holidays(year=year,studio_obj=studio_obj)
                 
                 if holiday_filter_result[0] == True:
                     prepare_holiday_data(holiday_qs=holiday_filter_result[1])
@@ -284,7 +280,7 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             else:
                 self.create_studio_holidays_for_year(year=str(year), studio_obj=studio_obj)
                
-                holiday_filter_result = self.all_holidays(year=formatted_year_str,studio_obj=studio_obj)
+                holiday_filter_result = self.all_holidays(year=year,studio_obj=studio_obj)
                 
                 if holiday_filter_result[0] == True:
                     prepare_holiday_data(holiday_qs=holiday_filter_result[1])

@@ -28,7 +28,7 @@ class RangeHolidayCheckerSerializer(serializers.Serializer):
     studio = serializers.IntegerField()
 
 
-class AllHolidayCheckerSerializer(serializers.Serializer):
-    date = serializers.DateField()
+class AllHolidaysCheckerSerializer(serializers.Serializer):
+    year = serializers.CharField()
     studio = serializers.IntegerField()
      
