@@ -43,7 +43,6 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
     def create_studio_holidays_for_year(self, year, studio_obj):
         try:
             for date, name in sorted(holidays.JP(years=int(year)).items()):
-                # print(date, name)
                 StudioCalendar.objects.create(studio=studio_obj, year=year, date=date, title=name)
             return True
         except Exception as E:
@@ -78,7 +77,7 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             return True, date_objects
         return False, date_objects
     
-    def all_holidays(self, year, studio_obj):
+    def get_holidays_for_year(self, year, studio_obj):
         one_year = parser.parse(year)
         year = one_year.year
 
@@ -268,11 +267,11 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
                 
                 return result
             
-            # check if studio holidays exists for start and end year
+            # check if studio holidays exists for year
             holiday_existance_result_for_start = self.check_studio_holidays_exists_for_year(year=year, studio_obj=studio_obj)
  
             if holiday_existance_result_for_start == True:
-                holiday_filter_result = self.all_holidays(year=year,studio_obj=studio_obj)
+                holiday_filter_result = self.get_holidays_for_year(year=year,studio_obj=studio_obj)
                 
                 if holiday_filter_result[0] == True:
                     prepare_holiday_data(holiday_qs=holiday_filter_result[1])
@@ -282,7 +281,7 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             else:
                 self.create_studio_holidays_for_year(year=str(year), studio_obj=studio_obj)
                
-                holiday_filter_result = self.all_holidays(year=year,studio_obj=studio_obj)
+                holiday_filter_result = self.get_holidays_for_year(year=year,studio_obj=studio_obj)
                 
                 if holiday_filter_result[0] == True:
                     prepare_holiday_data(holiday_qs=holiday_filter_result[1])

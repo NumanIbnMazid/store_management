@@ -31,4 +31,3 @@ class RangeHolidayCheckerSerializer(serializers.Serializer):
 class YearHolidayCheckerSerializer(serializers.Serializer):
     year = serializers.CharField()
     studio = serializers.IntegerField()
-     
