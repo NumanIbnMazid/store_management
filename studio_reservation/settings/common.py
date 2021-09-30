@@ -125,11 +125,11 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_APP_DIR, 'static'),
+    os.path.join(BASE_APP_DIR, 'static_proj'),
 ]
 
-STATIC_ROOT = os.path.join(BASE_DIR, os.path.join('static_cdn', 'static_root'))
-MEDIA_ROOT = os.path.join(BASE_DIR, os.path.join('static_cdn', 'media_root'))
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 """ *** Other Definitions *** """
 SITE_ID = 1
