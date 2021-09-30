@@ -146,6 +146,7 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             return ResponseWrapper(data=result, status=200)
         return ResponseWrapper(error_msg=serializer.errors, error_code=400)
     
+    
     def check_holiday_between_range(self, request, *args, **kwargs):
         """ *** Parent Method for checking holiday between range *** """
         serializer_class = self.get_serializer_class()
