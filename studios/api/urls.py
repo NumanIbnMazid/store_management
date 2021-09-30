@@ -16,6 +16,6 @@ urlpatterns = [
     path("moderator/create/staff/", StudioModeratorManagerViewSet.as_view({'post': 'create_staff'}, name='create_studio_staff')),
     path("moderator/retrieve/<slug>/", StudioModeratorManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_studio_moderator")),
     path("moderator/update/<slug>/", StudioModeratorManagerViewSet.as_view({"patch": "update"}, name="update_studio_moderator")),
-    path("moderator/delete/admin/<slug>/", StudioModeratorManagerViewSet.as_view({"delete": "destroy_admin"}, name="delete_studio_admin")),
+    # path("moderator/delete/admin/<slug>/", StudioModeratorManagerViewSet.as_view({"delete": "destroy_admin"}, name="delete_studio_admin")),
     path("moderator/delete/staff/<slug>/", StudioModeratorManagerViewSet.as_view({"delete": "destroy_staff"}, name="delete_studio_staff")),
 ]
