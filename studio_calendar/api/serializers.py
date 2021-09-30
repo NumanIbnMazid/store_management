@@ -31,4 +31,8 @@ class RangeHolidayCheckerSerializer(serializers.Serializer):
 class AllHolidaysCheckerSerializer(serializers.Serializer):
     year = serializers.CharField()
     studio = serializers.IntegerField()
+
+class GetHolidaysFromListCheckerSerializer(serializers.Serializer):
+    date = serializers.ListField()
+    studio = serializers.IntegerField()
      

@@ -1,7 +1,13 @@
 from datetime import date
 from studios.models import Studio
 import holidays
-from .serializers import StudioCalendarSerializer, StudioCalendarUpdateSerializer, SingleHolidayCheckerSerializer, RangeHolidayCheckerSerializer,AllHolidaysCheckerSerializer
+from .serializers import (
+    StudioCalendarSerializer, 
+    StudioCalendarUpdateSerializer, 
+    SingleHolidayCheckerSerializer, 
+    RangeHolidayCheckerSerializer,
+    AllHolidaysCheckerSerializer,
+    GetHolidaysFromListCheckerSerializer,)
 from studio_calendar.models import StudioCalendar
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
@@ -30,6 +36,8 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             self.serializer_class = RangeHolidayCheckerSerializer
         elif self.action in ['check_holidays_for_year']:
             self.serializer_class = AllHolidaysCheckerSerializer
+        elif self.action in ['check_holiday_from_list']:
+            self.serializer_class = GetHolidaysFromListCheckerSerializer
         else:
             self.serializer_class = StudioCalendarSerializer
         return self.serializer_class
@@ -81,6 +89,15 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
         year = one_year.year
 
         qs = StudioCalendar.objects.filter(year=year, studio=studio_obj)
+        date_objects = []
+        if qs.exists():
+            for instance in qs:
+                date_objects.append(instance)
+            return True, date_objects
+        return False, date_objects
+
+    def get_holidays_list(self, year, date, studio_obj):
+        qs = StudioCalendar.objects.filter(year=year,date=date, studio=studio_obj)
         date_objects = []
         if qs.exists():
             for instance in qs:
@@ -288,6 +305,77 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
                 else:
                     result["is_holiday"] = False
                     
+            return ResponseWrapper(data=result, status=200)
+        return ResponseWrapper(error_msg=serializer.errors, error_code=400)
+
+    
+    def check_holiday_from_list(self, request, *args, **kwargs):
+        """ *** Parent Method for checking holidays from list *** """
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(data=request.data, partial=True)
+        if serializer.is_valid():
+            studio = int(request.data.get("studio", None))
+            studio_qs = Studio.objects.filter(id=studio)
+            studio_obj = None
+            
+            if studio_qs.exists():
+                studio_obj = studio_qs.first()
+            else:
+                return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg=f"Studio {studio} does not exists!", status=400)
+            
+            date_list = request.data.get("date", "")
+            result = {
+                # "date":date,
+                "studio": studio,
+                "is_holiday":None,
+                "total_holidays": None,
+                "holidays": []
+            }
+            holiday_list = []
+            def prepare_holiday_data(holiday_qs=None):
+                for holiday in holiday_qs:
+                    data = {}
+                    data["title"] = holiday.title
+                    data["comments"] = holiday.comments
+                    data["country_code"] = holiday.country_code
+                    data["year"] = holiday.year
+                    data["date"] = holiday.date
+                    holiday_list.append(data)
+                    
+                result['holidays'] = holiday_list
+                result['total_holidays'] = len(holiday_list)
+                return result
+            
+            for date in date_list:
+                date_obj = None
+                try:
+                    date_obj = parser.parse(date)
+                except Exception as e:
+                    return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg=f"Got invalid date format. Failed to parse date! Exception: {str(e)}", status=400)
+                
+                year = date_obj.year
+                formatted_date_str = date_obj.strftime("%Y-%m-%d")
+                # check if studio holidays exists for start and end year
+                holiday_existance_result_for_start = self.check_studio_holidays_exists_for_year(year=year, studio_obj=studio_obj)
+    
+                if holiday_existance_result_for_start == True:
+                    holiday_filter_result = self.get_holidays_list(year=year,date=formatted_date_str,studio_obj=studio_obj)
+                    if holiday_filter_result[0] == True:
+                        prepare_holiday_data(holiday_qs=holiday_filter_result[1])
+                        result["is_holiday"] = True
+                    else:
+                        result["is_holiday"] = False
+                else:
+                    self.create_studio_holidays_for_year(year=str(year), studio_obj=studio_obj)
+                
+                    holiday_filter_result = self.get_holidays_list(year=year,date=formatted_date_str,studio_obj=studio_obj)
+                    
+                    if holiday_filter_result[0] == True:
+                        prepare_holiday_data(holiday_qs=holiday_filter_result[1])
+                        result["is_holiday"] = True
+                    else:
+                        result["is_holiday"] = False
+                        
             return ResponseWrapper(data=result, status=200)
         return ResponseWrapper(error_msg=serializer.errors, error_code=400)
 
