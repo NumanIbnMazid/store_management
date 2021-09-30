@@ -350,3 +350,26 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
                         
             return ResponseWrapper(data=result, status=200)
         return ResponseWrapper(error_msg=serializer.errors, error_code=400)
+
+class StudioCalendarManager(LoggingMixin, CustomViewSet):
+    logging_methods = ["GET", "POST", "PATCH", "DELETE"]
+    queryset = StudioCalendar.objects.all()
+    lookup_field = "slug"
+
+    def get_serializer_class(self):
+        if self.action in ["create"]:
+            self.serializer_class = StudioCalendarSerializer
+
+        if self.action in ["update"]:
+            self.serializer_class = StudioCalendarUpdateSerializer
+
+        if self.action in ["destroy"]:
+            self.serializer_class = StudioCalendarUpdateSerializer
+        else:
+            self.serializer_class = StudioCalendarSerializer
+
+        return self.serializer_class
+    
+    def get_permissions(self):
+        permission_classes = [custom_permissions.IsStudioAdmin]
+        return [permission() for permission in permission_classes]

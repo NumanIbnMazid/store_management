@@ -142,3 +142,6 @@ LOGIN_URL = "/rest-auth/login/"
 
 """ *** Third Party Configurations *** """
 from studio_reservation.settings.third_party_configs import *
+
+
+

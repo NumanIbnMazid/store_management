@@ -32,7 +32,6 @@ class OptionUpdateSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ("slug","category","number",)
 
-
 class PlanSerializer(serializers.ModelSerializer):
     
     class Meta:
