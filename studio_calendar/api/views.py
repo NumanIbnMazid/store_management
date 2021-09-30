@@ -1,7 +1,9 @@
 from datetime import date
 from studios.models import Studio
 import holidays
-from .serializers import StudioCalendarSerializer, StudioCalendarUpdateSerializer, SingleHolidayCheckerSerializer, RangeHolidayCheckerSerializer,AllHolidaysCheckerSerializer
+from .serializers import (
+    StudioCalendarSerializer, StudioCalendarUpdateSerializer, SingleHolidayCheckerSerializer, RangeHolidayCheckerSerializer, YearHolidayCheckerSerializer
+)
 from studio_calendar.models import StudioCalendar
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
@@ -29,7 +31,7 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
         elif self.action in ['check_holiday_between_range']:
             self.serializer_class = RangeHolidayCheckerSerializer
         elif self.action in ['check_holidays_for_year']:
-            self.serializer_class = AllHolidaysCheckerSerializer
+            self.serializer_class = YearHolidayCheckerSerializer
         else:
             self.serializer_class = StudioCalendarSerializer
         return self.serializer_class
