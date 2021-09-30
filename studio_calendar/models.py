@@ -30,7 +30,7 @@ def update_studio_calendar_slug_on_pre_save(sender, instance, **kwargs):
     if not instance.slug:
         try:
             instance.slug = unique_slug_generator(
-                instance=instance, field=str(instance.date)
+                instance=instance, field=str(instance.date) + "__" + str(instance.studio.name[:50])
             )
         except Exception as E:
             instance.slug = simple_random_string()
