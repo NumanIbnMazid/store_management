@@ -28,11 +28,11 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             self.serializer_class = StudioCalendarUpdateSerializer
         elif self.action in ["check_single_holiday"]:
             self.serializer_class = SingleHolidayCheckerSerializer
-        elif self.action in ['check_holiday_between_range']:
+        elif self.action in ["check_holidays_between_range"]:
             self.serializer_class = RangeHolidayCheckerSerializer
-        elif self.action in ['check_holidays_for_year']:
+        elif self.action in ["check_holidays_for_year"]:
             self.serializer_class = YearHolidayCheckerSerializer
-        elif self.action in ['check_holidays_from_list']:
+        elif self.action in ["check_holidays_from_list"]:
             self.serializer_class = ListHolidayCheckerSerializer
         else:
             self.serializer_class = StudioCalendarSerializer
@@ -141,7 +141,7 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
         return ResponseWrapper(error_msg=serializer.errors, error_code=400)
     
     
-    def check_holiday_between_range(self, request, *args, **kwargs):
+    def check_holidays_between_range(self, request, *args, **kwargs):
         """ *** Parent Method for checking holiday between range *** """
         serializer_class = self.get_serializer_class()
         serializer = serializer_class(data=request.data, partial=True)
@@ -315,9 +315,9 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             for date in date_list:
                 date_obj = None
                 try:
-                    date_obj = parser.parse(date)
+                    date_obj = parser.isoparse(date)
                 except Exception as e:
-                    return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg=f"Got invalid date format. Failed to parse date! Exception: {str(e)}", status=400)
+                    return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg=f"Required Date Format: YYYY-MM-DD. Got invalid date format. Failed to parse date! Exception: {str(e)}", status=400)
                 
                 year = date_obj.year
                 
