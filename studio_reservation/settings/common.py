@@ -128,8 +128,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_APP_DIR, 'static'),
 ]
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+STATIC_ROOT = os.path.join(BASE_DIR, os.path.join('static_cdn', 'static_root'))
+MEDIA_ROOT = os.path.join(BASE_DIR, os.path.join('static_cdn', 'media_root'))
 
 """ *** Other Definitions *** """
 SITE_ID = 1
