@@ -55,7 +55,7 @@ def upload_category_image_path(instance, filename):
     final_filename = '{new_filename}{ext}'.format(
         new_filename=new_filename, ext=ext
     )
-    return "Categories/{category}/Images/{final_filename}".format(
+    return "Categories/{store}/Images/{final_filename}".format(
         store=slugify(instance.title[:50]),
         final_filename=final_filename
     )

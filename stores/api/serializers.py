@@ -3,7 +3,7 @@ from stores.models import Store
 
 
 class StoreSerializer(serializers.ModelSerializer):
-    
+    # image_i = serializers.CharField(allow_blank=True, allow_null=True)
     class Meta:
         model = Store
         fields = "__all__"

@@ -3,6 +3,7 @@ from plans.models import OptionCategory
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
+from utils.helpers import ResponseWrapper
 
 class OptionCategoryManagerViewSet(LoggingMixin, CustomViewSet):
     
@@ -20,3 +21,10 @@ class OptionCategoryManagerViewSet(LoggingMixin, CustomViewSet):
     def get_permissions(self):
         permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
+    
+
+    def _clean_data(self, data):
+        if isinstance(data, bytes):
+            data = data.decode(errors='ignore')
+        return super(OptionCategoryManagerViewSet, self)._clean_data(data)
+

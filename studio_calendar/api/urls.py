@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .views import StudioCalendarManagerViewSet, StudioCalendarManager
+from .views import StudioCalendarManagerViewSet
 
 
 router = DefaultRouter()
@@ -13,8 +13,8 @@ urlpatterns = [
     path("get-holidays-by-list/", StudioCalendarManagerViewSet.as_view({"post": "check_holidays_from_list"}, name="check_holidays_from_list")),
 
     # ==============================*** Studio Calendar URLS Create Update Delete ***==============================
-    path("create/", StudioCalendarManager.as_view({'post': 'create'}, name='create_studio_calendar')),
-    path("retrieve/<slug>/", StudioCalendarManager.as_view({"get": "retrieve"}, name="retrieve_studio_calendar")),
-    path("update/<slug>/", StudioCalendarManager.as_view({"patch": "update"}, name="update_studio_calendar")),
-    path("delete/<slug>/", StudioCalendarManager.as_view({"delete": "destroy"}, name="delete_studio_calendar")),
+    path("create/", StudioCalendarManagerViewSet.as_view({'post': 'create'}, name='create_studio_calendar')),
+    path("retrieve/<slug>/", StudioCalendarManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_studio_calendar")),
+    path("update/<slug>/", StudioCalendarManagerViewSet.as_view({"patch": "update"}, name="update_studio_calendar")),
+    path("delete/<slug>/", StudioCalendarManagerViewSet.as_view({"delete": "destroy"}, name="delete_studio_calendar")),
 ]
