@@ -21,3 +21,10 @@ class SpaceManagerViewSet(LoggingMixin, CustomViewSet):
         permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
     
+
+    def _clean_data(self, data):
+        if isinstance(data, bytes):
+            data = data.decode(errors='ignore')
+        return super(SpaceManagerViewSet, self)._clean_data(data)
+    
+    

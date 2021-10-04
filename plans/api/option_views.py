@@ -20,3 +20,9 @@ class OptionManagerViewSet(LoggingMixin, CustomViewSet):
     def get_permissions(self):
         permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
+    
+    def _clean_data(self, data):
+        if isinstance(data, bytes):
+            data = data.decode(errors='ignore')
+        return super(OptionManagerViewSet, self)._clean_data(data)
+

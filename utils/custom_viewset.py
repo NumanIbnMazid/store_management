@@ -44,3 +44,5 @@ class CustomViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return ResponseWrapper(serializer.data)
+    
+    

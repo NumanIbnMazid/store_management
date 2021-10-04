@@ -29,7 +29,7 @@ def upload_space_image_path(instance, filename):
     final_filename = '{new_filename}{ext}'.format(
         new_filename=new_filename, ext=ext
     )
-    return "Spaces/{space}/Images/{final_filename}".format(
+    return "Spaces/{store}/Images/{final_filename}".format(
         store=slugify(instance.name[:50]),
         final_filename=final_filename
     )
@@ -42,7 +42,7 @@ def upload_plan_image_path(instance, filename):
     final_filename = '{new_filename}{ext}'.format(
         new_filename=new_filename, ext=ext
     )
-    return "Plans/{plan}/Images/{final_filename}".format(
+    return "Plans/{store}/Images/{final_filename}".format(
         store=slugify(instance.title[:50]),
         final_filename=final_filename
     )
@@ -68,7 +68,7 @@ def upload_option_image_path(instance, filename):
     final_filename = '{new_filename}{ext}'.format(
         new_filename=new_filename, ext=ext
     )
-    return "OPtions/{option}/Images/{final_filename}".format(
+    return "OPtions/{store}/Images/{final_filename}".format(
         store=slugify(instance.title[:50]),
         final_filename=final_filename
     )
