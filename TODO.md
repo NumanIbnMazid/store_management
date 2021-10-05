@@ -16,3 +16,5 @@
 # TODO: API: Tax Management
 
 # TODO: API: Collective Deal Management
+
+# TODO: BUG: Same Plan can be on multiple space
