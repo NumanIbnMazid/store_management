@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from plans.models import OptionCategory, Option, Plan
-from utils.base64_image import Base64ImageField
+from drf_extra_fields.fields import HybridImageField
 
 class OptionCategorySerializer(serializers.ModelSerializer):
-    icon = Base64ImageField(max_length=None, use_url=True)
+    icon = HybridImageField(required=False)
+    
     class Meta:
         model = OptionCategory
         fields = ("number", "title", "studio", "icon",)
@@ -11,7 +12,8 @@ class OptionCategorySerializer(serializers.ModelSerializer):
 
 
 class OptionCategoryUpdateSerializer(serializers.ModelSerializer):
-    icon = Base64ImageField(max_length=None, use_url=True)
+    icon = HybridImageField(required=False)
+    
     class Meta:
         model = OptionCategory
         fields = "__all__"
@@ -19,14 +21,15 @@ class OptionCategoryUpdateSerializer(serializers.ModelSerializer):
 
 
 class OptionSerializer(serializers.ModelSerializer):
-    icon = Base64ImageField(max_length=None, use_url=True)
+    icon = HybridImageField(required=False)
+    
     class Meta:
         model = Option
         fields = "__all__"
         read_only_fields = ("slug",)
 
 class OptionUpdateSerializer(serializers.ModelSerializer):
-    icon = Base64ImageField(max_length=None, use_url=True)
+    icon = HybridImageField(required=False)
     
     class Meta:
         model = Option
@@ -34,18 +37,20 @@ class OptionUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ("slug","category","number",)
 
 class PlanSerializer(serializers.ModelSerializer):
-    image_1 = Base64ImageField(max_length=None, use_url=True)
-    image_2 = Base64ImageField(max_length=None, use_url=True)
-    image_3 = Base64ImageField(max_length=None, use_url=True)
+    image_1 = HybridImageField(required=False)
+    image_2 = HybridImageField(required=False)
+    image_3 = HybridImageField(required=False)
+    
     class Meta:
         model = Plan
         fields = "__all__"
         read_only_fields = ("slug",)
 
 class PlanUpdateSerializer(serializers.ModelSerializer):
-    image_1 = Base64ImageField(max_length=None, use_url=True)
-    image_2 = Base64ImageField(max_length=None, use_url=True)
-    image_3 = Base64ImageField(max_length=None, use_url=True)
+    image_1 = HybridImageField(required=False)
+    image_2 = HybridImageField(required=False)
+    image_3 = HybridImageField(required=False)
+    
     class Meta:
         model = Plan
         fields = "__all__"

@@ -12,7 +12,7 @@ class OptionCategory(models.Model):
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_option_categories")
     title = models.CharField(max_length=150)
     slug = models.SlugField(unique=True)
-    icon = models.ImageField(upload_to=upload_category_image_path, blank=False)
+    icon = models.ImageField(upload_to=upload_category_image_path, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
  

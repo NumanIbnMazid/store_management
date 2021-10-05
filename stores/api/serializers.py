@@ -1,12 +1,11 @@
 from rest_framework import serializers
 from stores.models import Store
-from utils.base64_image import Base64ImageField
+from drf_extra_fields.fields import HybridImageField
 
 class StoreSerializer(serializers.ModelSerializer):
-    image_1 = Base64ImageField(max_length=None, use_url=True)
-    image_2 = Base64ImageField(max_length=None, use_url=True)
-    image_3 = Base64ImageField(max_length=None, use_url=True)
-   
+    image_1 = HybridImageField(required=False)
+    image_2 = HybridImageField(required=False)
+    image_3 = HybridImageField(required=False)
     
     class Meta:
         model = Store
@@ -14,9 +13,10 @@ class StoreSerializer(serializers.ModelSerializer):
         read_only_fields = ("slug",)
 
 class StoreUpdateSerializer(serializers.ModelSerializer):
-    image_1 = Base64ImageField(max_length=None, use_url=True)
-    image_2 = Base64ImageField(max_length=None, use_url=True)
-    image_3 = Base64ImageField(max_length=None, use_url=True)
+    image_1 = HybridImageField(required=False)
+    image_2 = HybridImageField(required=False)
+    image_3 = HybridImageField(required=False)
+    
     class Meta:
         model = Store
         fields = "__all__"

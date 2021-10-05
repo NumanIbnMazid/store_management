@@ -8,3 +8,11 @@
 # TODO: API: Fix All Image Fields and convert to base64
 
 # TODO: API: Create, Update Studio Calendar Custom Holidays
+
+# TODO: API: Manage Studio Business Hour, Regular Holiday Registration Edit by Day of Week
+
+# TODO: API: Manage Notification
+
+# TODO: API: Tax Management
+
+# TODO: API: Collective Deal Management

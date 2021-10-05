@@ -1,13 +1,13 @@
 from rest_framework import serializers
 from spaces.models import Space
-from utils.base64_image import Base64ImageField
+from drf_extra_fields.fields import HybridImageField
 
 class SpaceSerializer(serializers.ModelSerializer):
-    image_1 = Base64ImageField(max_length=None, use_url=True)
-    image_2 = Base64ImageField(max_length=None, use_url=True)
-    image_3 = Base64ImageField(max_length=None, use_url=True)
-    image_4 = Base64ImageField(max_length=None, use_url=True)
-    image_5 = Base64ImageField(max_length=None, use_url=True)
+    image_1 = HybridImageField(required=False)
+    image_2 = HybridImageField(required=False)
+    image_3 = HybridImageField(required=False)
+    image_4 = HybridImageField(required=False)
+    image_5 = HybridImageField(required=False)
 
     class Meta:
         model = Space
@@ -15,11 +15,11 @@ class SpaceSerializer(serializers.ModelSerializer):
         read_only_fields = ("slug",)
 
 class SpaceUpdateSerializer(serializers.ModelSerializer):
-    image_1 = Base64ImageField(max_length=None, use_url=True)
-    image_2 = Base64ImageField(max_length=None, use_url=True)
-    image_3 = Base64ImageField(max_length=None, use_url=True)
-    image_4 = Base64ImageField(max_length=None, use_url=True)
-    image_5 = Base64ImageField(max_length=None, use_url=True)
+    image_1 = HybridImageField(required=False)
+    image_2 = HybridImageField(required=False)
+    image_3 = HybridImageField(required=False)
+    image_4 = HybridImageField(required=False)
+    image_5 = HybridImageField(required=False)
     
     class Meta:
         model = Space

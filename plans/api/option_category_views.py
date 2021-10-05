@@ -3,13 +3,14 @@ from plans.models import OptionCategory
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
-from utils.helpers import ResponseWrapper
+from rest_framework.parsers import MultiPartParser
 
 class OptionCategoryManagerViewSet(LoggingMixin, CustomViewSet):
     
     logging_methods = ["GET", "POST", "PATCH", "DELETE"]
     queryset = OptionCategory.objects.all()
     lookup_field = "slug"
+    parser_classes = (MultiPartParser, )
     
     def get_serializer_class(self):
         if self.action in ["update"]:
