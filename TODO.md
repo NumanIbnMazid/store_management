@@ -17,7 +17,7 @@
 
 # TODO: API: Collective Deal Management
 
-# TODO: BUG: Same Plan can be on multiple space
+# TODO: BUG: Same Plan can be on multiple space (Fixed)
 
 # TODO: Slug is blank while studio name is japanese
 

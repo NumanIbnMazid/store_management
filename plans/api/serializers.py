@@ -9,8 +9,7 @@ class OptionCategorySerializer(serializers.ModelSerializer):
         model = OptionCategory
         fields = ("number", "title", "studio", "icon",)
         read_only_fields = ("slug",)
-
-
+        
 class OptionCategoryUpdateSerializer(serializers.ModelSerializer):
     icon = HybridImageField(required=False)
     

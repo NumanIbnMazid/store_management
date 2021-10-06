@@ -34,12 +34,6 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             self.serializer_class = YearHolidayCheckerSerializer
         elif self.action in ["check_holidays_from_list"]:
             self.serializer_class = ListHolidayCheckerSerializer
-        elif self.action in ["create"]:
-            self.serializer_class = StudioCalendarSerializer
-        elif self.action in ["update"]:
-            self.serializer_class = StudioCalendarUpdateSerializer
-        elif self.action in ["destroy"]:
-            self.serializer_class = StudioCalendarUpdateSerializer
         else:
             self.serializer_class = StudioCalendarSerializer
 

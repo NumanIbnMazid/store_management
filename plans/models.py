@@ -47,7 +47,7 @@ class Option(models.Model):
         return self.title
 
 class Plan(models.Model):
-    space = models.ForeignKey(Space, on_delete=models.CASCADE, related_name="space_plans")
+    space = models.ManyToManyField(Space, related_name="space_plans")
     option = models.ManyToManyField(Option, blank=True, related_name='plan_options')
     title = models.CharField(max_length=254, unique=True)
     slug = models.SlugField(unique=True)

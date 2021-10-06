@@ -68,9 +68,14 @@ class IsStudioAdmin(permissions.BasePermission):
             return False
         if request.user.is_superuser:
             return True
+        
         # Base Permission
-        if request.user.is_studio_admin:
-            return True
+        try:
+            if request.user.is_studio_admin and view.get_studio().user == request.user:
+                return True
+        except Exception as E:
+            return False
+        
         return False
 
     def has_object_permission(self, request, view, obj):
@@ -98,10 +103,19 @@ class IsStudioStaff(permissions.BasePermission):
             return False
         if request.user.is_superuser:
             return True
+        
         # Base Permission
-        if request.user.is_studio_admin == True or request.user.is_studio_staff == True or request.user.studio_moderator_user.is_staff == True:
-            return True
-        return False
+        try:
+            if request.user.is_studio_admin and view.get_studio().user == request.user:
+                return True
+            elif request.user.is_studio_staff == True and request.user.studio_moderator_user.studio == view.get_studio():
+                return True
+            elif request.user.studio_moderator_user.is_staff == True and request.user.studio_moderator_user.studio == view.get_studio():
+                return True
+            else:
+                return False
+        except Exception as E:
+            return False
 
     def has_object_permission(self, request, view, obj):
         if not bool(request.user and request.user.is_authenticated):
