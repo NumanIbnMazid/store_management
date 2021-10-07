@@ -22,3 +22,7 @@
 # TODO: Slug is blank while studio name is japanese
 
 # TODO: Staff permission check if in accessing studio
+
+# Manage permissions from model by custom manager and overriding get method and changing objects to custom manager
+
+# Enhance PrimaryKeyRelatedField in serializer

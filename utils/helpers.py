@@ -67,6 +67,41 @@ def custom_exception_handler(exc, context):
     except Exception as E:
         if response is not None:
             response.data['status_code'] = response.status_code
-        # print(f"Failed to customize exception. Exception: {str(E)}")
 
     return response
+
+
+def populate_related_object_id(request, related_data_name):
+    """[Populates Related Data Object ID]
+
+    Args:
+        related_data_name ([String]): [Related Data Name]
+
+    Returns:
+        [tuple]: [(Status(Boolean), ObjectID(Integer)/Message(String/None))]
+    """
+    
+    related_data_name = related_data_name.lower()
+    related_data = request.data.get(related_data_name)
+    
+    related_data_type = type(related_data)
+    # Return False if space not given (as it is mandatory to verify user permission)
+    if related_data == None or related_data == "":
+        return False, f"`{related_data_name.title()}` is required!"
+    if (related_data_type == list or related_data_type == tuple) and len(related_data) <= 0:
+        return False, f"At least one `{related_data_name.title()}` is required!"
+    
+    realated_object_id = None
+    
+    # populate related object id
+    if related_data_type == list or related_data_type == tuple:
+        realated_object_id = related_data[0]
+    elif related_data_type == str:
+        splitted_data = related_data.split(",") if "," in related_data else related_data.split()
+        realated_object_id = [int(i) for i in splitted_data][0]
+    elif related_data_type == int:
+        realated_object_id = related_data
+    else:
+        return False, "Invalid data type received!"
+    
+    return True, realated_object_id
