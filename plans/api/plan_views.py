@@ -4,9 +4,8 @@ from plans.models import Plan
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
-from rest_framework.parsers import MultiPartParser
 from studios.models import Studio
-from utils.helpers import ResponseWrapper
+from utils.helpers import populate_related_object_id
 
 
 class PlanManagerViewSet(LoggingMixin, CustomViewSet):
@@ -14,30 +13,28 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
     logging_methods = ["GET", "POST", "PATCH", "DELETE"]
     queryset = Plan.objects.all()
     lookup_field = "slug"
-    parser_classes = (MultiPartParser, )
     
     def get_studio(self):
         try:
-            return self.get_object().space.all().first().store.studio
+            return True, self.get_object().space.all().first().store.studio
         except Exception as E:
-            space = None
-            print(self.request.POST, "xxxxxxxxxxx")
-            print(type(self.request.data.get("space")), "asfsdfsdsddsfsdsdfsddsff")
-            if type(self.request.data.get("space")) == list or type(self.request.data.get("space")) == tuple:
-                space = self.request.data.get("space")[0]
-            elif type(self.request.data.get("space")) == str:
-                space = self.request.data.get("space").split(",")[0]
-            else:
-                return ResponseWrapper(error_code=400, msg="Invalid data type received! Please input spaces and List/Array or Comma Separeted String Value!", status=400)
-            print(space, "SDSDSDDasdasasdasd")
-            space_qs = Space.objects.filter(id=int(space))
+            # get related object id
+            related_object = populate_related_object_id(request=self.request, related_data_name="space")
+            # check related object status
+            if related_object[0] == False:
+                return False, related_object[-1]
+            # space queryset
+            space_qs = Space.objects.filter(id=int(related_object[-1]))
+            # check if space is exists
             if space_qs.exists():
                 qs = Studio.objects.filter(id=int(space_qs.first().store.studio.id))
                 if qs.exists():
-                    return qs.first()
+                    return True, qs.first()
             else:
-                return ResponseWrapper(error_code=400, msg="Failed to get space! Thus failed to provide required permissions required for Studio Management.", status=400)
-        return ResponseWrapper(error_code=400, msg="Failed to get studio! Thus failed to provide required permissions required for Studio Management.", status=400)
+                return False, "Failed to get `Space`! Thus failed to provide required permissions required for Studio Management."
+            
+        return False, "Failed to get `Studio`! Thus failed to provide required permissions required for Studio Management."
+    
     
     def get_serializer_class(self):
         if self.action in ["update"]:
@@ -47,7 +44,9 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
         return self.serializer_class
     
     def get_permissions(self):
-        permission_classes = [custom_permissions.IsStudioAdmin]
+        permission_classes = [
+            custom_permissions.IsStudioAdmin, custom_permissions.SpaceAccessPermission, custom_permissions.OptionAccessPermission
+        ]
         return [permission() for permission in permission_classes]
     
     def _clean_data(self, data):

@@ -1,7 +1,6 @@
 from rest_framework import viewsets
 from utils.helpers import ResponseWrapper
 
-
 class CustomViewSet(viewsets.ModelViewSet):
     lookup_field = 'pk'
 
