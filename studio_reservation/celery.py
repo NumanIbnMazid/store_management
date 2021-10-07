@@ -13,6 +13,14 @@ app = Celery('studio_reservation')
 #   should have a `CELERY_` prefix.
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
+app.conf.beat_schedule = {
+    'add-every-5-seconds': {
+        'task': 'notifications.tasks.send_email',
+        'schedule': 1.0,
+        'args': ('test@gmail.com','This is sample message.')
+    }
+}
+
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
 

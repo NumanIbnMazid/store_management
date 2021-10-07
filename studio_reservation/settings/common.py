@@ -43,6 +43,9 @@ THIRD_PARTY_APPS = [
     "drf_yasg",
     # Django Rest Framework Tracking
     "rest_framework_tracking",
+    # Celery task save in database
+    "django_celery_results",
+    "django_celery_beat",
 ]
 
 LOCAL_APPS = [
@@ -146,4 +149,5 @@ LOGIN_URL = "/rest-auth/login/"
 from studio_reservation.settings.third_party_configs import *
 
 
-
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'default'
