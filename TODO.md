@@ -17,10 +17,8 @@
 
 # TODO: API: Collective Deal Management
 
-# TODO: BUG: Same Plan can be on multiple space
+# TODO: BUG: Same Plan can be on multiple space (Fixed)
 
-# Notifications fields id, title, slug, display_date, display_time(null_able), message, link_url, pdf_link, file(base64), is_published(default=False), studio, created_at, update_at
+# TODO: Slug is blank while studio name is japanese
 
-# Get active notifications list only petch is_published
-
-# Crud --- manage celery or cron jobs for every crud 
+# TODO: Staff permission check if in accessing studio

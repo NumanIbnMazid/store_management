@@ -18,8 +18,7 @@ class CustomViewSet(viewsets.ModelViewSet):
             qs = serializer.save()
             serializer = self.serializer_class(instance=qs)
             return ResponseWrapper(data=serializer.data, msg='created')
-        else:
-            return ResponseWrapper(error_msg=serializer.errors, error_code=400)
+        return ResponseWrapper(error_msg=serializer.errors, error_code=400)
 
     def update(self, request, **kwargs):
         serializer_class = self.get_serializer_class()
@@ -29,16 +28,14 @@ class CustomViewSet(viewsets.ModelViewSet):
             ), validated_data=serializer.validated_data)
             serializer = self.serializer_class(instance=qs)
             return ResponseWrapper(data=serializer.data)
-        else:
-            return ResponseWrapper(error_msg=serializer.errors, error_code=400)
+        return ResponseWrapper(error_msg=serializer.errors, error_code=400)
 
     def destroy(self, request, **kwargs):
         qs = self.queryset.filter(**kwargs).first()
         if qs:
             qs.delete()
             return ResponseWrapper(status=200, msg='deleted')
-        else:
-            return ResponseWrapper(error_msg="failed to delete", error_code=400)
+        return ResponseWrapper(error_msg="failed to delete", error_code=400)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
