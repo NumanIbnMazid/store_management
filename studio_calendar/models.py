@@ -113,3 +113,4 @@ def create_business_hour_slug_on_pre_save(sender, instance, **kwargs):
             )
         except Exception as E:
             instance.slug = simple_random_string()
+

@@ -56,3 +56,4 @@ swagger-spec-validator==2.7.3
 toml==0.10.2
 uritemplate==3.0.1
 urllib3==1.26.6
+celery=5.1.2

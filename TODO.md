@@ -18,3 +18,9 @@
 # TODO: API: Collective Deal Management
 
 # TODO: BUG: Same Plan can be on multiple space
+
+# Notifications fields id, title, slug, display_date, display_time(null_able), message, link_url, pdf_link, file(base64), is_published(default=False), studio, created_at, update_at
+
+# Get active notifications list only petch is_published
+
+# Crud --- manage celery or cron jobs for every crud 

@@ -55,6 +55,7 @@ LOCAL_APPS = [
     "plans",
     "studio_calendar",
     "deals",
+    "notifications",
 ]
 
 INSTALLED_APPS = [
