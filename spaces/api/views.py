@@ -10,7 +10,7 @@ class SpaceManagerViewSet(LoggingMixin, CustomViewSet):
     logging_methods = ["GET", "POST", "PATCH", "DELETE"]
     queryset = Space.objects.all()
     lookup_field = "slug"
-    parser_classes = (MultiPartParser, )
+    parser_classes = (MultiPartParser,)
     
     def get_serializer_class(self):
         if self.action in ["update"]:
