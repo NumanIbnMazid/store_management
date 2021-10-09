@@ -87,9 +87,9 @@ def populate_related_object_id(request, related_data_name):
     related_data_type = type(related_data)
     # Return False if space not given (as it is mandatory to verify user permission)
     if related_data == None or related_data == "":
-        return False, f"`{related_data_name.title()}` is required!"
+        return False, f"`{related_data_name}` is required!"
     if (related_data_type == list or related_data_type == tuple) and len(related_data) <= 0:
-        return False, f"At least one `{related_data_name.title()}` is required!"
+        return False, f"At least one `{related_data_name}` is required!"
     
     realated_object_id = None
     

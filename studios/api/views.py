@@ -5,6 +5,7 @@ from utils.custom_viewset import CustomViewSet
 from utils.helpers import ResponseWrapper
 from .serializers import StudioSerializer, StudioModeratorSerializer, StudioModeratorUpdateSerializer
 from studios.models import Studio, StudioModerator
+from utils.helpers import populate_related_object_id
 
 
 """
@@ -14,6 +15,15 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
     logging_methods = ["GET", "POST", "PATCH", "DELETE"]
     queryset = Studio.objects.all()
     lookup_field = "slug"
+    
+    def get_studio_id(self):
+        try:
+            return True, self.get_object().id
+        except Exception as E:
+            try:
+                return True, self.request.user.studio_user.id
+            except Exception as E:
+                return False, str(E)
 
     def get_serializer_class(self):
         if self.action in ["create", "update"]:
@@ -26,7 +36,7 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
         if self.action in ["create", "destroy"]:
             permission_classes = [custom_permissions.IsSuperUser]
         else:
-            permission_classes = [permissions.IsAuthenticated]
+            permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
     
     def create(self, request, *args, **kwargs):
@@ -65,6 +75,17 @@ class StudioModeratorManagerViewSet(LoggingMixin, CustomViewSet):
     logging_methods = ['GET', 'POST', 'PATCH', 'DELETE']
     queryset = StudioModerator.objects.all()
     lookup_field = "slug"
+    
+    def get_studio_id(self):
+        try:
+            return True, self.get_object().studio.id
+        except Exception as E:
+            # get related object id
+            related_object = populate_related_object_id(request=self.request, related_data_name="studio")
+            # check related object status
+            if related_object[0] == True:
+                return True, related_object[-1]
+            return False, related_object[-1]
 
     def get_serializer_class(self):
         if self.action in ["create_admin"]:
