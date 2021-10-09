@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Studio, StudioModerator
+from .models import Studio, StudioModerator, VatTax
 from utils.mixins import CustomModelAdminMixin
 
 
@@ -18,3 +18,11 @@ class StudioModeratorAdmin(CustomModelAdminMixin, admin.ModelAdmin):
 
 
 admin.site.register(StudioModerator, StudioModeratorAdmin)
+
+class VatTaxAdmin(CustomModelAdminMixin, admin.ModelAdmin):
+    pass
+    class Meta:
+        model = VatTax
+
+
+admin.site.register(VatTax, VatTaxAdmin)
