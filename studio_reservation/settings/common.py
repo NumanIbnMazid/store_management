@@ -18,7 +18,7 @@ SECRET_KEY = env.str('SECRET_KEY')
 if env.bool('IS_PRODUCTION', default='') == True:
     DEBUG = False
 elif env.bool('IS_PRODUCTION', default='') == False and env.bool('IS_STAGING', default='') == True:
-    DEBUG = False
+    DEBUG = True
 else:
     DEBUG = True
 
