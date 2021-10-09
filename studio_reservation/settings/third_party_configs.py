@@ -37,7 +37,7 @@ REST_AUTH_REGISTER_SERIALIZERS = {
 
 REST_AUTH_SERIALIZERS = {
     'USER_DETAILS_SERIALIZER': 'users.api.serializers.RegisterSerializer',
-    'LOGIN_SERIALIZER': 'users.api.serializers.LoginSerializer'
+    'LOGIN_SERIALIZER': 'users.api.serializers.LoginSerializer',
 }
 
 """
@@ -48,7 +48,7 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
-    'UPDATE_LAST_LOGIN': False,
+    'UPDATE_LAST_LOGIN': True,
 
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': env.str('SECRET_KEY'),

@@ -143,7 +143,7 @@ WSGI_APPLICATION = 'studio_reservation.wsgi.application'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 HOME_URL = "/"
 ADMIN_LOGIN_URL = "/admin/login/"
-LOGIN_URL = "/rest-auth/login/"
+LOGIN_URL = "/api/login/"
 
 """ *** Third Party Configurations *** """
 from studio_reservation.settings.third_party_configs import *
