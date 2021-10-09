@@ -62,7 +62,6 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
             }
             
             def prepare_vat_tax_data(vat_tax_instance=None):
-                print(vat_tax_instance)
                 result["vattax"]["vat"] = vat_tax_instance.vat
                 result["vattax"]["tax"] = vat_tax_instance.tax
                 result["vattax"]["other_service"] = vat_tax_instance.other_service
