@@ -14,7 +14,7 @@ class AccountManagerViewSet(LoggingMixin, CustomViewSet):
     logging_methods = ['GET', 'POST', 'PATCH', 'DELETE']
     queryset = Customer.objects.all()
     lookup_field = 'slug'
-    
+
     def get_custom_permission(self):
         if self.action in ["create"]:
             return True

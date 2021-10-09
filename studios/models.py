@@ -77,7 +77,7 @@ class VatTax(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return self.slug
+        return self.studio.name
 
 
 """

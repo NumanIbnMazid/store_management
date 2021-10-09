@@ -4,6 +4,7 @@ from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
 from studios.models import VatTax, Studio
 from utils.helpers import ResponseWrapper
+from utils.helpers import populate_related_object_id
 
 """
     ----------------------- * Vat Tax * -----------------------
@@ -14,6 +15,17 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
     logging_methods = ["GET", "POST", "PATCH", "DELETE"]
     queryset = VatTax.objects.all()
     lookup_field = "slug"
+    
+    def get_studio_id(self):
+        try:
+            return True, self.get_object().studio.id
+        except Exception as E:
+            # get related object id
+            related_object = populate_related_object_id(request=self.request, related_data_name="studio")
+            # check related object status
+            if related_object[0] == True:
+                return True, related_object[-1]
+            return False, related_object[-1]
      
     
     def get_serializer_class(self):
@@ -35,8 +47,8 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
             data = data.decode(errors='ignore')
         return super(VatTaxManagerViewSet, self)._clean_data(data)
     
-    def get_studio_vat_tax(self,studio):
-        qs = VatTax.objects.filter(studio=studio)
+    def get_studio_vat_tax(self, studio_id):
+        qs = VatTax.objects.filter(studio=studio_id)
         if qs.exists():
             return True, qs.first()
         return False, None
@@ -57,7 +69,7 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
                 return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg=f"Studio {studio} does not exists!", status=400)
 
             result = {
-                "studio": studio,
+                "studio": studio_obj.name,
                 "vattax":{}
             }
             
@@ -68,7 +80,7 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
                 return result
     
             # get vat tax from DB
-            vat_tax_filter_result = self.get_studio_vat_tax(studio=studio)
+            vat_tax_filter_result = self.get_studio_vat_tax(studio_id=studio_obj.id)
             
             # preapare vat tax data
             if vat_tax_filter_result[0] == True:
