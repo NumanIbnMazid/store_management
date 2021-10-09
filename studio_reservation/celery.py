@@ -1,5 +1,5 @@
 import os
-
+from datetime import datetime, timedelta
 from celery import Celery
 
 # Set the default Django settings module for the 'celery' program.
@@ -13,17 +13,16 @@ app = Celery('studio_reservation')
 #   should have a `CELERY_` prefix.
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
+datetime_now = datetime.now()
 app.conf.beat_schedule = {
-    'add-every-5-seconds': {
-        'task': 'notifications.tasks.send_email',
-        'schedule': 1.0,
-        'args': ('test@gmail.com','This is sample message.')
+    'add-every-6-hours': {
+        'task': 'notifications.tasks.notification',
+        'schedule': timedelta(hours=6),
     }
 }
 
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
-
 
 @app.task(bind=True)
 def debug_task(self):
