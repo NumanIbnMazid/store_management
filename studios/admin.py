@@ -16,5 +16,4 @@ class StudioModeratorAdmin(CustomModelAdminMixin, admin.ModelAdmin):
     class Meta:
         model = StudioModerator
 
-
 admin.site.register(StudioModerator, StudioModeratorAdmin)

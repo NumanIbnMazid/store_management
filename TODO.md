@@ -31,3 +31,7 @@
 # Get active notifications list only petch is_published
 
 # Crud --- manage celery or cron jobs for every crud 
+
+# Customer search 
+
+# Page Number 14

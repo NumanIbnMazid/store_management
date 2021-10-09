@@ -67,6 +67,7 @@ class VatTax(models.Model):
     vat = models.IntegerField(default=0)
     tax = models.IntegerField(default=0)
     other_service = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
