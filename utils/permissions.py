@@ -164,6 +164,10 @@ def module_permission_checker(request, queryset, module_name):
         [tuple]: [(Status[Boolean], Message[String/None])]
     """
     
+    # ByPass if user is super_user
+    if request.user.is_superuser:
+        return True, None
+    
     module_in_request = request.data.get(module_name)
     
     # ByPass if module not given

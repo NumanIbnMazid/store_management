@@ -23,12 +23,6 @@
 
 # TODO: Staff permission check if in accessing studio
 
-<<<<<<< HEAD
-# Manage permissions from model by custom manager and overriding get method and changing objects to custom manager
-
-# Enhance PrimaryKeyRelatedField in serializer
-=======
-
 # TODO: BUG: Same Plan can be on multiple space
 
 # Notifications fields id, title, slug, display_date, display_time(null_able), message, link_url, pdf_link, file(base64), is_published(default=False), studio, created_at, update_at
@@ -36,4 +30,3 @@
 # Get active notifications list only petch is_published
 
 # Crud --- manage celery or cron jobs for every crud 
->>>>>>> 74b0bfe94595ca7fe711fc5e798c80d0a720d8b6

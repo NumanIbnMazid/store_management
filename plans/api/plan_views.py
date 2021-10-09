@@ -53,7 +53,3 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
         if isinstance(data, bytes):
             data = data.decode(errors='ignore')
         return super(PlanManagerViewSet, self)._clean_data(data)
-
-
-
-    

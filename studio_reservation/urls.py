@@ -15,6 +15,13 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from utils.decorators import has_staff_permission_required
 from .views import HomeView
+from users.api.views import CustomAPILoginView
+from rest_auth.views import (
+    LogoutView, UserDetailsView, PasswordChangeView,
+    PasswordResetView, PasswordResetConfirmView
+)
+from rest_auth.registration.views import RegisterView, VerifyEmailView
+from django.views.generic import TemplateView
 
 
 # Define Rest Framework Router
@@ -34,13 +41,28 @@ schema_view = get_schema_view(
     permission_classes=(permissions.AllowAny,),
 )
 
+""" Authentication URL Patterns """
+
+AUTHENTICATION_URL_PATTERNS = [
+    path("api/register/", RegisterView.as_view(), name="rest_register"),
+    path("api/verify-email/", VerifyEmailView.as_view(), name="rest_verify_email"),
+    url(r"^api/account-confirm-email/(?P<key>[-:\w]+)/$", TemplateView.as_view(), name="account_confirm_email"),
+    path("api/login/", CustomAPILoginView.as_view(), name="rest_login"),
+    path("api/logout/", LogoutView.as_view(), name="rest_logout"),
+    # path("api/user/", UserDetailsView.as_view(), name="rest_user_details"),
+    path("api/password/change/", PasswordChangeView.as_view(), name="rest_password_change"),
+    path("api/password/reset/", PasswordResetView.as_view(), name="rest_password_reset"),
+    path("api/password/reset/confirm/", PasswordResetConfirmView.as_view(), name="rest_password_reset_confirm"),
+]
+
 """ Third Party URL Patterns """
+
 THIRD_PARTY_URL_PATTERNS = [
     # Django Rest Framework
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     # Django Rest Auth
-    path('rest-auth/', include('rest_auth.urls')),
-    path('rest-auth/registration/', include('rest_auth.registration.urls')),
+    # path('rest-auth/', include('rest_auth.urls')),
+    # path('rest-auth/registration/', include('rest_auth.registration.urls')),
     # Django Rest Framework JWT
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
@@ -50,8 +72,9 @@ THIRD_PARTY_URL_PATTERNS = [
     url(r'^redoc/$', has_staff_permission_required(schema_view.with_ui('redoc', cache_timeout=0)), name='schema-redoc'),
 ]
 
+""" Internal App URL Patterns """
+
 INTERNAL_APP_URL_PATTERNS = [
-    # ==============================*** CUSTOMER URLS ***==============================
     path("customer/", include(("customers.api.urls", "customers"), namespace="customers")),
     path("staff/", include(("staffs.api.urls", "staffs"), namespace="staffs")),
     path("studio/", include(("studios.api.urls", "studios"), namespace="studios")),
@@ -70,7 +93,7 @@ urlpatterns = [
     url(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
     path('admin/', admin.site.urls),
     path("", HomeView.as_view(), name="home"),
-] + THIRD_PARTY_URL_PATTERNS + INTERNAL_APP_URL_PATTERNS
+] + THIRD_PARTY_URL_PATTERNS + AUTHENTICATION_URL_PATTERNS + INTERNAL_APP_URL_PATTERNS
 
 if settings.DEBUG:
     urlpatterns = urlpatterns + \

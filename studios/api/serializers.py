@@ -39,7 +39,7 @@ class StudioSerializer(serializers.ModelSerializer):
         register_serializer = RegisterSerializer(data=user_data)
         if register_serializer.is_valid():
             instance = register_serializer.save(request)
-            # alter is_customer = True
+            # alter is_studio_admin = True
             instance.is_studio_admin = True
             instance.save()
             return instance
@@ -87,6 +87,9 @@ class StudioModeratorSerializer(serializers.ModelSerializer):
         register_serializer = RegisterSerializer(data=user_data)
         if register_serializer.is_valid():
             instance = register_serializer.save(request)
+            # alter is_studio_staff = True
+            instance.is_studio_staff = True
+            instance.save()
             return instance
         if register_serializer.errors:
             raise serializers.ValidationError(register_serializer.errors)

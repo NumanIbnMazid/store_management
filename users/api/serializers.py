@@ -6,10 +6,17 @@ from rest_framework import serializers
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from rest_auth.serializers import LoginSerializer as RestAuthLoginSerializer
+from django.contrib.auth import get_user_model
 
 
+class CustomUserDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = "__all__"
+        
 class LoginSerializer(RestAuthLoginSerializer):
     username = None
+    
 
 class RegisterSerializer(serializers.Serializer):
     name = serializers.CharField(required=False)
@@ -52,4 +59,3 @@ class RegisterSerializer(serializers.Serializer):
         user.name = self.data.get('name') 
         user.save()
         return user
-    
