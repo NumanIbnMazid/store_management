@@ -10,6 +10,7 @@ from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
 from utils.helpers import ResponseWrapper
 from dateutil import parser
+from utils.helpers import populate_related_object_id
 
 
 class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
@@ -22,6 +23,17 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
     jp_holidays = holidays.JP()
     # define base holiday
     base_holidays = holidays.HolidayBase()
+    
+    def get_studio_id(self):
+        try:
+            return True, self.get_object().studio.id
+        except Exception as E:
+            # get related object id
+            related_object = populate_related_object_id(request=self.request, related_data_name="studio")
+            # check related object status
+            if related_object[0] == True:
+                return True, related_object[-1]
+            return False, related_object[-1]
 
     def get_serializer_class(self):
         if self.action in ["update"]:
@@ -40,7 +52,10 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
         return self.serializer_class
 
     def get_permissions(self):
-        permission_classes = [custom_permissions.IsStudioStaff]
+        if self.action in ["check_single_holiday", "check_holidays_between_range", "check_holidays_for_year", "check_holidays_from_list"]:
+            permission_classes = [custom_permissions.IsStudioStaff]
+        else:
+            permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
     
     def create_studio_holidays_for_year(self, year, studio_obj):
