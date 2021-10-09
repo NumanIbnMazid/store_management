@@ -60,6 +60,25 @@ class StudioModerator(models.Model):
         return self.slug
 
 
+
+class VatTax(models.Model):
+    studio = models.OneToOneField(Studio, on_delete=models.CASCADE, related_name="studio_vattax")
+    slug = models.SlugField(unique=True)
+    vat = models.IntegerField(default=0)
+    tax = models.IntegerField(default=0)
+    other_service = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Vat Tax'
+        verbose_name_plural = 'Vat Tax'
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.slug
+
+
 """
 *** Pre-Save, Post-Save and Pre-Delete Hooks ***
 """
@@ -100,3 +119,11 @@ def delete_users_on_studio_moderator_pre_delete(sender, instance, **kwargs):
             user_qs.delete()
     except Exception as E:
         raise Exception(f"Failed to delete `User` on `StudioModerator` post_delete hook. Exception: {str(E)}")
+
+
+
+@receiver(pre_save, sender=VatTax)
+def update_vattax_slug_on_pre_save(sender, instance, **kwargs):
+    """ Generates and updates VatTax slug using pre_save hook """
+    if not instance.slug:
+        instance.slug = simple_random_string()

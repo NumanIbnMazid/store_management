@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import StudioViewSet, StudioModeratorManagerViewSet
+from .vat_tax_views import VatTaxManagerViewSet
 
 
 router = DefaultRouter()
@@ -18,4 +19,11 @@ urlpatterns = [
     path("moderator/update/<slug>/", StudioModeratorManagerViewSet.as_view({"patch": "update"}, name="update_studio_moderator")),
     # path("moderator/delete/admin/<slug>/", StudioModeratorManagerViewSet.as_view({"delete": "destroy_admin"}, name="delete_studio_admin")),
     path("moderator/delete/staff/<slug>/", StudioModeratorManagerViewSet.as_view({"delete": "destroy_staff"}, name="delete_studio_staff")),
+
+     # ==============================*** Vat Tax URLS ***==============================
+    path("vattax/create/", VatTaxManagerViewSet.as_view({'post': 'create'}, name='create_vat_tax')),
+    path("vattax/retrieve/<slug>/", VatTaxManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_vat_tax")),
+    path("vattax/update/<slug>/", VatTaxManagerViewSet.as_view({"patch": "update"}, name="update_vat_tax")),
+    path("vattax/delete/<slug>/", VatTaxManagerViewSet.as_view({"delete": "destroy"}, name="delete_vat_tax")),
+    path("vattax/", VatTaxManagerViewSet.as_view({"post": "studio_vat_tax"}, name="studio_vat_tax")),
 ]

@@ -1,5 +1,5 @@
 from rest_framework import fields, serializers
-from studios.models import Studio, StudioModerator
+from studios.models import Studio, StudioModerator, VatTax
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from users.api.serializers import (RegisterSerializer)
@@ -108,3 +108,20 @@ class StudioModeratorUpdateSerializer(serializers.ModelSerializer):
         representation = super(StudioModeratorUpdateSerializer, self).to_representation(instance)
         representation['user'] = UserStudioModeratorSerializer(instance.user).data
         return representation
+
+
+
+class VatTaxSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VatTax
+        fields = "__all__"
+        read_only_fields = ("slug",)
+        
+class VatTaxUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VatTax
+        fields = "__all__"
+        read_only_fields = ("slug","studio",)
+
+class StudioVatTaxSerializer(serializers.Serializer):
+    studio = serializers.IntegerField()
