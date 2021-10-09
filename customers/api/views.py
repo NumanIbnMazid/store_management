@@ -14,6 +14,17 @@ class AccountManagerViewSet(LoggingMixin, CustomViewSet):
     logging_methods = ['GET', 'POST', 'PATCH', 'DELETE']
     queryset = Customer.objects.all()
     lookup_field = 'slug'
+    
+    def get_custom_permission(self):
+        if self.action in ["create"]:
+            return True
+        else:
+            try:
+                if self.get_object().user == self.request.user:
+                    return True
+            except Exception as E:
+                return False, str(E)
+        return False, "You are not allowed to access this content!"
 
     def get_serializer_class(self):
         if self.action in ["create"]:
@@ -26,10 +37,10 @@ class AccountManagerViewSet(LoggingMixin, CustomViewSet):
         return self.serializer_class
 
     def get_permissions(self):
-        if self.action in ["create", "update"]:
-            permission_classes = [custom_permissions.IsStaff]
+        if self.action in ["create"]:
+            permission_classes = [permissions.AllowAny]
         else:
-            permission_classes = [permissions.IsAuthenticated]
+            permission_classes = [custom_permissions.GetDynamicPermissionFromViewset]
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):

@@ -7,6 +7,32 @@ from stores.models import Store
 from studio_calendar.models import StudioCalendar, BusinessDay, BusinessHour
 
 
+class GetDynamicPermissionFromViewset(permissions.BasePermission):
+    """
+    Permission: GetDynamicPermissionFromViewset
+    """
+
+    message = "Permission Denied!"
+
+    def has_permission(self, request, view):
+        """
+        Return `True` if permission is granted, `False` otherwise.
+        """
+        # if view function has get_custom_permission method
+        if hasattr(view, 'get_custom_permission'):
+            # get permission from viewset (status[Boolean], message[String])
+            custom_permission = view.get_custom_permission()
+            custom_permission_status = custom_permission[0] if type(custom_permission) in [list, tuple] else custom_permission
+            if custom_permission_status == True:
+                return True
+            else:
+                if type(custom_permission) in [list, tuple] and not custom_permission[-1] == None:
+                    self.message = custom_permission[-1]
+        else:
+            self.message = self.message + " Please define get_custom_permission() method on viewset!"
+        return False
+    
+
 class IsStaff(permissions.BasePermission):
     """
     Permission: IsStaff
@@ -78,25 +104,34 @@ class IsStudioAdmin(permissions.BasePermission):
         
         # Base Permission
         try:
-            # get studio id from viewset
-            studio_id = view.get_studio_id()
-            
-            if studio_id[0] == True:
-                # query studio from studio_id passed by viewset
-                studio_qs = Studio.objects.filter(id=int(studio_id[-1]))
-                # check if studio exists
-                if studio_qs.exists():
-                    # get studio object
-                    studio = studio_qs.first()
-                    # *** Check Base Permission ***
-                    if request.user.is_studio_admin and studio.user == request.user:
-                        return True
+            # if view function has get_studio_id method
+            if hasattr(view, 'get_studio_id'):
+                # get studio id from viewset
+                studio_id = view.get_studio_id()
+
+                if studio_id[0] == True:
+                    # query studio from studio_id passed by viewset
+                    studio_qs = Studio.objects.filter(id=int(studio_id[-1]))
+                    # check if studio exists
+                    if studio_qs.exists():
+                        # get studio object
+                        studio = studio_qs.first()
+                        # *** Check Base Permission ***
+                        if request.user.is_studio_admin and studio.user == request.user:
+                            return True
+                    else:
+                        self.message = f"Studio {studio_id[-1]} not found! Thus failed to provide required permissions for Studio Management."
+                        return False
                 else:
-                    self.message = f"Studio {studio_id[-1]} not found! Thus failed to provide required permissions for Studio Management."
+                    self.message = studio_id[-1]
                     return False
+            # if not view function has get_studio_id method
             else:
-                self.message = studio_id[-1]
-                return False
+                # *** Check Base Permission ***
+                if request.user.is_studio_admin:
+                    return True
+                else:
+                    return False
         except Exception as E:
             return False
         
@@ -111,6 +146,7 @@ class IsStudioAdmin(permissions.BasePermission):
         if request.user.is_studio_admin:
             return True
         return False
+
 
 class IsStudioStaff(permissions.BasePermission):
     """
@@ -130,31 +166,40 @@ class IsStudioStaff(permissions.BasePermission):
         
         # Base Permission
         try:
-            # get studio id from viewset
-            studio_id = view.get_studio_id()
+            # if view function has get_studio_id method
+            if hasattr(view, 'get_studio_id'):
+                # get studio id from viewset
+                studio_id = view.get_studio_id()
 
-            if studio_id[0] == True:
-                # query studio from studio_id passed by viewset
-                studio_qs = Studio.objects.filter(id=int(studio_id[-1]))
-                # check if studio exists
-                if studio_qs.exists():
-                    # get studio object
-                    studio = studio_qs.first()
-                    # *** Check Base Permission ***
-                    if request.user.is_studio_admin and studio.user == request.user:
-                        return True
-                    elif request.user.is_studio_staff == True and request.user.studio_moderator_user.studio == studio:
-                        return True
-                    elif request.user.studio_moderator_user.is_staff == True and request.user.studio_moderator_user.studio == studio:
-                        return True
+                if studio_id[0] == True:
+                    # query studio from studio_id passed by viewset
+                    studio_qs = Studio.objects.filter(id=int(studio_id[-1]))
+                    # check if studio exists
+                    if studio_qs.exists():
+                        # get studio object
+                        studio = studio_qs.first()
+                        # *** Check Base Permission ***
+                        if request.user.is_studio_admin and studio.user == request.user:
+                            return True
+                        elif request.user.is_studio_staff == True and request.user.studio_moderator_user.studio == studio:
+                            return True
+                        elif request.user.studio_moderator_user.is_staff == True and request.user.studio_moderator_user.studio == studio:
+                            return True
+                        else:
+                            return False
                     else:
+                        self.message = f"Studio {studio_id[-1]} not found! Thus failed to provide required permissions for Studio Management."
                         return False
                 else:
-                    self.message = f"Studio {studio_id[-1]} not found! Thus failed to provide required permissions for Studio Management."
+                    self.message = studio_id[-1]
                     return False
+            # if not view function has get_studio_id method
             else:
-                self.message = studio_id[-1]
-                return False
+                # *** Check Base Permission ***
+                if request.user.is_studio_admin or request.user.is_studio_staff or request.user.studio_moderator_user.is_staff:
+                    return True
+                else:
+                    return False
         except Exception as E:
             return False
 
