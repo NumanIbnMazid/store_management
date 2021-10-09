@@ -41,6 +41,8 @@ class StudioSerializer(serializers.ModelSerializer):
             instance = register_serializer.save(request)
             # alter is_studio_admin = True
             instance.is_studio_admin = True
+            # alter is_studio_staff = True
+            instance.is_studio_staff = True
             instance.save()
             return instance
         if register_serializer.errors:
