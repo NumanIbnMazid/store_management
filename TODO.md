@@ -38,3 +38,5 @@
 # Crud manage celery or cron jobs for every crud
 
 # Currency Model, Inherit everywhere where amount or cost is used
+
+# TODO: validate default_closing_days in store create from serializer
