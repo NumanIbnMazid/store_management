@@ -4,11 +4,15 @@ from utils.image_upload_helper import upload_store_image_path
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from studios.models import Studio
+from django.utils.translation import gettext_lazy as _
+from django.contrib.postgres.fields import ArrayField
 
 class Store(models.Model):
+    
     name = models.CharField(max_length=150, unique=True)
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_stores")
     slug = models.SlugField(unique=True)
+    default_closed_days = ArrayField(models.CharField(max_length=254))
     address = models.CharField(max_length=254, blank=True, null=True)
     contact_1 = models.CharField(max_length=30, blank=True, null=True)
     contact_2 = models.CharField(max_length=30, blank=True, null=True)
@@ -33,6 +37,31 @@ class Store(models.Model):
     
     def __str__(self):
         return self.name
+    
+
+# class StoreDefaultClosedDay(models.Model):
+#     class Days(models.TextChoices):
+#         SATURDAY = "Saturday", _("Saturday")
+#         SUNDAY = "Sunday", _("Sunday")
+#         MONDAY = "Monday", _("Monday")
+#         TUESDAY = "Tuesday", _("Tuesday")
+#         WEDNESDAY = "Wednesday", _("Wednesday")
+#         THURSDAY = "Thursday", _("Thursday")
+#         FRIDAY = "Friday", _("Friday")
+        
+#     store = models.OneToOneField(Store, on_delete=models.CASCADE, related_name="store_default_closed_day")
+#     slug = models.SlugField(unique=True)
+#     days = models.JSONField()
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+    
+#     class Meta:
+#         verbose_name = 'Store Default ClosedDay'
+#         verbose_name_plural = 'Store Default ClosedDays'
+#         ordering = ["-created_at"]
+
+#     def __str__(self):
+#         return self.store.name
 
 
 @receiver(pre_save, sender=Store)
@@ -43,3 +72,10 @@ def update_store_slug_on_pre_save(sender, instance, **kwargs):
             instance.slug = unique_slug_generator(instance=instance, field=instance.name)
         except Exception as E:
             instance.slug = simple_random_string()
+
+
+# @receiver(pre_save, sender=StoreDefaultClosedDay)
+# def create_store_default_closed_day_slug_on_pre_save(sender, instance, **kwargs):
+#     """ Creates store default closed day slug on StoreDefaultClosedDay pre_save hook """
+#     if not instance.slug:
+#         instance.slug = simple_random_string()

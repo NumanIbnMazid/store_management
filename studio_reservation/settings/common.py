@@ -43,6 +43,8 @@ THIRD_PARTY_APPS = [
     "drf_yasg",
     # Django Rest Framework Tracking
     "rest_framework_tracking",
+    # Django CORS
+    "corsheaders",
     # Celery task save in database
     "django_celery_results",
     "django_celery_beat",
@@ -78,11 +80,15 @@ AUTH_USER_MODEL = 'users.User'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # Django CORS Middleware
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Custom Slash Middleware
+    'middlewares.slash_middleware.AppendOrRemoveSlashMiddleware',
 ]
 
 """ *** Template Definitions *** """
@@ -142,8 +148,9 @@ ROOT_URLCONF = 'studio_reservation.urls'
 WSGI_APPLICATION = 'studio_reservation.wsgi.application'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 HOME_URL = "/"
-ADMIN_LOGIN_URL = "/admin/login/"
-LOGIN_URL = "/api/login/"
+ADMIN_LOGIN_URL = "/admin/login"
+LOGIN_URL = "/api/login"
+APPEND_SLASH = False
 
 """ *** Third Party Configurations *** """
 from studio_reservation.settings.third_party_configs import *

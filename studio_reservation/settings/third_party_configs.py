@@ -14,6 +14,17 @@ env = environ.Env()
 env.read_env(env_file=os.path.join(BASE_DIR, '.env'))
 
 """
+----------------------- * Django CORS Configuration * -----------------------
+"""
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3030',
+    'http://localhost:8080',
+    'http://157.245.201.79',
+    'http://192.168.100.247:8080'
+]
+
+"""
 ----------------------- * Rest Framework Configuration * -----------------------
 """
 REST_FRAMEWORK = {

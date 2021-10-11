@@ -25,7 +25,7 @@ class StudioCalendar(models.Model):
     def __str__(self):
         return str(self.date)
     
-    
+
 class BusinessDay(models.Model):
     class Status(models.IntegerChoices):
         OPEN = 0, _("Open")
@@ -46,11 +46,16 @@ class BusinessDay(models.Model):
     def __str__(self):
         return str(self.date)
     
+    def get_status_str(self):
+        if self.status == 0:
+            return "Open"
+        return "Closed"
+    
 class BusinessHour(models.Model):
     class Status(models.IntegerChoices):
         OPEN = 0, _("Open")
         CLOSED = 1, _("Closed")
-
+        
     store = models.OneToOneField(Store, on_delete=models.CASCADE, related_name="store_business_hour")
     slug = models.SlugField(unique=True)
     saturday_opening_time = models.TimeField()
