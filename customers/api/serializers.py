@@ -50,7 +50,6 @@ class CustomerSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(register_serializer.errors)
         return ResponseWrapper(data=register_serializer.data, status=200)
 
-
 class CustomerUpdateSerializer(serializers.ModelSerializer):
     user = UserCustomerUpdateSerializer(read_only=True)
     slug = serializers.ReadOnlyField()
