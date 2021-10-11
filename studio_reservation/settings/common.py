@@ -87,6 +87,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Custom Slash Middleware
+    'middlewares.slash_middleware.AppendOrRemoveSlashMiddleware',
 ]
 
 """ *** Template Definitions *** """
@@ -146,8 +148,9 @@ ROOT_URLCONF = 'studio_reservation.urls'
 WSGI_APPLICATION = 'studio_reservation.wsgi.application'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 HOME_URL = "/"
-ADMIN_LOGIN_URL = "/admin/login/"
-LOGIN_URL = "/api/login/"
+ADMIN_LOGIN_URL = "/admin/login"
+LOGIN_URL = "/api/login"
+APPEND_SLASH = False
 
 """ *** Third Party Configurations *** """
 from studio_reservation.settings.third_party_configs import *
