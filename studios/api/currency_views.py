@@ -1,14 +1,19 @@
-from .serializers import (CouponSerializer, CouponUpdateSerializer)
-from deals.models import Coupon
+from .serializers import (CurrencySerializer, CurrencyUpdateSerializer)
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
+from studios.models import Studio, Currency
+from utils.helpers import ResponseWrapper
 from utils.helpers import populate_related_object_id
 
-class CouponManagerViewSet(LoggingMixin, CustomViewSet):
+"""
+    ----------------------- * Vat Tax * -----------------------
+"""
+
+class CurrencyManagerViewSet(LoggingMixin, CustomViewSet):
     
     logging_methods = ["GET", "POST", "PATCH", "DELETE"]
-    queryset = Coupon.objects.all()
+    queryset = Currency.objects.all()
     lookup_field = "slug"
     
     def get_studio_id(self):
@@ -24,9 +29,9 @@ class CouponManagerViewSet(LoggingMixin, CustomViewSet):
     
     def get_serializer_class(self):
         if self.action in ["update"]:
-            self.serializer_class = CouponUpdateSerializer
+            self.serializer_class = CurrencyUpdateSerializer
         else:
-            self.serializer_class = CouponSerializer
+            self.serializer_class = CurrencySerializer
         return self.serializer_class
     
     def get_permissions(self):
@@ -36,5 +41,10 @@ class CouponManagerViewSet(LoggingMixin, CustomViewSet):
     def _clean_data(self, data):
         if isinstance(data, bytes):
             data = data.decode(errors='ignore')
-        return super(CouponManagerViewSet, self)._clean_data(data)
+        return super(CurrencyManagerViewSet, self)._clean_data(data)
+   
 
+   
+
+    
+    

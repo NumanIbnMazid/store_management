@@ -1,5 +1,5 @@
 from rest_framework import fields, serializers
-from studios.models import Studio, StudioModerator, VatTax
+from studios.models import Studio, StudioModerator, VatTax, Currency
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from users.api.serializers import (RegisterSerializer)
@@ -111,8 +111,6 @@ class StudioModeratorUpdateSerializer(serializers.ModelSerializer):
         representation['user'] = UserStudioModeratorSerializer(instance.user).data
         return representation
 
-
-
 class VatTaxSerializer(serializers.ModelSerializer):
     class Meta:
         model = VatTax
@@ -127,3 +125,16 @@ class VatTaxUpdateSerializer(serializers.ModelSerializer):
 
 class StudioVatTaxSerializer(serializers.Serializer):
     studio = serializers.IntegerField()
+
+
+class CurrencySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Currency
+        fields = "__all__"
+        read_only_fields = ("slug","code","currency")
+        
+class CurrencyUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Currency
+        fields = "__all__"
+        read_only_fields = ("slug","studio","code","currency")

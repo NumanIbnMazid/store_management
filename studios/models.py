@@ -4,7 +4,8 @@ from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import pre_save, post_delete
 from django.dispatch import receiver
 from utils.snippets import unique_slug_generator, simple_random_string
-
+import pytz
+import pycountry
 
 class Studio(models.Model):
     
@@ -80,6 +81,34 @@ class VatTax(models.Model):
         return self.studio.name
 
 
+class Currency(models.Model):
+    country_code = {}
+    choice_country = []
+    for key, val in pytz.country_names.items():
+        obj = {val:key}
+        country_code.update(obj)
+        choice_country.append((val,val))
+    country_name = tuple(choice_country)
+
+    studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_currency")
+    country = models.CharField(max_length=50, choices=country_name)
+    slug = models.SlugField(unique=True)
+    code = models.CharField(max_length=5, blank=True)
+    currency = models.CharField(max_length=10, blank=True)
+    is_active = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Currency'
+        verbose_name_plural = 'Currency'
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.studio.name
+
+
+
 """
 *** Pre-Save, Post-Save and Pre-Delete Hooks ***
 """
@@ -89,7 +118,7 @@ def update_studio_slug_on_pre_save(sender, instance, **kwargs):
     """ Generates and updates studio slug on `Studio` pre_save hook """
     if not instance.slug:
         try:
-            instance.slug = unique_slug_generator(instance=instance, field=instance.name)
+            instance.slug = unique_slug_generator(instance=instance, field=instance.studio_currency)
         except Exception as E:
             instance.slug = simple_random_string()
             
@@ -127,4 +156,21 @@ def delete_users_on_studio_moderator_pre_delete(sender, instance, **kwargs):
 def update_vattax_slug_on_pre_save(sender, instance, **kwargs):
     """ Generates and updates VatTax slug using pre_save hook """
     if not instance.slug:
-        instance.slug = simple_random_string()
+        try:
+            instance.slug = unique_slug_generator(instance=instance, field=instance.studio.name) # Noman bhai can you check it why can't get studio.name 
+        except Exception as E:
+            instance.slug = simple_random_string()
+
+
+@receiver(pre_save, sender=Currency)
+def update_currency_slug_on_pre_save(sender, instance, **kwargs):
+    """ Generates and updates Currency slug using pre_save hook """
+    if instance.country in instance.country_code:
+            instance.code = instance.country_code[instance.country]
+            py_country = pycountry.countries.get(name=instance.country)          
+            instance.currency = py_country.alpha_3
+    if not instance.slug:
+        try:
+            instance.slug = unique_slug_generator(instance=instance, field=instance.country)
+        except Exception as E:
+            instance.slug = simple_random_string()

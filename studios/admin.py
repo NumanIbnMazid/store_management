@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Studio, StudioModerator, VatTax
+from .models import Studio, StudioModerator, VatTax, Currency
 from utils.mixins import CustomModelAdminMixin
 
 
@@ -25,3 +25,12 @@ class VatTaxAdmin(CustomModelAdminMixin, admin.ModelAdmin):
 
 
 admin.site.register(VatTax, VatTaxAdmin)
+
+
+class CurrencyAdmin(CustomModelAdminMixin, admin.ModelAdmin):
+    pass
+    class Meta:
+        model = Currency
+
+
+admin.site.register(Currency, CurrencyAdmin)

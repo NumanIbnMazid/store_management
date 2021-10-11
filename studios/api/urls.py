@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import StudioViewSet, StudioModeratorManagerViewSet
 from .vat_tax_views import VatTaxManagerViewSet
+from .currency_views import CurrencyManagerViewSet
 
 
 router = DefaultRouter()
@@ -26,4 +27,10 @@ urlpatterns = [
     path("vattax/update/<slug>", VatTaxManagerViewSet.as_view({"patch": "update"}, name="update_vat_tax")),
     path("vattax/delete/<slug>", VatTaxManagerViewSet.as_view({"delete": "destroy"}, name="delete_vat_tax")),
     path("vattax", VatTaxManagerViewSet.as_view({"post": "studio_vat_tax"}, name="studio_vat_tax")),
+
+    # ==============================*** Currency URLS ***==============================
+    path("currency/create", CurrencyManagerViewSet.as_view({'post': 'create'}, name='create_currency')),
+    path("currency/retrieve/<slug>", CurrencyManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_currency")),
+    path("currency/update/<slug>", CurrencyManagerViewSet.as_view({"patch": "update"}, name="update_currency")),
+    path("currency/delete/<slug>", CurrencyManagerViewSet.as_view({"delete": "destroy"}, name="delete_currency")),
 ]
