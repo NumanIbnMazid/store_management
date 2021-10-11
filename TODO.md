@@ -30,14 +30,8 @@
 
 # Get active notifications list only petch is_published
 
-<<<<<<< HEAD
 # Crud --- manage celery or cron jobs for every crud 
 
 # Customer search 
 
 # Page Number 14
-=======
-# Crud --- manage celery or cron jobs for every crud
-
-# Currency Model, Inherit everywhere where amount or cost is used
->>>>>>> 86eeb75d8081accde18f2bba61ca2c68a4410c56
