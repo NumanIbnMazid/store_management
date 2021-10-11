@@ -10,7 +10,6 @@ from customers.models import Customer
 
 
 class AccountManagerViewSet(LoggingMixin, CustomViewSet):
-
     logging_methods = ['GET', 'POST', 'PATCH', 'DELETE']
     queryset = Customer.objects.all()
     lookup_field = 'slug'
@@ -29,8 +28,12 @@ class AccountManagerViewSet(LoggingMixin, CustomViewSet):
     def get_serializer_class(self):
         if self.action in ["create"]:
             self.serializer_class = CustomerSerializer
-        if self.action in ["update"]:
+        elif self.action in ["update"]:
             self.serializer_class = CustomerUpdateSerializer
+
+        elif self.action in ["list"]:
+            self.serializer_class = CustomerSerializer
+
         else:
             self.serializer_class = CustomerSerializer
 

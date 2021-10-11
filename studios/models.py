@@ -80,22 +80,11 @@ class VatTax(models.Model):
     def __str__(self):
         return self.studio.name
 
-
 class Currency(models.Model):
-    country_code = {}
-    choice_country = []
-    for key, val in pytz.country_names.items():
-        obj = {val:key}
-        country_code.update(obj)
-        choice_country.append((val,val))
-    country_name = tuple(choice_country)
-
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_currency")
-    country = models.CharField(max_length=50, choices=country_name)
+    country = models.CharField(max_length=50)
     slug = models.SlugField(unique=True)
-    code = models.CharField(max_length=5, blank=True)
-    currency = models.CharField(max_length=10, blank=True)
-    is_active = models.BooleanField(default=False)
+    currency = models.CharField(max_length=50, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -165,12 +154,8 @@ def update_vattax_slug_on_pre_save(sender, instance, **kwargs):
 @receiver(pre_save, sender=Currency)
 def update_currency_slug_on_pre_save(sender, instance, **kwargs):
     """ Generates and updates Currency slug using pre_save hook """
-    if instance.country in instance.country_code:
-            instance.code = instance.country_code[instance.country]
-            py_country = pycountry.countries.get(name=instance.country)          
-            instance.currency = py_country.alpha_3
     if not instance.slug:
         try:
-            instance.slug = unique_slug_generator(instance=instance, field=instance.country)
+            instance.slug = unique_slug_generator(instance=instance, field=instance.currency)
         except Exception as E:
             instance.slug = simple_random_string()

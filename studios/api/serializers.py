@@ -128,13 +128,15 @@ class StudioVatTaxSerializer(serializers.Serializer):
 
 
 class CurrencySerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Currency
         fields = "__all__"
-        read_only_fields = ("slug","code","currency")
+        read_only_fields = ("slug",)
         
 class CurrencyUpdateSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Currency
         fields = "__all__"
-        read_only_fields = ("slug","studio","code","currency")
+        read_only_fields = ("slug","studio")

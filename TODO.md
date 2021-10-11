@@ -38,3 +38,11 @@
 # TODO: terminate loop imidiately if found an element in business day checker within check business day exists for year
 
 # TODO: BUG: django.db.utils.DataError: value too long for type character varying(27) : check business day API
+
+# studio:{
+    "store":["studio all store"
+    ],
+}
+
+# Get all studio list 
+

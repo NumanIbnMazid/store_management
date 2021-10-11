@@ -5,6 +5,7 @@ from utils.custom_viewset import CustomViewSet
 from studios.models import Studio, Currency
 from utils.helpers import ResponseWrapper
 from utils.helpers import populate_related_object_id
+from rest_framework.parsers import MultiPartParser
 
 """
     ----------------------- * Vat Tax * -----------------------
@@ -15,7 +16,7 @@ class CurrencyManagerViewSet(LoggingMixin, CustomViewSet):
     logging_methods = ["GET", "POST", "PATCH", "DELETE"]
     queryset = Currency.objects.all()
     lookup_field = "slug"
-    
+
     def get_studio_id(self):
         try:
             return True, self.get_object().studio.id
