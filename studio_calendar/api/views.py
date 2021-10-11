@@ -11,6 +11,7 @@ from utils.custom_viewset import CustomViewSet
 from utils.helpers import ResponseWrapper
 from dateutil import parser
 from utils.helpers import populate_related_object_id
+from django.db import transaction
 
 
 class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
@@ -58,6 +59,7 @@ class StudioCalendarManagerViewSet(LoggingMixin, CustomViewSet):
             permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
     
+    @transaction.atomic
     def create_studio_holidays_for_year(self, year, studio_obj):
         try:
             for date, name in sorted(holidays.JP(years=int(year)).items()):
