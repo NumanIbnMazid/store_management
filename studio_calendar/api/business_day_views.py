@@ -8,6 +8,7 @@ from utils.helpers import ResponseWrapper
 from dateutil import parser
 import datetime
 from utils.helpers import populate_related_object_id
+from django.db import transaction
 
 
 class BusinessDayManagerViewSet(LoggingMixin, CustomViewSet):
@@ -47,6 +48,8 @@ class BusinessDayManagerViewSet(LoggingMixin, CustomViewSet):
             permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
     
+    
+    @transaction.atomic
     def create_business_days_for_year(self, year, store_obj):
         
         try:

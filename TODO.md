@@ -33,6 +33,8 @@
 
 # Currency Model, Inherit everywhere where amount or cost is used
 
-# Customer search
+# TODO: validate default_closing_days in store create from serializer (Done)
 
-# Page Number 14
+# TODO: terminate loop imidiately if found an element in business day checker within check business day exists for year
+
+# TODO: BUG: django.db.utils.DataError: value too long for type character varying(27) : check business day API
