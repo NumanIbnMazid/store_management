@@ -57,8 +57,10 @@ class BusinessDayManagerViewSet(LoggingMixin, CustomViewSet):
 
             while start_date <= end_date:
                 # Create BusinessDay Object
-                # TODO: Manage Business Day Status based on configuration
-                BusinessDay.objects.create(store=store_obj, date=start_date, day_name=start_date.strftime("%A"), status=0)
+                day_name = start_date.strftime("%A")
+                BusinessDay.objects.create(
+                    store=store_obj, date=start_date, day_name=day_name, status=0 if day_name in store_obj.default_closed_days else 1
+                )
                 start_date += time_delta
             return True
         
