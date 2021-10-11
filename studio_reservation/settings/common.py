@@ -148,7 +148,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 HOME_URL = "/"
 ADMIN_LOGIN_URL = "/admin/login/"
 LOGIN_URL = "/api/login/"
-APPEND_SLASH = False
 
 """ *** Third Party Configurations *** """
 from studio_reservation.settings.third_party_configs import *
