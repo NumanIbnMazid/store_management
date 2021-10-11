@@ -31,12 +31,12 @@ class CustomAPILoginView(LoginView):
         
         # customize response
         custom_response_data = {
-            "JWT_TOKEN": {
+            "jwt_token": {
                 "refresh": str(refresh),
                 "access": str(refresh.access_token)
             },
-            "USER": user_data,
-            "KEY": key
+            "user": user_data,
+            "key": key
         }
         # update original response
         original_response.data.update(custom_response_data)
