@@ -1,10 +1,15 @@
-from .serializers import (StoreSerializer, StoreUpdateSerializer)
-from stores.models import Store
+from .serializers import (
+    StoreSerializer, StoreUpdateSerializer, CustomClosedDaySerializer, CustomClosedDayUpdateSerializer
+)
+from stores.models import Store, CustomClosedDay
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
 from utils.helpers import populate_related_object_id
 from utils.helpers import ResponseWrapper
+from utils.studio_getter_helper import (
+    get_studio_id_from_studio, get_studio_id_from_store
+)
 
 class StoreManagerViewSet(LoggingMixin, CustomViewSet):
     
@@ -46,3 +51,24 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
         if isinstance(data, bytes):
             data = data.decode(errors='ignore')
         return super(StoreManagerViewSet, self)._clean_data(data)
+
+
+class CustomClosedDayManagerViewSet(LoggingMixin, CustomViewSet):
+    
+    logging_methods = ["GET", "POST", "PATCH", "DELETE"]
+    queryset = CustomClosedDay.objects.all()
+    lookup_field = "slug"
+    
+    def get_studio_id(self):
+        return get_studio_id_from_store(selfObject=self)
+    
+    def get_serializer_class(self):
+        if self.action in ["update"]:
+            self.serializer_class = CustomClosedDayUpdateSerializer
+        else:
+            self.serializer_class = CustomClosedDaySerializer
+        return self.serializer_class
+    
+    def get_permissions(self):
+        permission_classes = [custom_permissions.IsStudioAdmin]
+        return [permission() for permission in permission_classes]
