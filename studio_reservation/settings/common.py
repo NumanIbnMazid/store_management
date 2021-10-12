@@ -89,6 +89,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # Custom Slash Middleware
     'middlewares.slash_middleware.AppendOrRemoveSlashMiddleware',
+    # Request Middleware
+    # 'middlewares.request_middleware.RequestMiddleware',
 ]
 
 """ *** Template Definitions *** """
