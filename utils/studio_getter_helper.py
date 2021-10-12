@@ -1,5 +1,6 @@
 
 from utils.helpers import populate_related_object_id
+from studios.models import Studio
 from spaces.models import Space
 from plans.models import OptionCategory
 from stores.models import Store
@@ -22,18 +23,26 @@ def get_custom_permission(selfObject):
 """ *** Get Studio ID | Key : `studio` """
 
 
-def get_studio_id_from_studio(selfObject):
+def get_studio_id_from_studio(selfObject, slug=None):
     try:
         return True, selfObject.get_object().studio.id
     except Exception as E:
         # get related object id
-        related_object = populate_related_object_id(
-            request=selfObject.request, related_data_name="studio"
-        )
-        # check related object status
-        if related_object[0] == True:
-            return True, related_object[-1]
-        return False, related_object[-1]
+        if slug == None:
+            related_object = populate_related_object_id(
+                request=selfObject.request, related_data_name="studio"
+            )
+            # check related object status
+            if related_object[0] == True:
+                return True, related_object[-1]
+            else:
+                return False, related_object[-1]
+        else:
+            studio_qs = Studio.objects.filter(slug__iexact=slug)
+            if studio_qs.exists():
+                return True, studio_qs.first().id
+            else:
+                return False, "Studio not found!"
 
 
 """ *** Get Studio ID | Key : `store` """
