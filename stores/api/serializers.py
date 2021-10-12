@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from stores.models import Store, CustomClosedDay
 from drf_extra_fields.fields import HybridImageField
+from middlewares.request_middleware import RequestMiddleware
 
 class StoreSerializer(serializers.ModelSerializer):
     image_1 = HybridImageField(required=False)
@@ -66,28 +67,28 @@ class CustomClosedDaySerializer(serializers.ModelSerializer):
 
 
 class CustomClosedDayUpdateSerializer(serializers.ModelSerializer):
-    
     class Meta:
         model = CustomClosedDay
         fields = "__all__"
         read_only_fields = ("slug", "store",)
         
-    def validate_date(self, value):
-        # validate if custom closed day exists for the provided store
-        print(self.context, "ccccccccccccccccc")
-        request = self.context['request']
-        print(value, "jhjhjhjhjhjhjhj")
-        return value
-        
-    # def validate(self, data):
+    # def validate_date(self, value):
     #     # validate if custom closed day exists for the provided store
+    #     print(value, "jhjhjhjhjhjhjhj")
     #     print(self.context, "ccccccccccccccccc")
     #     request = self.context['request']
-    #     date = data['date']
-    #     slug = request.query_params['slug']
-    #     print(request, slug, "asdsadasdsad")
-    #     custom_closed_day_qs = CustomClosedDay.objects.filter(date=date)
-    #     if custom_closed_day_qs:
-    #         raise serializers.ValidationError(
-    #             f"Date `{date}` is alerady exists in Custom Closed Day!")
-    #     return data
+    #     print(request, "ffffffffff")
+    #     return value
+        
+    def validate(self, data):
+        # validate if custom closed day exists for the provided store
+        print(data, "ccccccccccccccccc")
+        # request = self.context['request']
+        # date = data['date']
+        # slug = request.query_params['slug']
+        # print(request, slug, "asdsadasdsad")
+        # custom_closed_day_qs = CustomClosedDay.objects.filter(date=date)
+        # if custom_closed_day_qs:
+        #     raise serializers.ValidationError(
+        #         f"Date `{date}` is alerady exists in Custom Closed Day!")
+        return data
