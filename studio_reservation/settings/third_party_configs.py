@@ -18,11 +18,11 @@ env.read_env(env_file=os.path.join(BASE_DIR, '.env'))
 """
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3030',
-    'http://localhost:8080',
+    'http://127.0.0.1',
+    'http://localhost',
     'http://157.245.201.79',
-    'http://192.168.100.247:8080',
-    'http://192.168.0.102:8081'
+    'http://192.168.100.247',
+    'http://192.168.0.102',
 ]
 
 """
