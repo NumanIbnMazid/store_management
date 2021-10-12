@@ -10,5 +10,6 @@ urlpatterns = [
     path("coupon/retrieve/<slug>", CouponManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_coupon")),
     path("coupon/update/<slug>", CouponManagerViewSet.as_view({"patch": "update"}, name="update_coupon")),
     path("coupon/delete/<slug>", CouponManagerViewSet.as_view({"delete": "destroy"}, name="delete_coupon")),
+    path("list/<studio_slug>", CouponManagerViewSet.as_view({"get": "list"}, name="list_coupon")),
 
 ]
