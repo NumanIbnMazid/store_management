@@ -63,3 +63,19 @@ class CustomClosedDayManagerViewSet(LoggingMixin, CustomViewSet):
     def get_permissions(self):
         permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
+    
+    def update(self, request, **kwargs):
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(data=request.data, partial=True)
+        if serializer.is_valid():
+            date = request.data.get("date", None)
+            store_custom_closed_day_qs = CustomClosedDay.objects.filter(
+                date=date, store=self.get_object().store
+            ).exclude(slug__iexact=kwargs["slug"])
+            if store_custom_closed_day_qs.exists():
+                error_message = f"Date `{date}` already exists!"
+                return ResponseWrapper(error_code=400, error_msg=error_message, msg="Failed to update!", status=400)
+            qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
+            serializer = self.serializer_class(instance=qs)
+            return ResponseWrapper(data=serializer.data)
+        return ResponseWrapper(error_msg=serializer.errors, error_code=400)
