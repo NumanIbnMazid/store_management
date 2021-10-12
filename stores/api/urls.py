@@ -11,4 +11,5 @@ urlpatterns = [
     path("retrieve/<slug>", StoreManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_store")),
     path("update/<slug>", StoreManagerViewSet.as_view({"patch": "update"}, name="update_store")),
     path("delete/<slug>", StoreManagerViewSet.as_view({"delete": "destroy"}, name="delete_store")),
+    path("list/<studio_slug>", StoreManagerViewSet.as_view({"get": "list"}, name="list_store")),
 ]

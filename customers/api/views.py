@@ -28,6 +28,7 @@ class AccountManagerViewSet(LoggingMixin, CustomViewSet):
     def get_serializer_class(self):
         if self.action in ["create"]:
             self.serializer_class = CustomerSerializer
+
         elif self.action in ["update"]:
             self.serializer_class = CustomerUpdateSerializer
 
@@ -42,6 +43,9 @@ class AccountManagerViewSet(LoggingMixin, CustomViewSet):
     def get_permissions(self):
         if self.action in ["create"]:
             permission_classes = [permissions.AllowAny]
+
+        elif self.action in ["list"]:
+            permission_classes = [custom_permissions.IsSuperUser]
         else:
             permission_classes = [custom_permissions.GetDynamicPermissionFromViewset]
         return [permission() for permission in permission_classes]
@@ -65,3 +69,8 @@ class AccountManagerViewSet(LoggingMixin, CustomViewSet):
             qs.user.save()
             return ResponseWrapper(data=serializer.data, status=200)
         return ResponseWrapper(error_msg=serializer.errors, error_code=400)
+
+
+     
+
+     
