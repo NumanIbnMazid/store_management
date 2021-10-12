@@ -42,7 +42,7 @@ class Store(models.Model):
 class CustomClosedDay(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name="store_custom_closed_day")
     slug = models.SlugField(unique=True)
-    date = models.DateField(unique=True)
+    date = models.DateField()
     details = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
