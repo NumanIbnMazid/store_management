@@ -34,6 +34,10 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
         else:
             self.serializer_class = StoreSerializer
         return self.serializer_class
+    
+    # def get_permissions(self):
+    #     permission_classes = [custom_permissions.IsStudioAdmin]
+    #     return [permission() for permission in permission_classes]
 
     def list(self, request, *args, **kwargs):
         studio_slug = kwargs.get("studio_slug")
@@ -42,9 +46,6 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
         serializer = serializer_class(instance=qs, many=True)
         return ResponseWrapper(data=serializer.data, msg='success')
     
-    def get_permissions(self):
-        permission_classes = [custom_permissions.IsStudioAdmin]
-        return [permission() for permission in permission_classes]
     
     def _clean_data(self, data):
         if isinstance(data, bytes):

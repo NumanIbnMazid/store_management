@@ -4,6 +4,9 @@ from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
 from utils.helpers import populate_related_object_id
+from utils.custom_viewset import CustomViewSet
+from utils.helpers import ResponseWrapper
+from rest_framework import permissions
 
 class CouponManagerViewSet(LoggingMixin, CustomViewSet):
     
@@ -37,4 +40,11 @@ class CouponManagerViewSet(LoggingMixin, CustomViewSet):
         if isinstance(data, bytes):
             data = data.decode(errors='ignore')
         return super(CouponManagerViewSet, self)._clean_data(data)
+    
+    def list(self, request, *args, **kwargs):
+        studio_slug = kwargs.get("studio_slug")
+        qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(instance=qs, many=True)
+        return ResponseWrapper(data=serializer.data, msg='success')
 
