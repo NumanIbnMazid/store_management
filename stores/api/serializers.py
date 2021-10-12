@@ -54,6 +54,15 @@ class CustomClosedDaySerializer(serializers.ModelSerializer):
         model = CustomClosedDay
         fields = "__all__"
         read_only_fields = ("slug",)
+        
+    def validate(self, data):
+        # validate if custom closed day exists for the provided store
+        date = data['date']
+        store = data['store']
+        custom_closed_day_qs = CustomClosedDay.objects.filter(store=store, date=date)
+        if custom_closed_day_qs:
+            raise serializers.ValidationError(f"Date `{date}` is alerady exists in Custom Closed Day!")
+        return data
 
 
 class CustomClosedDayUpdateSerializer(serializers.ModelSerializer):
@@ -62,3 +71,23 @@ class CustomClosedDayUpdateSerializer(serializers.ModelSerializer):
         model = CustomClosedDay
         fields = "__all__"
         read_only_fields = ("slug", "store",)
+        
+    def validate_date(self, value):
+        # validate if custom closed day exists for the provided store
+        print(self.context, "ccccccccccccccccc")
+        request = self.context['request']
+        print(value, "jhjhjhjhjhjhjhj")
+        return value
+        
+    # def validate(self, data):
+    #     # validate if custom closed day exists for the provided store
+    #     print(self.context, "ccccccccccccccccc")
+    #     request = self.context['request']
+    #     date = data['date']
+    #     slug = request.query_params['slug']
+    #     print(request, slug, "asdsadasdsad")
+    #     custom_closed_day_qs = CustomClosedDay.objects.filter(date=date)
+    #     if custom_closed_day_qs:
+    #         raise serializers.ValidationError(
+    #             f"Date `{date}` is alerady exists in Custom Closed Day!")
+    #     return data
