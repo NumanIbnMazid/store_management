@@ -6,6 +6,9 @@ from utils.helpers import ResponseWrapper
 from .serializers import StudioSerializer, StudioModeratorSerializer, StudioModeratorUpdateSerializer
 from studios.models import Studio, StudioModerator
 from utils.helpers import populate_related_object_id
+from utils.studio_getter_helper import (
+    get_studio_id_from_studio
+)
 
 
 """
@@ -33,7 +36,7 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
         return self.serializer_class
 
     def get_permissions(self):
-        if self.action in ["create", "destroy"]:
+        if self.action in ["create", "destroy", "list"]:
             permission_classes = [custom_permissions.IsSuperUser]
         else:
             permission_classes = [custom_permissions.IsStudioAdmin]
@@ -77,15 +80,7 @@ class StudioModeratorManagerViewSet(LoggingMixin, CustomViewSet):
     lookup_field = "slug"
     
     def get_studio_id(self):
-        try:
-            return True, self.get_object().studio.id
-        except Exception as E:
-            # get related object id
-            related_object = populate_related_object_id(request=self.request, related_data_name="studio")
-            # check related object status
-            if related_object[0] == True:
-                return True, related_object[-1]
-            return False, related_object[-1]
+        return get_studio_id_from_studio(selfObject=self, slug=self.kwargs.get("studio_slug"))
 
     def get_serializer_class(self):
         if self.action in ["create_admin"]:
@@ -94,13 +89,12 @@ class StudioModeratorManagerViewSet(LoggingMixin, CustomViewSet):
             self.serializer_class = StudioModeratorUpdateSerializer
         else:
             self.serializer_class = StudioModeratorSerializer
-
         return self.serializer_class
 
     def get_permissions(self):
         if self.action in ["create_admin", "destroy_admin"]:
             permission_classes = [custom_permissions.IsSuperUser]
-        elif self.action in ["create_staff", "destroy_staff"]:
+        elif self.action in ["create_staff", "destroy_staff","list"]:
             permission_classes = [custom_permissions.IsStudioAdmin]
         else:
             permission_classes = [custom_permissions.IsStudioAdmin]
@@ -166,3 +160,10 @@ class StudioModeratorManagerViewSet(LoggingMixin, CustomViewSet):
             qs.user.save()
             return ResponseWrapper(data=serializer.data, status=200)
         return ResponseWrapper(error_msg=serializer.errors, error_code=400)
+    
+    def list(self, request, *args, **kwargs):
+        studio_slug = kwargs.get("studio_slug")
+        qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(instance=qs, many=True)
+        return ResponseWrapper(data=serializer.data, msg='success')

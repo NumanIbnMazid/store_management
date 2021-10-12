@@ -18,6 +18,7 @@ urlpatterns = [
     path("option/retrieve/<slug>", OptionManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_option")),
     path("option/update/<slug>", OptionManagerViewSet.as_view({"patch": "update"}, name="update_option")),
     path("option/delete/<slug>", OptionManagerViewSet.as_view({"delete": "destroy"}, name="delete_option")),
+    path("option/list/<store_slug>", OptionManagerViewSet.as_view({"get": "list"}, name="list_option")),
 
     # ==============================*** Plan URLS ***==============================
     path("create", PlanManagerViewSet.as_view({'post': 'create'}, name='create_plan')),

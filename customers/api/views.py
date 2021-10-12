@@ -46,6 +46,7 @@ class AccountManagerViewSet(LoggingMixin, CustomViewSet):
 
         elif self.action in ["list"]:
             permission_classes = [custom_permissions.IsSuperUser]
+            
         else:
             permission_classes = [custom_permissions.GetDynamicPermissionFromViewset]
         return [permission() for permission in permission_classes]

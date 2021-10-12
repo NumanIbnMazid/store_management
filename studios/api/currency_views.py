@@ -6,6 +6,9 @@ from studios.models import Studio, Currency
 from utils.helpers import ResponseWrapper
 from utils.helpers import populate_related_object_id
 from rest_framework.parsers import MultiPartParser
+from utils.studio_getter_helper import (
+    get_studio_id_from_studio
+)
 
 """
     ----------------------- * Vat Tax * -----------------------
@@ -18,15 +21,7 @@ class CurrencyManagerViewSet(LoggingMixin, CustomViewSet):
     lookup_field = "slug"
 
     def get_studio_id(self):
-        try:
-            return True, self.get_object().studio.id
-        except Exception as E:
-            # get related object id
-            related_object = populate_related_object_id(request=self.request, related_data_name="studio")
-            # check related object status
-            if related_object[0] == True:
-                return True, related_object[-1]
-            return False, related_object[-1]
+        return get_studio_id_from_studio(selfObject=self, slug=self.kwargs.get("studio_slug"))
     
     def get_serializer_class(self):
         if self.action in ["update"]:
@@ -43,6 +38,15 @@ class CurrencyManagerViewSet(LoggingMixin, CustomViewSet):
         if isinstance(data, bytes):
             data = data.decode(errors='ignore')
         return super(CurrencyManagerViewSet, self)._clean_data(data)
+
+    
+    def list(self, request, *args, **kwargs):
+        studio_slug = kwargs.get("studio_slug")
+        qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(instance=qs, many=True)
+        return ResponseWrapper(data=serializer.data, msg='success')
+
    
 
    
