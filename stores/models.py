@@ -39,29 +39,21 @@ class Store(models.Model):
         return self.name
     
 
-# class StoreDefaultClosedDay(models.Model):
-#     class Days(models.TextChoices):
-#         SATURDAY = "Saturday", _("Saturday")
-#         SUNDAY = "Sunday", _("Sunday")
-#         MONDAY = "Monday", _("Monday")
-#         TUESDAY = "Tuesday", _("Tuesday")
-#         WEDNESDAY = "Wednesday", _("Wednesday")
-#         THURSDAY = "Thursday", _("Thursday")
-#         FRIDAY = "Friday", _("Friday")
-        
-#     store = models.OneToOneField(Store, on_delete=models.CASCADE, related_name="store_default_closed_day")
-#     slug = models.SlugField(unique=True)
-#     days = models.JSONField()
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+class CustomClosedDay(models.Model):
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name="store_custom_closed_day")
+    slug = models.SlugField(unique=True)
+    date = models.DateField()
+    details = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
-#     class Meta:
-#         verbose_name = 'Store Default ClosedDay'
-#         verbose_name_plural = 'Store Default ClosedDays'
-#         ordering = ["-created_at"]
+    class Meta:
+        verbose_name = 'Store Custom Closed Day'
+        verbose_name_plural = 'Store Custom Closed Days'
+        ordering = ["-created_at"]
 
-#     def __str__(self):
-#         return self.store.name
+    def __str__(self):
+        return str(self.date)
 
 
 @receiver(pre_save, sender=Store)
@@ -74,8 +66,8 @@ def update_store_slug_on_pre_save(sender, instance, **kwargs):
             instance.slug = simple_random_string()
 
 
-# @receiver(pre_save, sender=StoreDefaultClosedDay)
-# def create_store_default_closed_day_slug_on_pre_save(sender, instance, **kwargs):
-#     """ Creates store default closed day slug on StoreDefaultClosedDay pre_save hook """
-#     if not instance.slug:
-#         instance.slug = simple_random_string()
+@receiver(pre_save, sender=CustomClosedDay)
+def create_store_custom_closed_day_slug_on_pre_save(sender, instance, **kwargs):
+    """ Creates store custom closed day slug on CustomClosedDay pre_save hook """
+    if not instance.slug:
+        instance.slug = simple_random_string()
