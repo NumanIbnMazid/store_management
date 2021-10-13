@@ -29,6 +29,15 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
     def get_permissions(self):
         permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
+    
+    def create(self, request):
+        serializer_class = self.get_serializer_class()
+        serializer = serializer_class(data=request.data)
+        if serializer.is_valid():
+            qs = serializer.save()
+            serializer = self.serializer_class(instance=qs)
+            return ResponseWrapper(data=serializer.data, msg='created')
+        return ResponseWrapper(error_msg=serializer.errors, error_code=400)
 
     def list(self, request, *args, **kwargs):
         studio_slug = kwargs.get("studio_slug")

@@ -49,14 +49,13 @@ class BusinessDayManagerViewSet(CustomViewSet):
                 return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg=f"Store {store_id} does not exists!", status=400)
 
             date_obj = parser.parse(request.data.get("date", ""))
-            year = date_obj.year
             formatted_date_str = date_obj.strftime("%Y-%m-%d")
 
             result = {
                 "store": store_obj.name,
                 "type": "default_business_day",
                 "date": formatted_date_str,
-                "day_name": date_obj.strftime("%A"),
+                "day_of_week": date_obj.strftime("%A"),
                 "status": "Open"
             }
             
@@ -64,7 +63,7 @@ class BusinessDayManagerViewSet(CustomViewSet):
 
                 result["store"] = store_obj.name
                 result["type"] = "custom_closed_day" if is_custom == True else "default_closed_day"
-                result["day_name"] = date_obj.strftime("%A")
+                result["day_of_week"] = date_obj.strftime("%A")
                 result["status"] = "Closed"
 
                 return result
@@ -75,8 +74,8 @@ class BusinessDayManagerViewSet(CustomViewSet):
                 # prepare custom business day data
                 prepare_business_day_data(is_custom=True)
             else:
-                store_default_closed_days = store_obj.default_closed_days
-                is_exists = date_obj.strftime("%A") in store_default_closed_days
+                store_default_closed_day_of_weeks = store_obj.default_closed_day_of_weeks
+                is_exists = date_obj.strftime("%A") in store_default_closed_day_of_weeks
                 if is_exists:
                     # prepare default business day data
                     prepare_business_day_data()

@@ -13,16 +13,15 @@ class StoreSerializer(serializers.ModelSerializer):
         read_only_fields = ("slug",)
         
     def validate(self, data):
-        default_closed_days = data['default_closed_days']
-        valid_days = [
+        default_closed_day_of_weeks = data.get("default_closed_day_of_weeks")
+        valid_day_of_weeks = [
             "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
         ]
-        if not type(default_closed_days) == list:
+        if not type(default_closed_day_of_weeks) == list:
             raise serializers.ValidationError("Invalid data type received! Expected List/Array.")
-        
-        for data in default_closed_days:
-            if data.title() not in valid_days:
-                raise serializers.ValidationError(f"Invalid data received `{data}`! Available `default_closed_days` are `{valid_days}`")
+        for day_of_week in default_closed_day_of_weeks:
+            if day_of_week.title() not in valid_day_of_weeks:
+                raise serializers.ValidationError(f"Invalid data received `{day_of_week}`! Available `default_closed_day_of_weeks` are `{valid_day_of_weeks}`")
         return data
 
 class StoreUpdateSerializer(serializers.ModelSerializer):
@@ -36,16 +35,16 @@ class StoreUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ("slug", "studio",)
         
     def validate(self, data):
-        default_closed_days = data.get("default_closed_days", None)
-        valid_days = [
+        default_closed_day_of_weeks = data.get("default_closed_day_of_weeks")
+        valid_day_of_weeks = [
             "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
         ]
-        if not type(default_closed_days) == list:
+        if not type(default_closed_day_of_weeks) == list:
             raise serializers.ValidationError("Invalid data type received! Expected List/Array.")
         
-        for data in default_closed_days:
-            if data.title() not in valid_days:
-                raise serializers.ValidationError(f"Invalid data received `{data}`! Available `default_closed_days` are `{valid_days}`")
+        for day_of_week in default_closed_day_of_weeks:
+            if day_of_week.title() not in valid_day_of_weeks:
+                raise serializers.ValidationError(f"Invalid data received `{day_of_week}`! Available `default_closed_day_of_weeks` are `{valid_day_of_weeks}`")
         return data
 
 class CustomClosedDaySerializer(serializers.ModelSerializer):
