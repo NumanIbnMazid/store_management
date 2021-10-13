@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from stores.models import Store, CustomClosedDay
 from drf_extra_fields.fields import HybridImageField
-from middlewares.request_middleware import RequestMiddleware
 
 class StoreSerializer(serializers.ModelSerializer):
     image_1 = HybridImageField(required=False)
@@ -37,7 +36,7 @@ class StoreUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = ("slug", "studio",)
         
     def validate(self, data):
-        default_closed_days = data['default_closed_days']
+        default_closed_days = data.get("default_closed_days", None)
         valid_days = [
             "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
         ]
@@ -58,8 +57,8 @@ class CustomClosedDaySerializer(serializers.ModelSerializer):
         
     def validate(self, data):
         # validate if custom closed day exists for the provided store
-        date = data['date']
-        store = data['store']
+        date = data.get("date", None)
+        store = data.gte('store', None)
         custom_closed_day_qs = CustomClosedDay.objects.filter(store=store, date=date)
         if custom_closed_day_qs:
             raise serializers.ValidationError(f"Date `{date}` is alerady exists in Custom Closed Day!")

@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import StoreManagerViewSet, CustomClosedDayManagerViewSet
+from .business_day_views import BusinessDayManagerViewSet
 
 
 router = DefaultRouter()
@@ -18,4 +19,10 @@ urlpatterns = [
     path("custom-closed-day/retrieve/<slug>", CustomClosedDayManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_custom_closed_day")),
     path("custom-closed-day/update/<slug>", CustomClosedDayManagerViewSet.as_view({"patch": "update"}, name="update_custom_closed_day")),
     path("custom-closed-day/delete/<slug>", CustomClosedDayManagerViewSet.as_view({"delete": "destroy"}, name="delete_custom_closed_day")),
+    
+    # ==============================*** Store BusinessDay URLS ***==============================
+    path("get-single-business-day-status", BusinessDayManagerViewSet.as_view(
+            {"post": "check_single_business_day_status"}, name="check_single_business_day_status"
+        )
+    ),
 ]

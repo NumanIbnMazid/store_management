@@ -7,6 +7,7 @@ router = DefaultRouter()
 
 urlpatterns = [
     # ==============================*** User URLS ***==============================
+    path("details", UserManagerViewSet.as_view({"get": "get_logged_in_user_details"}, name="get_logged_in_user_details")),
     path("retrieve/<slug>", UserManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_user")),
     path("update/<slug>", UserManagerViewSet.as_view({"patch": "update"}, name="update_user")),
     # path("delete/<slug>", UserManagerViewSet.as_view({"delete": "destroy"}, name="delete_user")),

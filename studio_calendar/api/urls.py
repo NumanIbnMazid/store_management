@@ -1,7 +1,6 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import StudioCalendarManagerViewSet
-from .business_day_views import BusinessDayManagerViewSet
 
 
 router = DefaultRouter()
@@ -18,10 +17,4 @@ urlpatterns = [
     path("retrieve/<slug>", StudioCalendarManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_studio_calendar")),
     path("update/<slug>", StudioCalendarManagerViewSet.as_view({"patch": "update"}, name="update_studio_calendar")),
     path("delete/<slug>", StudioCalendarManagerViewSet.as_view({"delete": "destroy"}, name="delete_studio_calendar")),
-    
-    # ==============================*** Studio BusinessDay URLS ***==============================
-    path("get-single-business-day-status", BusinessDayManagerViewSet.as_view(
-            {"post": "check_single_business_day_status"}, name="check_single_business_day_status"
-        )
-    ),
 ]

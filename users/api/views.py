@@ -8,6 +8,7 @@ from rest_framework_tracking.mixins import LoggingMixin
 from utils.custom_viewset import CustomViewSet
 from .serializers import UserSerializer, UserUpdateSerializer
 from utils import permissions as custom_permissions
+from utils.helpers import ResponseWrapper
 
 
 class CustomAPILoginView(LoginView):
@@ -77,6 +78,13 @@ class UserManagerViewSet(LoggingMixin, CustomViewSet):
     def get_permissions(self):
         if self.action in ["update"]:
             permission_classes = [custom_permissions.GetDynamicPermissionFromViewset]
+        elif self.action in ["get_logged_in_user_details"]:
+            permission_classes = [custom_permissions.GetDynamicPermissionFromViewset]
         else:
             permission_classes = [custom_permissions.IsSuperUser]
         return [permission() for permission in permission_classes]
+    
+    def get_logged_in_user_details(self, request, *args, **kwargs):
+        instance = self.request.user
+        serializer = self.get_serializer(instance)
+        return ResponseWrapper(serializer.data)
