@@ -18,6 +18,8 @@ class GetDynamicPermissionFromViewset(permissions.BasePermission):
         """
         Return `True` if permission is granted, `False` otherwise.
         """
+        if not bool(request.user and request.user.is_authenticated):
+            return False
         if request.user.is_superuser:
             return True
         # if view function has get_custom_permission method
