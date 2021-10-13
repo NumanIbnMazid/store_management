@@ -18,6 +18,8 @@ class GetDynamicPermissionFromViewset(permissions.BasePermission):
         """
         Return `True` if permission is granted, `False` otherwise.
         """
+        if request.user.is_superuser:
+            return True
         # if view function has get_custom_permission method
         if hasattr(view, 'get_custom_permission'):
             # get permission from viewset (status[Boolean], message[String])
