@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Store, CustomClosedDay
+from .models import Store, CustomBusinessDay
 from utils.mixins import CustomModelAdminMixin
 
 
@@ -11,10 +11,10 @@ class StoreAdmin(CustomModelAdminMixin, admin.ModelAdmin):
 
 admin.site.register(Store, StoreAdmin)
 
-class CustomClosedDayAdmin(CustomModelAdminMixin, admin.ModelAdmin):
+class CustomBusinessDayAdmin(CustomModelAdminMixin, admin.ModelAdmin):
     pass
 
     class Meta:
-        model = CustomClosedDay
+        model = CustomBusinessDay
 
-admin.site.register(CustomClosedDay, CustomClosedDayAdmin)
+admin.site.register(CustomBusinessDay, CustomBusinessDayAdmin)

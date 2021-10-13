@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .views import StoreManagerViewSet, CustomClosedDayManagerViewSet
+from .views import StoreManagerViewSet, CustomBusinessDayManagerViewSet
 from .business_day_views import BusinessDayManagerViewSet
 
 
@@ -15,14 +15,18 @@ urlpatterns = [
     path("list/<studio_slug>", StoreManagerViewSet.as_view({"get": "list"}, name="list_store")),
     
     # ==============================*** CustomClosedDay URLS ***==============================
-    path("custom-closed-day/create", CustomClosedDayManagerViewSet.as_view({'post': 'create'}, name='create_custom_closed_day')),
-    path("custom-closed-day/retrieve/<slug>", CustomClosedDayManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_custom_closed_day")),
-    path("custom-closed-day/update/<slug>", CustomClosedDayManagerViewSet.as_view({"patch": "update"}, name="update_custom_closed_day")),
-    path("custom-closed-day/delete/<slug>", CustomClosedDayManagerViewSet.as_view({"delete": "destroy"}, name="delete_custom_closed_day")),
+    path("custom-business-day/create", CustomBusinessDayManagerViewSet.as_view({'post': 'create'}, name='create_custom_business_day')),
+    path("custom-business-day/retrieve/<slug>", CustomBusinessDayManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_custom_business_day")),
+    path("custom-business-day/update/<slug>", CustomBusinessDayManagerViewSet.as_view({"patch": "update"}, name="update_custom_business_day")),
+    path("custom-business-day/delete/<slug>", CustomBusinessDayManagerViewSet.as_view({"delete": "destroy"}, name="delete_custom_business_day")),
     
     # ==============================*** Store BusinessDay URLS ***==============================
     path("get-single-business-day-status", BusinessDayManagerViewSet.as_view(
             {"post": "check_single_business_day_status"}, name="check_single_business_day_status"
+        )
+    ),
+    path("get-business-days-by-year", BusinessDayManagerViewSet.as_view(
+            {"post": "get_business_days_by_year"}, name="get_business_days_by_year"
         )
     ),
 ]

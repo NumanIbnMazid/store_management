@@ -39,21 +39,37 @@ class Store(models.Model):
         return self.name
     
 
-class CustomClosedDay(models.Model):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name="store_custom_closed_day")
+class CustomBusinessDay(models.Model):
+    class Status(models.IntegerChoices):
+        CLOSED = 0, _("Closed")
+        OPEN = 1, _("Open")
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name="store_custom_business_day")
     slug = models.SlugField(unique=True)
     date = models.DateField()
+    status = models.PositiveSmallIntegerField(choices=Status.choices, default=1)
     details = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        verbose_name = 'Store Custom Closed Day'
-        verbose_name_plural = 'Store Custom Closed Days'
+        verbose_name = 'Store Custom Business Day'
+        verbose_name_plural = 'Store Custom Business Days'
         ordering = ["-created_at"]
 
     def __str__(self):
         return str(self.date)
+    
+    def get_status_str(self):
+        if self.status == 0:
+            return "Closed"
+        return "Open"
+    
+    def get_business_day_type(self):
+        if self.status == 0:
+            return "custom_closed_day"
+        elif self.status == 1:
+            return "custom_business_day"
+        return "default_business_day"
 
 
 @receiver(pre_save, sender=Store)
@@ -66,8 +82,8 @@ def update_store_slug_on_pre_save(sender, instance, **kwargs):
             instance.slug = simple_random_string()
 
 
-@receiver(pre_save, sender=CustomClosedDay)
+@receiver(pre_save, sender=CustomBusinessDay)
 def create_store_custom_closed_day_slug_on_pre_save(sender, instance, **kwargs):
-    """ Creates store custom closed day slug on CustomClosedDay pre_save hook """
+    """ Creates store custom closed day slug on CustomBusinessDay pre_save hook """
     if not instance.slug:
         instance.slug = simple_random_string()

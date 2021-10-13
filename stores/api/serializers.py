@@ -1,6 +1,8 @@
 from rest_framework import serializers
-from stores.models import Store, CustomClosedDay
+from stores.models import Store, CustomBusinessDay
 from drf_extra_fields.fields import HybridImageField
+import datetime
+from dateutil import parser
 
 class StoreSerializer(serializers.ModelSerializer):
     image_1 = HybridImageField(required=False)
@@ -47,25 +49,36 @@ class StoreUpdateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(f"Invalid data received `{day_of_week}`! Available `default_closed_day_of_weeks` are `{valid_day_of_weeks}`")
         return data
 
-class CustomClosedDaySerializer(serializers.ModelSerializer):
+class CustomBusinessDaySerializer(serializers.ModelSerializer):
     
     class Meta:
-        model = CustomClosedDay
+        model = CustomBusinessDay
         fields = "__all__"
         read_only_fields = ("slug",)
         
     def validate(self, data):
-        # validate if custom closed day exists for the provided store
         date = data.get("date", None)
-        store = data.gte('store', None)
-        custom_closed_day_qs = CustomClosedDay.objects.filter(store=store, date=date)
-        if custom_closed_day_qs:
+        store = data.get('store', None)
+        status = data.get('status', None)
+        
+        store_qs = Store.objects.filter(id=int(store.id))
+        if store_qs:
+            store_default_closed_day_of_weeks = store_qs.first().default_closed_day_of_weeks
+            if date.strftime("%A") in store_default_closed_day_of_weeks and int(status) == 0:
+                raise serializers.ValidationError(f"Date `{date} - {date.strftime('%A')}` is alerady exists in Store Default Closed Day of Weeks!")
+            if date.strftime("%A") not in store_default_closed_day_of_weeks and int(status) == 1:
+                raise serializers.ValidationError(f"Date `{date} - {date.strftime('%A')}` is alerady a Business Day!")
+        else:
+            raise serializers.ValidationError("Store not found!")
+        
+        custom_business_day_qs = CustomBusinessDay.objects.filter(store__id=store.id, date=date)
+        if custom_business_day_qs:
             raise serializers.ValidationError(f"Date `{date}` is alerady exists in Custom Closed Day!")
         return data
 
 
-class CustomClosedDayUpdateSerializer(serializers.ModelSerializer):
+class CustomBusinessDayUpdateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CustomClosedDay
+        model = CustomBusinessDay
         fields = "__all__"
         read_only_fields = ("slug", "store",)
