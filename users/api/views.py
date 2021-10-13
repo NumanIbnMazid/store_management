@@ -1,8 +1,13 @@
 from rest_auth.views import LoginView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import permissions
 from django.core import serializers
 from django.contrib.auth import get_user_model
 import json
+from rest_framework_tracking.mixins import LoggingMixin
+from utils.custom_viewset import CustomViewSet
+from .serializers import UserSerializer, UserUpdateSerializer
+from utils import permissions as custom_permissions
 
 
 class CustomAPILoginView(LoginView):
@@ -43,3 +48,35 @@ class CustomAPILoginView(LoginView):
         
         # return the response
         return original_response
+
+
+class UserManagerViewSet(LoggingMixin, CustomViewSet):
+    logging_methods = ["GET", "POST", "PATCH", "DELETE"]
+    queryset = get_user_model().objects.all()
+    lookup_field = "slug"
+    
+    def get_custom_permission(self):
+        if self.action in ["update"]:
+            try:
+                if self.get_object() == self.request.user:
+                    return True
+                else:
+                    return False, "You are not allowed to access this content!"
+            except Exception as E:
+                return False, str(E)
+        return True
+            
+    
+    def get_serializer_class(self):
+        if self.action in ["update"]:
+            self.serializer_class = UserUpdateSerializer
+        else:
+            self.serializer_class = UserSerializer
+        return self.serializer_class
+
+    def get_permissions(self):
+        if self.action in ["update"]:
+            permission_classes = [custom_permissions.GetDynamicPermissionFromViewset]
+        else:
+            permission_classes = [custom_permissions.IsSuperUser]
+        return [permission() for permission in permission_classes]

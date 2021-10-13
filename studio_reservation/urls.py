@@ -75,6 +75,7 @@ THIRD_PARTY_URL_PATTERNS = [
 """ Internal App URL Patterns """
 
 INTERNAL_APP_URL_PATTERNS = [
+    path("user/", include(("users.api.urls", "users"), namespace="users")),
     path("customer/", include(("customers.api.urls", "customers"), namespace="customers")),
     path("staff/", include(("staffs.api.urls", "staffs"), namespace="staffs")),
     path("studio/", include(("studios.api.urls", "studios"), namespace="studios")),

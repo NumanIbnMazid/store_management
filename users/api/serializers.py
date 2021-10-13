@@ -8,6 +8,18 @@ from django.utils.translation import gettext_lazy as _
 from rest_auth.serializers import LoginSerializer as RestAuthLoginSerializer
 from django.contrib.auth import get_user_model
 
+class UserSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = get_user_model()
+        fields = "__all__"
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = get_user_model()
+        fields = ["name"]
+
 
 class CustomUserDetailsSerializer(serializers.ModelSerializer):
     class Meta:
