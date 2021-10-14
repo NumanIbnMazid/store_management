@@ -28,6 +28,10 @@ class Coupon(models.Model):
         return self.name
     
     def clean(self):
+        print("-----clean test-----")
+        raise ValidationError(
+                {"name": [f"{self.__class__.__name__} with this name ({self.name}) already exists!"]}
+            )
         name_validation_qs = self.__class__.objects.filter(name__iexact=self.name.lower())
         if self.pk:
             name_validation_qs = name_validation_qs.exclude(pk=self.pk)
@@ -35,9 +39,12 @@ class Coupon(models.Model):
             raise ValidationError(
                 {"name": [f"{self.__class__.__name__} with this name ({self.name}) already exists!"]}
             )
+        
     
     def save(self, *args, **kwargs):
-        self.full_clean()
+        # self.full_clean()
+        self.clean()
+        print("-----save-----")
         return super(self.__class__, self).save(*args, **kwargs)
 
 class PointSetting(models.Model):
@@ -58,6 +65,7 @@ class PointSetting(models.Model):
 @receiver(pre_save, sender=Coupon)
 def create_coupon_slug_on_pre_save(sender, instance, **kwargs):
     """ Creates coupon slug on Coupon pre_save hook """
+    print("-----instance-----", instance)
     if not instance.slug:
         try:
             instance.slug = unique_slug_generator(instance=instance, field=instance.name)
