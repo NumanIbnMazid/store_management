@@ -8,6 +8,11 @@ class CouponSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ("slug",)
         
+    def validate(self, attrs):
+        instance = Coupon(**attrs)
+        instance.clean()
+        return attrs
+        
 class CouponUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
