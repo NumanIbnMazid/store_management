@@ -1,7 +1,7 @@
 from django.db import models
 from django.dispatch import receiver
 from django.utils.text import slugify
-from utils.snippets import unique_slug_generator, simple_random_string
+from utils.snippets import unique_slug_generator, simple_random_string, random_string_generator
 
 def autoslug(fieldname):
     def decorator(model):
@@ -13,10 +13,19 @@ def autoslug(fieldname):
         def generate_slug(sender, instance, *args, raw=False, **kwargs):
             if not raw and not instance.slug:
                 source = getattr(instance, fieldname)
-                slug = slugify(source)
-                if slug:  # not all strings result in a slug value
-                    instance.slug = unique_slug_generator(instance=instance, field=slug)
-                else:
+                try:
+                    slug = slugify(source)
+                    Klass = instance.__class__
+                    qs_exists = Klass.objects.filter(slug=slug).exists()
+                    if qs_exists:
+                        new_slug = "{slug}-{randstr}".format(
+                            slug=slug,
+                            randstr=random_string_generator(size=4)
+                        )
+                        instance.slug = new_slug
+                    else:
+                        instance.slug = slug
+                except Exception as e:
                     instance.slug = simple_random_string()
         return model
     return decorator
