@@ -41,11 +41,8 @@ class CouponManagerViewSet(LoggingMixin, CustomViewSet):
             qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(instance=qs, many=True)
-            return ResponseWrapper(data=serializer.data, msg='success')
-        except:
-            try:
-                return ResponseWrapper(error_msg=serializer.errors, msg="Failed to retrieve the list!", error_code=400)
-            except Exception as E:
-                return ResponseWrapper(error_msg=str(E), msg="Failed to retrieve the list!", error_code=400)
+            return ResponseWrapper(data=serializer.data, msg='List retrieved successfully!')
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="Failed to retrieve the list!", error_code=400)
 
 
