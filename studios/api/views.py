@@ -49,29 +49,33 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
         try:
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(data=request.data, partial=True)
-            if serializer.is_valid(raise_exception=True):
+            
+            # validate user data
+            errors = {}
+            user_data = request.data.get("user", {})
+            email = user_data.get("email", None)
+            password1 = user_data.get("password1", None)
+            password2 = user_data.get("password2", None)
+            if email == None or email == "":
+                errors["email"] = ["Email field is required!"]
+            if password1 == None or password1 == "":
+                errors["password1"] = ["Password field is required!"]
+            if password1 != password2:
+                errors["password1"] = ["Password didn't match!"]
+            if email and email_address_exists(email):
+                errors["email"] = ["A user is already registered with this e-mail address."]
                 
-                # validate user data
-                errors = {}
-                user_data = request.data.get("user", {})
-                email = user_data.get("email", None)
-                password1 = user_data.get("password1", None)
-                password2 = user_data.get("password2", None)
-                if email == None or email == "":
-                    errors["email"] = ["Email field is required!"]
-                if password1 == None or password1 == "":
-                    errors["password1"] = ["Password field is required!"]
-                if password1 != password2:
-                    errors["password1"] = ["Password didn't match!"]
-                if email and email_address_exists(email):
-                    errors["email"] = ["A user is already registered with this e-mail address."]
-                    
-                if len(errors):
-                    return ResponseWrapper(error_code=400, error_msg=errors, msg="Failed to create user!")
                 
+            if serializer.is_valid(raise_exception=False):
                 user_instance = serializer.save_base_user(request)
                 studio_instance = serializer.save(user=user_instance)
                 return ResponseWrapper(data=serializer.data, status=200)
+            else:
+                errors.update(serializer.errors)
+            
+            if len(errors):
+                return ResponseWrapper(error_code=400, error_msg=errors, msg="Failed to create user!")
+            
             return ResponseWrapper(error_code=400, error_msg=serializer.errors)
         except:
             try:
