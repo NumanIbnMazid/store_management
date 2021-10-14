@@ -6,14 +6,9 @@ from django.dispatch import receiver
 from utils.snippets import unique_slug_generator, simple_random_string
 
 class Studio(models.Model):
-    
-    class Status(models.IntegerChoices):
-        OPEN = 0, _("Open")
-        CLOSED = 1, _("Closed")
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="studio_user")
     name = models.CharField(max_length=254, unique=True)
     slug = models.SlugField(unique=True)
-    status = models.PositiveSmallIntegerField(choices=Status.choices, default=0)
     country = models.CharField(max_length=50, blank=True, null=True)
     zip_code = models.CharField(max_length=15, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
