@@ -39,19 +39,3 @@ class OptionCategoryManagerViewSet(LoggingMixin, CustomViewSet):
         if isinstance(data, bytes):
             data = data.decode(errors='ignore')
         return super(OptionCategoryManagerViewSet, self)._clean_data(data)
-
-
-# if self.action in ["destroy"]:
-#     print(self.request, "DATATATATATATATA", self.request, "REREREREER")
-#     slug = self.request.data.get("slug", None)
-#      print(slug, "SSSLLLUUGGG")
-#       qs = OptionCategory.objects.filter(slug__iexact=slug)
-#        print(qs, "QQQQSSSS")
-#         if qs.exists():
-#              studio = qs.first().studio
-#               print(studio, "SSSSSS", self.request.user,
-#                      "RRRRRUUUU", studio.user, "SSSSSSUUUUUUU")
-#                if studio.user == self.request.user:
-#                     pass
-#                 else:
-#                     raise Exception("Permission Denied!")

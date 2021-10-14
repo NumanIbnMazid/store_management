@@ -3,10 +3,11 @@ from utils.snippets import unique_slug_generator, simple_random_string
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from studios.models import Studio
+from django.core.exceptions import ValidationError
 
 
 class Coupon(models.Model):
-    name = models.CharField(unique=True, max_length=254)
+    name = models.CharField(max_length=254)
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_coupons")
     slug = models.SlugField(unique=True)
     start_date = models.DateField(blank=True, null=True)
@@ -25,6 +26,19 @@ class Coupon(models.Model):
     
     def __str__(self):
         return self.name
+    
+    def clean(self):
+        name_validation_qs = self.__class__.objects.filter(name__iexact=self.name.lower())
+        if self.pk:
+            name_validation_qs = name_validation_qs.exclude(pk=self.pk)
+        if name_validation_qs.exists():
+            raise ValidationError(
+                {"name": [f"{self.__class__.__name__} with this name ({self.name}) already exists!"]}
+            )
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super(self.__class__, self).save(*args, **kwargs)
 
 class PointSetting(models.Model):
     studio = models.OneToOneField(Studio, on_delete=models.CASCADE, related_name="studio_point_setting")

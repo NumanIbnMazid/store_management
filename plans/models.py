@@ -5,10 +5,11 @@ from utils.snippets import simple_random_string, unique_slug_generator
 from utils.image_upload_helper import upload_plan_image_path, upload_category_image_path, upload_option_image_path
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from django.core.exceptions import ValidationError
 
 
 class OptionCategory(models.Model):
-    number = models.IntegerField(unique=True)
+    number = models.IntegerField()
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_option_categories")
     title = models.CharField(max_length=150)
     slug = models.SlugField(unique=True)
@@ -24,10 +25,30 @@ class OptionCategory(models.Model):
     def __str__(self):
         return self.title
     
+    def clean(self):
+        number_validation_qs = self.__class__.objects.filter(number=self.number)
+        if self.pk:
+            number_validation_qs = number_validation_qs.exclude(pk=self.pk)
+        if number_validation_qs.exists():
+            raise ValidationError(
+                {"number": [f"{self.__class__.__name__} with this number ({self.number}) already exists!"]}
+            )
+        title_validation_qs = self.__class__.objects.filter(title__iexact=self.title)
+        if self.pk:
+            title_validation_qs = title_validation_qs.exclude(pk=self.pk)
+        if title_validation_qs.exists():
+            raise ValidationError(
+                {"title": [f"{self.__class__.__name__} with this title ({self.title}) already exists!"]}
+            )
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super(self.__class__, self).save(*args, **kwargs)
+    
 
 class Option(models.Model):
     option_category = models.ForeignKey(OptionCategory, on_delete=models.CASCADE, related_name='option_category_options')
-    number = models.IntegerField(unique=True)
+    number = models.IntegerField()
     title = models.CharField(max_length=150)
     slug = models.SlugField(unique=True)
     icon = models.ImageField(upload_to=upload_option_image_path, blank=True, null=True)
@@ -45,11 +66,31 @@ class Option(models.Model):
 
     def __str__(self):
         return self.title
+    
+    def clean(self):
+        number_validation_qs = self.__class__.objects.filter(number=self.number)
+        if self.pk:
+            number_validation_qs = number_validation_qs.exclude(pk=self.pk)
+        if number_validation_qs.exists():
+            raise ValidationError(
+                {"number": [f"{self.__class__.__name__} with this number ({self.number}) already exists!"]}
+            )
+        title_validation_qs = self.__class__.objects.filter(title__iexact=self.title)
+        if self.pk:
+            title_validation_qs = title_validation_qs.exclude(pk=self.pk)
+        if title_validation_qs.exists():
+            raise ValidationError(
+                {"title": [f"{self.__class__.__name__} with this title ({self.title}) already exists!"]}
+            )
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super(self.__class__, self).save(*args, **kwargs)
 
 class Plan(models.Model):
     space = models.ManyToManyField(Space, related_name="space_plans")
     option = models.ManyToManyField(Option, blank=True, related_name='plan_options')
-    title = models.CharField(max_length=254, unique=True)
+    title = models.CharField(max_length=254)
     slug = models.SlugField(unique=True)
     hourly_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     daily_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -75,6 +116,19 @@ class Plan(models.Model):
     
     def __str__(self):
         return self.title
+    
+    def clean(self):
+        title_validation_qs = self.__class__.objects.filter(title__iexact=self.title.lower())
+        if self.pk:
+            title_validation_qs = title_validation_qs.exclude(pk=self.pk)
+        if title_validation_qs.exists():
+            raise ValidationError(
+                {"title": [f"{self.__class__.__name__} with this title ({self.title}) already exists!"]}
+            )
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super(self.__class__, self).save(*args, **kwargs)
 
 
 @receiver(pre_save, sender=OptionCategory)

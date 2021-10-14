@@ -1,4 +1,3 @@
-from rest_framework.serializers import Serializer
 from rest_framework import serializers
 from django.db import transaction
 from users.api.serializers import (

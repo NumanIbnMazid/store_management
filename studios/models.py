@@ -4,10 +4,11 @@ from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import pre_save, post_delete
 from django.dispatch import receiver
 from utils.snippets import unique_slug_generator, simple_random_string
+from django.core.exceptions import ValidationError
 
 class Studio(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="studio_user")
-    name = models.CharField(max_length=254, unique=True)
+    name = models.CharField(max_length=254)
     slug = models.SlugField(unique=True)
     country = models.CharField(max_length=50, blank=True, null=True)
     zip_code = models.CharField(max_length=15, blank=True, null=True)
@@ -24,7 +25,7 @@ class Studio(models.Model):
     twitter = models.URLField(max_length=254, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    
     class Meta:
         verbose_name = 'Studio'
         verbose_name_plural = 'Studios'
@@ -32,8 +33,21 @@ class Studio(models.Model):
 
     def __str__(self):
         return self.name
+    
+    
+    def clean(self):
+        name_validation_qs = self.__class__.objects.filter(name__iexact=self.name.lower())
+        if self.pk:
+            name_validation_qs = name_validation_qs.exclude(pk=self.pk)
+        if name_validation_qs.exists():
+            raise ValidationError(
+                {"name": [f"{self.__class__.__name__} with this name ({self.name}) already exists!"]}
+            )
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super(self.__class__, self).save(*args, **kwargs)
 
-        
 class StudioModerator(models.Model):
     user = models.OneToOneField(get_user_model(), related_name='studio_moderator_user', on_delete=models.CASCADE)
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_moderators")

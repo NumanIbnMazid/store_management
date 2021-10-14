@@ -6,6 +6,7 @@ from django.dispatch import receiver
 from studios.models import Studio
 from django.utils.translation import gettext_lazy as _
 from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import ValidationError
 
 class Store(models.Model):
     
@@ -37,6 +38,19 @@ class Store(models.Model):
     
     def __str__(self):
         return self.name
+    
+    def clean(self):
+        name_validation_qs = self.__class__.objects.filter(name__iexact=self.name.lower())
+        if self.pk:
+            name_validation_qs = name_validation_qs.exclude(pk=self.pk)
+        if name_validation_qs.exists():
+            raise ValidationError(
+                {"name": [f"{self.__class__.__name__} with this name ({self.name}) already exists!"]}
+            )
+    
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super(self.__class__, self).save(*args, **kwargs)
     
 
 class CustomBusinessDay(models.Model):

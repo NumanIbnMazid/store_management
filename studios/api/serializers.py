@@ -5,6 +5,7 @@ from django.db import transaction
 from users.api.serializers import (RegisterSerializer)
 from utils.helpers import ResponseWrapper
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from rest_framework import validators
 
 
 """
@@ -58,19 +59,6 @@ class StudioUpdateSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ("slug", "user")
         
-    def is_valid(self, raise_exception=False):
-        if hasattr(self, 'initial_data'):
-            try:
-                obj = Studio.objects.get(**self.initial_data)
-            except (ObjectDoesNotExist, MultipleObjectsReturned):
-                return super().is_valid(raise_exception)
-            else:
-                self.instance = obj
-                return super().is_valid(raise_exception)
-        else:
-            return super().is_valid(raise_exception)
-        
-    
     def to_representation(self, instance):
         """ Modify representation of data integrating `user` OneToOne Field """
         representation = super(StudioUpdateSerializer, self).to_representation(instance)
