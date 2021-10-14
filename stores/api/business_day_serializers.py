@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from stores.models import CustomBusinessDay, Store
+from stores.models import Store
 import datetime
 
 

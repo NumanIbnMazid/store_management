@@ -37,8 +37,8 @@ class Studio(models.Model):
 
     def __str__(self):
         return self.name
-    
-    
+
+        
 class StudioModerator(models.Model):
     user = models.OneToOneField(get_user_model(), related_name='studio_moderator_user', on_delete=models.CASCADE)
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_moderators")

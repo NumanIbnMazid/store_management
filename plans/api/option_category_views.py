@@ -5,6 +5,7 @@ from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
 from utils.helpers import populate_related_object_id
 
+
 class OptionCategoryManagerViewSet(LoggingMixin, CustomViewSet):
     
     logging_methods = ["GET", "POST", "PATCH", "DELETE"]

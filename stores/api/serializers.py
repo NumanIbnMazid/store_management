@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from stores.models import Store, CustomBusinessDay
 from drf_extra_fields.fields import HybridImageField
-import datetime
-from dateutil import parser
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 class StoreSerializer(serializers.ModelSerializer):
     image_1 = HybridImageField(required=False)
@@ -48,6 +47,18 @@ class StoreUpdateSerializer(serializers.ModelSerializer):
             if day_of_week.title() not in valid_day_of_weeks:
                 raise serializers.ValidationError(f"Invalid data received `{day_of_week}`! Available `default_closed_day_of_weeks` are `{valid_day_of_weeks}`")
         return data
+    
+    def is_valid(self, raise_exception=False):
+        if hasattr(self, 'initial_data'):
+            try:
+                obj = Store.objects.get(**self.initial_data)
+            except (ObjectDoesNotExist, MultipleObjectsReturned):
+                return super().is_valid(raise_exception)
+            else:
+                self.instance = obj
+                return super().is_valid(raise_exception)
+        else:
+            return super().is_valid(raise_exception)
 
 class CustomBusinessDaySerializer(serializers.ModelSerializer):
     

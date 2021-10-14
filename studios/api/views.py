@@ -1,11 +1,9 @@
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
-from rest_framework import permissions
 from utils.custom_viewset import CustomViewSet
 from utils.helpers import ResponseWrapper
-from .serializers import StudioSerializer, StudioModeratorSerializer, StudioModeratorUpdateSerializer
+from .serializers import StudioSerializer, StudioModeratorSerializer, StudioModeratorUpdateSerializer, StudioUpdateSerializer
 from studios.models import Studio, StudioModerator
-from utils.helpers import populate_related_object_id
 from utils.studio_getter_helper import (
     get_studio_id_from_studio
 )
@@ -26,11 +24,13 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
             try:
                 return True, self.request.user.studio_user.id
             except Exception as E:
-                return False, str(E)
+                return False
 
     def get_serializer_class(self):
-        if self.action in ["create", "update"]:
+        if self.action in ["create"]:
             self.serializer_class = StudioSerializer
+        elif self.action in ["update"]:
+            self.serializer_class = StudioUpdateSerializer
         else:
             self.serializer_class = StudioSerializer
         return self.serializer_class
@@ -43,31 +43,29 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
         return [permission() for permission in permission_classes]
     
     def create(self, request, *args, **kwargs):
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(data=request.data, partial=True)
-        if serializer.is_valid(raise_exception=True):
-            user_instance = serializer.save_base_user(request)
-            studio_instance = serializer.save(user=user_instance)
-            return ResponseWrapper(data=serializer.data, status=200)
-        return ResponseWrapper(error_code=400, error_msg=serializer.errors)
+        try:
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(data=request.data, partial=True)
+            if serializer.is_valid(raise_exception=True):
+                user_instance = serializer.save_base_user(request)
+                studio_instance = serializer.save(user=user_instance)
+                return ResponseWrapper(data=serializer.data, status=200)
+            return ResponseWrapper(error_code=400, error_msg=serializer.errors)
+        except Exception as E:
+            return ResponseWrapper(error_msg=str(E), msg="Failed to create!", error_code=400)
 
     def update(self, request, *args, **kwargs):
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(data=request.data, partial=True)
-        if serializer.is_valid():
-            qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
-            serializer = self.serializer_class(instance=qs)
-            qs.user.name = request.data.get('user', {}).get("name", None)
-            qs.user.save()
-            return ResponseWrapper(data=serializer.data, status=200)
-        return ResponseWrapper(error_msg=serializer.errors, error_code=400)
+        try:
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(data=request.data, partial=True)
+            if serializer.is_valid():
+                qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
+                serializer = self.serializer_class(instance=qs)
+                return ResponseWrapper(data=serializer.data, status=200)
+            return ResponseWrapper(error_msg=serializer.errors, error_code=400)
+        except Exception as E:
+            return ResponseWrapper(error_msg=str(E), msg="Failed to update!", error_code=400)
     
-    def destroy(self, request, **kwargs):
-        qs = self.queryset.filter(**kwargs).first()
-        if qs:
-            qs.delete()
-            return ResponseWrapper(status=200, msg='deleted')
-        return ResponseWrapper(error_msg="failed to delete", error_code=400)
 
 
 """

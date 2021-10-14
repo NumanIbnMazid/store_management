@@ -1,9 +1,10 @@
-from rest_framework import fields, serializers
+from rest_framework import serializers
 from studios.models import Studio, StudioModerator, VatTax, Currency
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from users.api.serializers import (RegisterSerializer)
 from utils.helpers import ResponseWrapper
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 
 
 """
@@ -48,8 +49,35 @@ class StudioSerializer(serializers.ModelSerializer):
         if register_serializer.errors:
             raise serializers.ValidationError(register_serializer.errors)
         return ResponseWrapper(data=register_serializer.data, status=200)
-        
 
+
+class StudioUpdateSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Studio
+        fields = '__all__'
+        read_only_fields = ("slug", "user")
+        
+    def is_valid(self, raise_exception=False):
+        if hasattr(self, 'initial_data'):
+            try:
+                obj = Studio.objects.get(**self.initial_data)
+            except (ObjectDoesNotExist, MultipleObjectsReturned):
+                return super().is_valid(raise_exception)
+            else:
+                self.instance = obj
+                return super().is_valid(raise_exception)
+        else:
+            return super().is_valid(raise_exception)
+        
+    
+    def to_representation(self, instance):
+        """ Modify representation of data integrating `user` OneToOne Field """
+        representation = super(StudioUpdateSerializer, self).to_representation(instance)
+        representation['user'] = UserSerializer(instance.user).data
+        return representation
+
+    
 """
 ----------------------- * StudioModerator * -----------------------
 """
