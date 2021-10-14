@@ -1,9 +1,9 @@
 from django.db import models
 from utils.snippets import unique_slug_generator, simple_random_string
+from utils.helpers import model_cleaner
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from studios.models import Studio
-from django.core.exceptions import ValidationError
 
 
 class Coupon(models.Model):
@@ -28,25 +28,17 @@ class Coupon(models.Model):
         return self.name
     
     def clean(self):
-        errors = {}
-        # name validation
-        name_validation_qs = self.__class__.objects.filter(name__iexact=self.name.lower())
-        if self.pk:
-            name_validation_qs = name_validation_qs.exclude(pk=self.pk)
-        if name_validation_qs.exists():
-            errors["name"] = [f"{self.__class__.__name__} with this name ({self.name}) already exists!"]
-        # code validation
-        code_validation_qs = self.__class__.objects.filter(code__iexact=self.code.lower())
-        if self.pk:
-            code_validation_qs = code_validation_qs.exclude(pk=self.pk)
-        if code_validation_qs.exists():
-            errors["code"] = [f"{self.__class__.__name__} with this code ({self.code}) already exists!"]
-            
-        # raise exception
-        if len(errors):
-            raise ValidationError(
-                errors
-            )
+        qsFieldObjectList = [
+            {
+                "qs": self.__class__.objects.filter(name__iexact=self.name.lower()),
+                "field": "name"
+            },
+            {
+                "qs": self.__class__.objects.filter(code__iexact=self.code.lower()),
+                "field": "code"
+            },
+        ]
+        model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList)
     
 
 class PointSetting(models.Model):

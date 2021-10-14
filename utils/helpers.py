@@ -1,5 +1,6 @@
 from rest_framework.views import exception_handler
 from rest_framework.response import Response
+from django.core.exceptions import ValidationError
 
 
 class ResponseWrapper(Response):
@@ -23,6 +24,21 @@ class ResponseWrapper(Response):
         if error_code is not None:
             status_by_default_for_gz = error_code
             response_success = False
+            
+        # manipulate dynamic msg
+        if msg is not None and not msg == "":
+            if msg.lower() == "list":
+                msg = "List retrieved successfully!" if response_success else "Failed to retrieve the list!"
+            elif msg.lower() == "create":
+                msg = "Created successfully!" if response_success else "Failed to create!"
+            elif msg.lower() == "update":
+                msg = "Updated successfully!" if response_success else "Failed to update!"
+            elif msg.lower() == "delete":
+                msg = "Deleted successfully!" if response_success else "Failed to delete!"
+            elif msg.lower() == "retrieve":
+                msg = "Object retrieved successfully!" if response_success else "Failed to retrieve the object!"
+            else:
+                pass
 
         output_data = {
             "error": {"code": error_code, "error_details": error_msg},
@@ -105,3 +121,23 @@ def populate_related_object_id(request, related_data_name):
         return False, "Invalid data type received!"
     
     return True, realated_object_id
+
+
+def model_cleaner(selfObj=None, qsFieldObjectList=[]):
+    errors = {}
+    
+    for obj in qsFieldObjectList:
+        # perform validation
+        qs = obj.get("qs", selfObj.__class__.objects.filter(id=None))
+        field = obj.get("field", "Undefined")
+        if selfObj.pk:
+            qs = qs.exclude(pk=selfObj.pk)
+        if qs.exists():
+            value = getattr(selfObj, field)
+            errors[field] = [f"{selfObj.__class__.__name__} with this {field} ({value}) already exists!"]
+            
+    # raise exception
+    if len(errors):
+        raise ValidationError(
+            errors
+        )

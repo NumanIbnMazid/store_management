@@ -19,6 +19,11 @@ class CouponUpdateSerializer(serializers.ModelSerializer):
         model = Coupon
         fields = "__all__"
         read_only_fields = ("slug","studio",)
+        
+    def validate(self, attrs):
+        instance = Coupon(**attrs)
+        instance.clean()
+        return attrs
 
 
 class PointSettingSerializer(serializers.ModelSerializer):
@@ -33,4 +38,4 @@ class PointSettingUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = PointSetting
         fields = "__all__"
-        read_only_fields = ("slug","studio",)
+        read_only_fields = ("slug", "studio",)

@@ -3,9 +3,9 @@ from studios.models import Studio
 from spaces.models import Space
 from utils.snippets import simple_random_string, unique_slug_generator
 from utils.image_upload_helper import upload_plan_image_path, upload_category_image_path, upload_option_image_path
+from utils.helpers import model_cleaner
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from django.core.exceptions import ValidationError
 
 
 class OptionCategory(models.Model):
@@ -26,24 +26,17 @@ class OptionCategory(models.Model):
         return self.title
     
     def clean(self):
-        number_validation_qs = self.__class__.objects.filter(number=self.number)
-        if self.pk:
-            number_validation_qs = number_validation_qs.exclude(pk=self.pk)
-        if number_validation_qs.exists():
-            raise ValidationError(
-                {"number": [f"{self.__class__.__name__} with this number ({self.number}) already exists!"]}
-            )
-        title_validation_qs = self.__class__.objects.filter(title__iexact=self.title)
-        if self.pk:
-            title_validation_qs = title_validation_qs.exclude(pk=self.pk)
-        if title_validation_qs.exists():
-            raise ValidationError(
-                {"title": [f"{self.__class__.__name__} with this title ({self.title}) already exists!"]}
-            )
-    
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        return super(self.__class__, self).save(*args, **kwargs)
+        qsFieldObjectList = [
+            {
+                "qs": self.__class__.objects.filter(number=self.number),
+                "field": "number"
+            },
+            {
+                "qs": self.__class__.objects.filter(title__iexact=self.title),
+                "field": "title"
+            },
+        ]
+        model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList)
     
 
 class Option(models.Model):
@@ -68,24 +61,17 @@ class Option(models.Model):
         return self.title
     
     def clean(self):
-        number_validation_qs = self.__class__.objects.filter(number=self.number)
-        if self.pk:
-            number_validation_qs = number_validation_qs.exclude(pk=self.pk)
-        if number_validation_qs.exists():
-            raise ValidationError(
-                {"number": [f"{self.__class__.__name__} with this number ({self.number}) already exists!"]}
-            )
-        title_validation_qs = self.__class__.objects.filter(title__iexact=self.title)
-        if self.pk:
-            title_validation_qs = title_validation_qs.exclude(pk=self.pk)
-        if title_validation_qs.exists():
-            raise ValidationError(
-                {"title": [f"{self.__class__.__name__} with this title ({self.title}) already exists!"]}
-            )
-    
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        return super(self.__class__, self).save(*args, **kwargs)
+        qsFieldObjectList = [
+            {
+                "qs": self.__class__.objects.filter(number=self.number),
+                "field": "number"
+            },
+            {
+                "qs": self.__class__.objects.filter(title__iexact=self.title),
+                "field": "title"
+            },
+        ]
+        model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList)
 
 class Plan(models.Model):
     space = models.ManyToManyField(Space, related_name="space_plans")
@@ -118,17 +104,13 @@ class Plan(models.Model):
         return self.title
     
     def clean(self):
-        title_validation_qs = self.__class__.objects.filter(title__iexact=self.title.lower())
-        if self.pk:
-            title_validation_qs = title_validation_qs.exclude(pk=self.pk)
-        if title_validation_qs.exists():
-            raise ValidationError(
-                {"title": [f"{self.__class__.__name__} with this title ({self.title}) already exists!"]}
-            )
-    
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        return super(self.__class__, self).save(*args, **kwargs)
+        qsFieldObjectList = [
+            {
+                "qs": self.__class__.objects.filter(title__iexact=self.title.lower()),
+                "field": "title"
+            }
+        ]
+        model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList)
 
 
 @receiver(pre_save, sender=OptionCategory)
