@@ -7,6 +7,9 @@ from studios.models import Studio, StudioModerator
 from utils.studio_getter_helper import (
     get_studio_id_from_studio
 )
+from allauth.account import app_settings as allauth_settings
+from allauth.utils import email_address_exists
+from allauth.account.adapter import get_adapter
 
 
 """
@@ -47,6 +50,25 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(data=request.data, partial=True)
             if serializer.is_valid(raise_exception=True):
+                
+                # validate user data
+                errors = {}
+                user_data = request.data.get("user", {})
+                email = user_data.get("email", None)
+                password1 = user_data.get("password1", None)
+                password2 = user_data.get("password2", None)
+                if email == None or email == "":
+                    errors["email"] = ["Email field is required!"]
+                if password1 == None or password1 == "":
+                    errors["password1"] = ["Password field is required!"]
+                if password1 != password2:
+                    errors["password1"] = ["Password didn't match!"]
+                if email and email_address_exists(email):
+                    errors["email"] = ["A user is already registered with this e-mail address."]
+                    
+                if len(errors):
+                    return ResponseWrapper(error_code=400, error_msg=errors, msg="Failed to create user!")
+                
                 user_instance = serializer.save_base_user(request)
                 studio_instance = serializer.save(user=user_instance)
                 return ResponseWrapper(data=serializer.data, status=200)

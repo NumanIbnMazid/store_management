@@ -46,3 +46,4 @@
 
 # Get all studio list 
 
+# TODO: name valdiation with case(Upper, lower), SLug with UUID, studio-> User {} : validation, This field is required -> field name is required, User validatoin and studio validation raise together.

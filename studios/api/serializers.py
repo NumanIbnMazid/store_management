@@ -4,8 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from users.api.serializers import (RegisterSerializer)
 from utils.helpers import ResponseWrapper
-from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
-from rest_framework import validators
+from rest_framework.validators import ValidationError
 
 
 """
@@ -28,7 +27,7 @@ class StudioSerializer(serializers.ModelSerializer):
         model = Studio
         fields = '__all__'
         read_only_fields = ('slug',)
-    
+        
     def to_representation(self, instance):
         """ Modify representation of data integrating `user` OneToOne Field """
         representation = super(StudioSerializer, self).to_representation(instance)
