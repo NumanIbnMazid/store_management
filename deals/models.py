@@ -4,8 +4,9 @@ from utils.helpers import model_cleaner
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from studios.models import Studio
+from utils.autoslug import autoslug
 
-
+@autoslug("name")
 class Coupon(models.Model):
     name = models.CharField(max_length=254)
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_coupons")
@@ -56,14 +57,6 @@ class PointSetting(models.Model):
     def __str__(self):
         return self.studio.name
     
-@receiver(pre_save, sender=Coupon)
-def create_coupon_slug_on_pre_save(sender, instance, **kwargs):
-    """ Creates coupon slug on Coupon pre_save hook """
-    if not instance.slug:
-        try:
-            instance.slug = unique_slug_generator(instance=instance, field=instance.name)
-        except Exception as E:
-            instance.slug = simple_random_string()
     
 @receiver(pre_save, sender=PointSetting)
 def create_point_setting_slug_on_pre_save(sender, instance, **kwargs):
