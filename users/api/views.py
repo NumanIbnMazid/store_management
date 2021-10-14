@@ -85,6 +85,12 @@ class UserManagerViewSet(LoggingMixin, CustomViewSet):
         return [permission() for permission in permission_classes]
     
     def get_logged_in_user_details(self, request, *args, **kwargs):
-        instance = self.request.user
-        serializer = self.get_serializer(instance)
-        return ResponseWrapper(serializer.data)
+        try:
+            instance = self.request.user
+            serializer = self.get_serializer(instance)
+            return ResponseWrapper(serializer.data)
+        except:
+            try:
+                return ResponseWrapper(error_msg=serializer.errors, msg="Failed to get the details!", error_code=400)
+            except Exception as E:
+                return ResponseWrapper(error_msg=str(E), msg="Failed to get the details!", error_code=400)

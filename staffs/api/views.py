@@ -34,21 +34,33 @@ class StaffAccountManagerViewSet(LoggingMixin, CustomViewSet):
         return [permission() for permission in permission_classes]
 
     def create(self, request, *args, **kwargs):
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(data=request.data, partial=True)
-        if serializer.is_valid(raise_exception=True):
-            user_instance = serializer.save_base_user(request)
-            staff_instance = serializer.save(user=user_instance)
-            return ResponseWrapper(data=serializer.data, status=200)
-        return ResponseWrapper(error_code=400, error_msg=serializer.errors)
+        try:
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(data=request.data, partial=True)
+            if serializer.is_valid(raise_exception=True):
+                user_instance = serializer.save_base_user(request)
+                staff_instance = serializer.save(user=user_instance)
+                return ResponseWrapper(data=serializer.data, status=200)
+            return ResponseWrapper(error_code=400, error_msg=serializer.errors)
+        except:
+            try:
+                return ResponseWrapper(error_msg=serializer.errors, msg="Failed to create!", error_code=400)
+            except Exception as E:
+                return ResponseWrapper(error_msg=str(E), msg="Failed to create!", error_code=400)
 
     def update(self, request, *args, **kwargs):
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(data=request.data, partial=True)
-        if serializer.is_valid():
-            qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
-            serializer = self.serializer_class(instance=qs)
-            qs.user.name = request.data.get('user', {}).get("name", None)
-            qs.user.save()
-            return ResponseWrapper(data=serializer.data, status=200)
-        return ResponseWrapper(error_msg=serializer.errors, error_code=400)
+        try:
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(data=request.data, partial=True)
+            if serializer.is_valid():
+                qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
+                serializer = self.serializer_class(instance=qs)
+                qs.user.name = request.data.get('user', {}).get("name", None)
+                qs.user.save()
+                return ResponseWrapper(data=serializer.data, status=200)
+            return ResponseWrapper(error_msg=serializer.errors, error_code=400)
+        except:
+            try:
+                return ResponseWrapper(error_msg=serializer.errors, msg="Failed to update!", error_code=400)
+            except Exception as E:
+                return ResponseWrapper(error_msg=str(E), msg="Failed to update!", error_code=400)
