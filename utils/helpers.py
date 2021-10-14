@@ -21,6 +21,7 @@ class ResponseWrapper(Response):
             else:
                 status_by_default_for_gz = status
         if error_code is not None:
+            status_by_default_for_gz = error_code
             response_success = False
 
         output_data = {
@@ -33,7 +34,6 @@ class ResponseWrapper(Response):
         if data_type is not None:
             output_data["type"] = data_type
 
-        # status=200
         super().__init__(data=output_data, status=status_by_default_for_gz,
                          template_name=template_name, headers=headers,
                          exception=exception, content_type=content_type)
