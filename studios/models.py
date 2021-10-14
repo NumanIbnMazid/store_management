@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import pre_save, post_delete
 from django.dispatch import receiver
 from utils.snippets import unique_slug_generator, simple_random_string
-from django.core.exceptions import ValidationError
+from utils.helpers import model_cleaner
 
 class Studio(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="studio_user")
@@ -36,18 +36,14 @@ class Studio(models.Model):
     
     
     def clean(self):
-        name_validation_qs = self.__class__.objects.filter(name__iexact=self.name.lower())
-        if self.pk:
-            name_validation_qs = name_validation_qs.exclude(pk=self.pk)
-        if name_validation_qs.exists():
-            raise ValidationError(
-                {"name": [f"{self.__class__.__name__} with this name ({self.name}) already exists!"]}
-            )
+        qsFieldObjectList = [
+            {
+                "qs": self.__class__.objects.filter(name__iexact=self.name.lower()),
+                "field": "name"
+            }
+        ]
+        model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList)
     
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        return super(self.__class__, self).save(*args, **kwargs)
-
 class StudioModerator(models.Model):
     user = models.OneToOneField(get_user_model(), related_name='studio_moderator_user', on_delete=models.CASCADE)
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_moderators")
@@ -102,6 +98,15 @@ class Currency(models.Model):
 
     def __str__(self):
         return self.studio.name
+    
+    def clean(self):
+        qsFieldObjectList = [
+            {
+                "qs": self.__class__.objects.filter(currency__iexact=self.currency.lower()),
+                "field": "currency"
+            }
+        ]
+        model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList)
 
 
 

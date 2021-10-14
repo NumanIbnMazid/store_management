@@ -1,4 +1,4 @@
-from django.contrib import admin
+from rest_framework import serializers
 
 # Class Custom Model Admin Mixing
 class CustomModelAdminMixin(object):
@@ -14,3 +14,11 @@ class CustomModelAdminMixin(object):
             field.name for field in model._meta.fields if field.get_internal_type() != 'TextField'
         ]
         super(CustomModelAdminMixin, self).__init__(model, admin_site)
+
+
+class DynamicMixinModelSerializer(serializers.ModelSerializer):
+
+    def validate(self, attrs):
+        instance = self.Meta.model(**attrs)
+        instance.clean()
+        return attrs

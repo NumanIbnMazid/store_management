@@ -123,7 +123,17 @@ def populate_related_object_id(request, related_data_name):
     return True, realated_object_id
 
 
-def model_cleaner(selfObj=None, qsFieldObjectList=[]):
+def model_cleaner(selfObj, qsFieldObjectList):
+    """[Dynamic Model Clean Method]
+
+    Args:
+        selfObj ([Model Instance]): [self]
+        qsFieldObjectList ([List]): [[{'qs': Model.objects.filter(title='abc'), 'field': 'title'}, ]]
+
+    Raises:
+        ValidationError: [Raises Django Validation Error]
+    """
+    
     errors = {}
     
     for obj in qsFieldObjectList:

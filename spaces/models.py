@@ -2,6 +2,7 @@ from django.db import models
 from stores.models import Store
 from utils.image_upload_helper import upload_space_image_path
 from utils.snippets import unique_slug_generator, simple_random_string
+from utils.helpers import model_cleaner
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
@@ -38,18 +39,13 @@ class Space(models.Model):
         return self.name
     
     def clean(self):
-        name_validation_qs = self.__class__.objects.filter(name__iexact=self.name.lower())
-        if self.pk:
-            name_validation_qs = name_validation_qs.exclude(pk=self.pk)
-        if name_validation_qs.exists():
-            raise ValidationError(
-                {"name": [f"{self.__class__.__name__} with this name ({self.name}) already exists!"]}
-            )
-    
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        return super(self.__class__, self).save(*args, **kwargs)
-    
+        qsFieldObjectList = [
+            {
+                "qs": self.__class__.objects.filter(name__iexact=self.name.lower()),
+                "field": "name"
+            }
+        ]
+        model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList)
     
     
 @receiver(pre_save, sender=Space)

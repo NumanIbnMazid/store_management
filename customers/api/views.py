@@ -60,11 +60,8 @@ class AccountManagerViewSet(LoggingMixin, CustomViewSet):
                 customer_instance = serializer.save(user=user_instance)
                 return ResponseWrapper(data=serializer.data, status=200)
             return ResponseWrapper(error_code=400, error_msg=serializer.errors)
-        except:
-            try:
-                return ResponseWrapper(error_msg=serializer.errors, msg="Failed to create!", error_code=400)
-            except Exception as E:
-                return ResponseWrapper(error_msg=str(E), msg="Failed to create!", error_code=400)
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="create", error_code=400)
 
     def update(self, request, *args, **kwargs):
         try:
@@ -77,11 +74,8 @@ class AccountManagerViewSet(LoggingMixin, CustomViewSet):
                 qs.user.save()
                 return ResponseWrapper(data=serializer.data, status=200)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
-        except:
-            try:
-                return ResponseWrapper(error_msg=serializer.errors, msg="Failed to update!", error_code=400)
-            except Exception as E:
-                return ResponseWrapper(error_msg=str(E), msg="Failed to update!", error_code=400)
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="update", error_code=400)
 
 
      

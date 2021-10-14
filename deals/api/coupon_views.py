@@ -3,9 +3,7 @@ from deals.models import Coupon
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
-from utils.helpers import populate_related_object_id
 from utils.helpers import ResponseWrapper
-from rest_framework import permissions
 from utils.studio_getter_helper import (
     get_studio_id_from_studio
 )
@@ -29,11 +27,7 @@ class CouponManagerViewSet(LoggingMixin, CustomViewSet):
     def get_permissions(self):
         permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
-    
-    def _clean_data(self, data):
-        if isinstance(data, bytes):
-            data = data.decode(errors='ignore')
-        return super(CouponManagerViewSet, self)._clean_data(data)
+
     
     def list(self, request, *args, **kwargs):
         try:

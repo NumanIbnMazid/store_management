@@ -1,7 +1,6 @@
 from stores.models import Store, CustomBusinessDay
 from utils.custom_viewset import CustomViewSet
 from .business_day_serializers import SingleBusinessDayCheckerSerializer, BusinessDaySerializer, YearBusinessDaysCheckerSerializer
-from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.helpers import ResponseWrapper
 from utils.studio_getter_helper import get_studio_id_from_store
@@ -15,7 +14,7 @@ class BusinessDayManagerViewSet(CustomViewSet):
     lookup_field = "slug"
     
     def get_studio_id(self):
-        return get_studio_id_from_store(selfObject=self)
+        return get_studio_id_from_store(selfObject=self, slug=self.kwargs.get("studio_slug"))
     
     def get_serializer_class(self):
         if self.action in ["check_single_business_day_status"]:
@@ -89,11 +88,8 @@ class BusinessDayManagerViewSet(CustomViewSet):
                 return ResponseWrapper(data=result, status=200)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
         
-        except:
-            try:
-                return ResponseWrapper(error_msg=serializer.errors, msg="Failed to get!", error_code=400)
-            except Exception as E:
-                return ResponseWrapper(error_msg=str(E), msg="Failed to get!", error_code=400)
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="Failed to get the result!", error_code=400)
     
     
     def get_business_days_by_year(self, request, *args, **kwargs):
@@ -188,8 +184,5 @@ class BusinessDayManagerViewSet(CustomViewSet):
                 return ResponseWrapper(data=result, status=200)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
         
-        except:
-            try:
-                return ResponseWrapper(error_msg=serializer.errors, msg="Failed to get!", error_code=400)
-            except Exception as E:
-                return ResponseWrapper(error_msg=str(E), msg="Failed to get!", error_code=400)
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="Failed to get the result!", error_code=400)

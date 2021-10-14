@@ -1,6 +1,5 @@
 from rest_auth.views import LoginView
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework import permissions
 from django.core import serializers
 from django.contrib.auth import get_user_model
 import json
@@ -88,9 +87,6 @@ class UserManagerViewSet(LoggingMixin, CustomViewSet):
         try:
             instance = self.request.user
             serializer = self.get_serializer(instance)
-            return ResponseWrapper(serializer.data)
-        except:
-            try:
-                return ResponseWrapper(error_msg=serializer.errors, msg="Failed to get the details!", error_code=400)
-            except Exception as E:
-                return ResponseWrapper(error_msg=str(E), msg="Failed to get the details!", error_code=400)
+            return ResponseWrapper(data=serializer.data, msg="retrieve", status=200)
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="retrieve", error_code=400)

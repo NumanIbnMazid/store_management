@@ -4,13 +4,13 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from users.api.serializers import (RegisterSerializer)
 from utils.helpers import ResponseWrapper
-from rest_framework.validators import ValidationError
+from utils.mixins import DynamicMixinModelSerializer
 
 
 """
 ----------------------- * User Serializer * -----------------------
 """
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(DynamicMixinModelSerializer):
     class Meta:
         model = get_user_model()
         fields = [
@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
 """
 ----------------------- * Studio * -----------------------
 """
-class StudioSerializer(serializers.ModelSerializer):
+class StudioSerializer(DynamicMixinModelSerializer):
     user = RegisterSerializer(read_only=True)
     slug = serializers.ReadOnlyField()
     
@@ -51,7 +51,7 @@ class StudioSerializer(serializers.ModelSerializer):
         return ResponseWrapper(data=register_serializer.data, status=200)
 
 
-class StudioUpdateSerializer(serializers.ModelSerializer):
+class StudioUpdateSerializer(DynamicMixinModelSerializer):
     
     class Meta:
         model = Studio
@@ -70,7 +70,7 @@ class StudioUpdateSerializer(serializers.ModelSerializer):
 """
 
 """ *** Studio Moderator *** """
-class UserStudioModeratorSerializer(serializers.ModelSerializer):
+class UserStudioModeratorSerializer(DynamicMixinModelSerializer):
     class Meta:
         model = get_user_model()
         fields = [
@@ -78,13 +78,13 @@ class UserStudioModeratorSerializer(serializers.ModelSerializer):
         ]
 
 
-class UserStudioModeratorUpdateSerializer(serializers.ModelSerializer):
+class UserStudioModeratorUpdateSerializer(DynamicMixinModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ["name"]
 
 
-class StudioModeratorSerializer(serializers.ModelSerializer):
+class StudioModeratorSerializer(DynamicMixinModelSerializer):
     user = RegisterSerializer(read_only=True)
 
     class Meta:
@@ -113,7 +113,7 @@ class StudioModeratorSerializer(serializers.ModelSerializer):
         return ResponseWrapper(data=register_serializer.data, status=200)
 
 
-class StudioModeratorUpdateSerializer(serializers.ModelSerializer):
+class StudioModeratorUpdateSerializer(DynamicMixinModelSerializer):
     user = UserStudioModeratorUpdateSerializer(read_only=True)
     
     class Meta:
@@ -126,13 +126,13 @@ class StudioModeratorUpdateSerializer(serializers.ModelSerializer):
         representation['user'] = UserStudioModeratorSerializer(instance.user).data
         return representation
 
-class VatTaxSerializer(serializers.ModelSerializer):
+class VatTaxSerializer(DynamicMixinModelSerializer):
     class Meta:
         model = VatTax
         fields = "__all__"
         read_only_fields = ("slug",)
         
-class VatTaxUpdateSerializer(serializers.ModelSerializer):
+class VatTaxUpdateSerializer(DynamicMixinModelSerializer):
     class Meta:
         model = VatTax
         fields = "__all__"
@@ -142,14 +142,14 @@ class StudioVatTaxSerializer(serializers.Serializer):
     studio = serializers.IntegerField()
 
 
-class CurrencySerializer(serializers.ModelSerializer):
+class CurrencySerializer(DynamicMixinModelSerializer):
 
     class Meta:
         model = Currency
         fields = "__all__"
         read_only_fields = ("slug",)
         
-class CurrencyUpdateSerializer(serializers.ModelSerializer):
+class CurrencyUpdateSerializer(DynamicMixinModelSerializer):
 
     class Meta:
         model = Currency

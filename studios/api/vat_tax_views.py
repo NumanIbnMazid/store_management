@@ -4,7 +4,6 @@ from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
 from studios.models import VatTax, Studio
 from utils.helpers import ResponseWrapper
-from utils.helpers import populate_related_object_id
 from utils.studio_getter_helper import (
     get_studio_id_from_studio
 )
@@ -42,11 +41,14 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
         return super(VatTaxManagerViewSet, self)._clean_data(data)
     
     def list(self, request, *args, **kwargs):
-        studio_slug = kwargs.get("studio_slug")
-        qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(instance=qs, many=True)
-        return ResponseWrapper(data=serializer.data, msg='success')
+        try:
+            studio_slug = kwargs.get("studio_slug")
+            qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(instance=qs, many=True)
+            return ResponseWrapper(data=serializer.data, msg='success')
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="list", error_code=400)
     
     def get_studio_vat_tax(self, studio_id):
         qs = VatTax.objects.filter(studio=studio_id)
@@ -57,40 +59,43 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
     
     def studio_vat_tax(self, request, *args, **kwargs):
         """ *** Get studio Vat Tax *** """
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(data=request.data, partial=True)
-        if serializer.is_valid():
-            studio = int(request.data.get("studio", None))
-            studio_qs = Studio.objects.filter(id=studio)
-            studio_obj = None
-            
-            if studio_qs.exists():
-                studio_obj = studio_qs.first()
-            else:
-                return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg=f"Studio {studio} does not exists!", status=400)
+        try:
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(data=request.data, partial=True)
+            if serializer.is_valid():
+                studio = int(request.data.get("studio", None))
+                studio_qs = Studio.objects.filter(id=studio)
+                studio_obj = None
+                
+                if studio_qs.exists():
+                    studio_obj = studio_qs.first()
+                else:
+                    return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg=f"Studio {studio} does not exists!", status=400)
 
-            result = {
-                "studio": studio_obj.name,
-                "vattax":{}
-            }
-            
-            def prepare_vat_tax_data(vat_tax_instance=None):
-                result["vattax"]["vat"] = vat_tax_instance.vat
-                result["vattax"]["tax"] = vat_tax_instance.tax
-                result["vattax"]["other_service"] = vat_tax_instance.other_service
-                return result
-    
-            # get vat tax from DB
-            vat_tax_filter_result = self.get_studio_vat_tax(studio_id=studio_obj.id)
-            
-            # preapare vat tax data
-            if vat_tax_filter_result[0] == True:
-                prepare_vat_tax_data(vat_tax_instance=vat_tax_filter_result[1])
-            else:
-                result["status"] = False
-                    
-            return ResponseWrapper(data=result, status=200)
-        return ResponseWrapper(error_msg=serializer.errors, error_code=400)
+                result = {
+                    "studio": studio_obj.name,
+                    "vattax":{}
+                }
+                
+                def prepare_vat_tax_data(vat_tax_instance=None):
+                    result["vattax"]["vat"] = vat_tax_instance.vat
+                    result["vattax"]["tax"] = vat_tax_instance.tax
+                    result["vattax"]["other_service"] = vat_tax_instance.other_service
+                    return result
+        
+                # get vat tax from DB
+                vat_tax_filter_result = self.get_studio_vat_tax(studio_id=studio_obj.id)
+                
+                # preapare vat tax data
+                if vat_tax_filter_result[0] == True:
+                    prepare_vat_tax_data(vat_tax_instance=vat_tax_filter_result[1])
+                else:
+                    result["status"] = False
+                        
+                return ResponseWrapper(data=result, msg="retrieve", status=200)
+            return ResponseWrapper(error_msg=serializer.errors, error_code=400, msg="retrieve")
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="retrieve", error_code=400)
 
    
 

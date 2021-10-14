@@ -33,11 +33,14 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
 
 
     def list(self, request, *args, **kwargs):
-        studio_slug = kwargs.get("studio_slug")
-        qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(instance=qs, many=True)
-        return ResponseWrapper(data=serializer.data, msg='success')
+        try:
+            studio_slug = kwargs.get("studio_slug")
+            qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(instance=qs, many=True)
+            return ResponseWrapper(data=serializer.data, msg='success')
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="list", error_code=400)
     
     
     def _clean_data(self, data):
@@ -53,7 +56,7 @@ class CustomBusinessDayManagerViewSet(LoggingMixin, CustomViewSet):
     lookup_field = "slug"
     
     def get_studio_id(self):
-        return get_studio_id_from_store(selfObject=self)
+        return get_studio_id_from_store(selfObject=self, slug=self.kwargs.get("store_slug"))
     
     def get_serializer_class(self):
         if self.action in ["update"]:
@@ -96,8 +99,5 @@ class CustomBusinessDayManagerViewSet(LoggingMixin, CustomViewSet):
                 return ResponseWrapper(data=serializer.data)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
         
-        except:
-            try:
-                return ResponseWrapper(error_msg=serializer.errors, msg="Failed to update!", error_code=400)
-            except Exception as E:
-                return ResponseWrapper(error_msg=str(E), msg="Failed to update!", error_code=400)
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="update", error_code=400)
