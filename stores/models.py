@@ -1,18 +1,17 @@
 from django.db import models
-from utils.snippets import unique_slug_generator, simple_random_string
 from utils.image_upload_helper import upload_store_image_path
 from utils.helpers import model_cleaner
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 from studios.models import Studio
 from django.utils.translation import gettext_lazy as _
 from django.contrib.postgres.fields import ArrayField
+import uuid
+
 
 class Store(models.Model):
     
     name = models.CharField(max_length=150, unique=True)
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_stores")
-    slug = models.SlugField(unique=True)
+    slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
     default_closed_day_of_weeks = ArrayField(models.CharField(max_length=254), blank=True)
     address = models.CharField(max_length=254, blank=True, null=True)
     contact_1 = models.CharField(max_length=30, blank=True, null=True)
@@ -48,12 +47,13 @@ class Store(models.Model):
         ]
         model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList)
 
+
 class CustomBusinessDay(models.Model):
     class Status(models.IntegerChoices):
         CLOSED = 0, _("Closed")
         OPEN = 1, _("Open")
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name="store_custom_business_day")
-    slug = models.SlugField(unique=True)
+    slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
     date = models.DateField()
     status = models.PositiveSmallIntegerField(choices=Status.choices, default=1)
     details = models.TextField(blank=True, null=True)
@@ -88,20 +88,3 @@ class CustomBusinessDay(models.Model):
         elif self.status == 1:
             return "custom_business_day"
         return "default_business_day"
-
-
-@receiver(pre_save, sender=Store)
-def update_store_slug_on_pre_save(sender, instance, **kwargs):
-    """ Generates and updates store slug on Store pre_save hook """
-    if not instance.slug:
-        try:
-            instance.slug = unique_slug_generator(instance=instance, field=instance.name)
-        except Exception as E:
-            instance.slug = simple_random_string()
-
-
-@receiver(pre_save, sender=CustomBusinessDay)
-def create_store_custom_closed_day_slug_on_pre_save(sender, instance, **kwargs):
-    """ Creates store custom closed day slug on CustomBusinessDay pre_save hook """
-    if not instance.slug:
-        instance.slug = simple_random_string()

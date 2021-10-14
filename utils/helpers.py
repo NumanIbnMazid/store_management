@@ -1,6 +1,11 @@
 from rest_framework.views import exception_handler
 from rest_framework.response import Response
 from django.core.exceptions import ValidationError
+from django.db import models
+from django.dispatch import receiver
+from django.utils.text import slugify
+from utils.snippets import simple_random_string, random_string_generator
+import uuid
 
 
 class ResponseWrapper(Response):
@@ -151,3 +156,46 @@ def model_cleaner(selfObj, qsFieldObjectList):
         raise ValidationError(
             errors
         )
+        
+
+def autoslugFromField(fieldname):
+    def decorator(model):
+        # some sanity checks first
+        assert hasattr(model, fieldname), f"Model has no field {fieldname!r}"
+        assert hasattr(model, "slug"), "Model is missing a slug field"
+
+        @receiver(models.signals.pre_save, sender=model, weak=False)
+        def generate_slug(sender, instance, *args, raw=False, **kwargs):
+            if not raw and not instance.slug:
+                source = getattr(instance, fieldname)
+                try:
+                    slug = slugify(source)
+                    Klass = instance.__class__
+                    qs_exists = Klass.objects.filter(slug=slug).exists()
+                    if qs_exists:
+                        new_slug = "{slug}-{randstr}".format(
+                            slug=slug,
+                            randstr=random_string_generator(size=4)
+                        )
+                        instance.slug = new_slug
+                    else:
+                        instance.slug = slug
+                except Exception as e:
+                    instance.slug = simple_random_string()
+        return model
+    return decorator
+        
+
+def autoslugFromUUID():
+    def decorator(model):
+        assert hasattr(model, "slug"), "Model is missing a slug field"
+
+        @receiver(models.signals.pre_save, sender=model, weak=False)
+        def generate_slug(sender, instance, *args, raw=False, **kwargs):
+            if not raw and not instance.slug:
+                try:
+                    instance.slug = str(uuid.uuid4())
+                except Exception as e:
+                    instance.slug = simple_random_string()
+        return model
+    return decorator

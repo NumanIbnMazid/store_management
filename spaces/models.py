@@ -1,16 +1,13 @@
 from django.db import models
 from stores.models import Store
 from utils.image_upload_helper import upload_space_image_path
-from utils.snippets import unique_slug_generator, simple_random_string
 from utils.helpers import model_cleaner
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
-from django.core.exceptions import ValidationError
+import uuid
 
 class Space(models.Model):
     name = models.CharField(max_length=150)
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name="store_spaces")
-    slug = models.SlugField(unique=True)
+    slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
     image_1 = models.ImageField(upload_to=upload_space_image_path, blank=True, null=True)
     image_1_reference = models.CharField(max_length=254, blank=True, null=True)
     image_1_comment = models.CharField(max_length=254, blank=True, null=True)
@@ -46,13 +43,3 @@ class Space(models.Model):
             }
         ]
         model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList)
-    
-    
-@receiver(pre_save, sender=Space)
-def update_space_slug_on_pre_save(sender, instance, **kwargs):
-    """ Generates and updates space slug on `Space` pre_save hook """
-    if not instance.slug:
-        try:
-            instance.slug = unique_slug_generator(instance=instance, field=instance.name)
-        except Exception as E:
-            instance.slug = simple_random_string()

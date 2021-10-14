@@ -1,15 +1,15 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-from django.db.models.signals import pre_save, post_delete
+from django.db.models.signals import post_delete
 from django.dispatch import receiver
-from utils.snippets import unique_slug_generator, simple_random_string
 from utils.helpers import model_cleaner
+import uuid
 
 class Studio(models.Model):
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="studio_user")
     name = models.CharField(max_length=254)
-    slug = models.SlugField(unique=True)
+    slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
     country = models.CharField(max_length=50, blank=True, null=True)
     zip_code = models.CharField(max_length=15, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
@@ -47,7 +47,7 @@ class Studio(models.Model):
 class StudioModerator(models.Model):
     user = models.OneToOneField(get_user_model(), related_name='studio_moderator_user', on_delete=models.CASCADE)
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_moderators")
-    slug = models.SlugField(unique=True)
+    slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
     contact = models.CharField(max_length=30, blank=True, null=True)
     address = models.CharField(max_length=254, blank=True, null=True)
     # is_admin = models.BooleanField(default=False)
@@ -67,7 +67,7 @@ class StudioModerator(models.Model):
 
 class VatTax(models.Model):
     studio = models.OneToOneField(Studio, on_delete=models.CASCADE, related_name="studio_vattax")
-    slug = models.SlugField(unique=True)
+    slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
     vat = models.IntegerField(default=0)
     tax = models.IntegerField(default=0)
     other_service = models.IntegerField(default=0)
@@ -86,7 +86,7 @@ class VatTax(models.Model):
 class Currency(models.Model):
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_currency")
     country = models.CharField(max_length=50)
-    slug = models.SlugField(unique=True)
+    slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
     currency = models.CharField(max_length=50, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -114,22 +114,6 @@ class Currency(models.Model):
 *** Pre-Save, Post-Save and Pre-Delete Hooks ***
 """
 
-@receiver(pre_save, sender=Studio)
-def update_studio_slug_on_pre_save(sender, instance, **kwargs):
-    """ Generates and updates studio slug on `Studio` pre_save hook """
-    if not instance.slug:
-        try:
-            instance.slug = unique_slug_generator(instance=instance, field=instance.studio_currency)
-        except Exception as E:
-            instance.slug = simple_random_string()
-            
-@receiver(pre_save, sender=StudioModerator)
-def update_studio_moderator_slug_on_pre_save(sender, instance, **kwargs):
-    """ Generates and updates studio slug on `Studio` pre_save hook """
-    if not instance.slug:
-        instance.slug = simple_random_string()
-
-
 @receiver(post_delete, sender=StudioModerator)
 def delete_moderator_users_on_studio_pre_delete(sender, instance, **kwargs):
     """ Deletes Studio Moderator Users on `Studio` pre_delete hook """
@@ -150,24 +134,3 @@ def delete_users_on_studio_moderator_pre_delete(sender, instance, **kwargs):
             user_qs.delete()
     except Exception as E:
         raise Exception(f"Failed to delete `User` on `StudioModerator` post_delete hook. Exception: {str(E)}")
-
-
-
-@receiver(pre_save, sender=VatTax)
-def update_vattax_slug_on_pre_save(sender, instance, **kwargs):
-    """ Generates and updates VatTax slug using pre_save hook """
-    if not instance.slug:
-        try:
-            instance.slug = unique_slug_generator(instance=instance, field=instance.studio.name) # Noman bhai can you check it why can't get studio.name 
-        except Exception as E:
-            instance.slug = simple_random_string()
-
-
-@receiver(pre_save, sender=Currency)
-def update_currency_slug_on_pre_save(sender, instance, **kwargs):
-    """ Generates and updates Currency slug using pre_save hook """
-    if not instance.slug:
-        try:
-            instance.slug = unique_slug_generator(instance=instance, field=instance.currency)
-        except Exception as E:
-            instance.slug = simple_random_string()

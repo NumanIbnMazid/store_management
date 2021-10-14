@@ -1,4 +1,3 @@
-from rest_framework import serializers
 from deals.models import Coupon, PointSetting
 from utils.mixins import DynamicMixinModelSerializer
 

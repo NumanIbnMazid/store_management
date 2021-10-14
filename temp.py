@@ -1,13 +1,19 @@
 studioData = {
+    "user": {
+        "name": "Music Zone Admin",
+        "email": "musiczoneadmin@studio.com",
+        "password1": "test12345",
+        "password2": "test12345"
+    },
     "name": "Music Zone",
-    "country": "Japan",
+    "country": "Japan, Tokio",
     "zip_code": "1212",
     "city": "Tokio",
     "state": "",
-    "address": "Tokio, Japan",
+    "address": "Japan, Tokio",
     "email": "musiczone@studio.com",
-    "phone": "03423432423",
-    "about": "Amazing Music Zone Studio",
+    "phone": "01776655456",
+    "about": "Amazing Studio",
     "linkedin": "",
     "website": "",
     "facebook": "",
