@@ -4,8 +4,9 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from studios.models import Studio
 from django.core.exceptions import ValidationError
+from utils.autoslug import autoslug
 
-
+@autoslug("name")
 class Coupon(models.Model):
     name = models.CharField(max_length=254)
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_coupons")
@@ -26,26 +27,7 @@ class Coupon(models.Model):
     
     def __str__(self):
         return self.name
-    
-    def clean(self):
-        print("-----clean test-----")
-        raise ValidationError(
-                {"name": [f"{self.__class__.__name__} with this name ({self.name}) already exists!"]}
-            )
-        name_validation_qs = self.__class__.objects.filter(name__iexact=self.name.lower())
-        if self.pk:
-            name_validation_qs = name_validation_qs.exclude(pk=self.pk)
-        if name_validation_qs.exists():
-            raise ValidationError(
-                {"name": [f"{self.__class__.__name__} with this name ({self.name}) already exists!"]}
-            )
-        
-    
-    def save(self, *args, **kwargs):
-        # self.full_clean()
-        self.clean()
-        print("-----save-----")
-        return super(self.__class__, self).save(*args, **kwargs)
+     
 
 class PointSetting(models.Model):
     studio = models.OneToOneField(Studio, on_delete=models.CASCADE, related_name="studio_point_setting")
@@ -62,15 +44,15 @@ class PointSetting(models.Model):
     def __str__(self):
         return self.studio.name
     
-@receiver(pre_save, sender=Coupon)
-def create_coupon_slug_on_pre_save(sender, instance, **kwargs):
-    """ Creates coupon slug on Coupon pre_save hook """
-    print("-----instance-----", instance)
-    if not instance.slug:
-        try:
-            instance.slug = unique_slug_generator(instance=instance, field=instance.name)
-        except Exception as E:
-            instance.slug = simple_random_string()
+# @receiver(pre_save, sender=Coupon)
+# def create_coupon_slug_on_pre_save(sender, instance, **kwargs):
+#     """ Creates coupon slug on Coupon pre_save hook """
+#     print("-----instance-----", instance)
+#     if not instance.slug:
+#         try:
+#             instance.slug = unique_slug_generator(instance=instance, field=instance.name)
+#         except Exception as E:
+#             instance.slug = simple_random_string()
     
 @receiver(pre_save, sender=PointSetting)
 def create_point_setting_slug_on_pre_save(sender, instance, **kwargs):
