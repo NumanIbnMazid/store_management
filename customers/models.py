@@ -55,6 +55,8 @@ class Customer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='created at')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='updated at')
 
+    objects = CustomerManager()
+
     class Meta:
         verbose_name = 'Customer'
         verbose_name_plural = 'Customers'
@@ -62,5 +64,6 @@ class Customer(models.Model):
     
     def __str__(self):
         return self.user.get_dynamic_username()
-    objects = CustomerManager()
+        
+    
     

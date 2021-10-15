@@ -29,7 +29,7 @@ class CustomerSearchManagerViewSet(LoggingMixin, CustomViewSet):
         start_date = parser.parse(start_date)
         end_date = parser.parse(end_date)
 
-        qs = Customer.objects.registrati(start_date=start_date, end_date=end_date)
+        qs = Customer.objects.get_queryset(created_at__range=[start_date, end_date])
         customer_objects = []
         if qs.exists():
             for instance in qs:
@@ -60,7 +60,6 @@ class CustomerSearchManagerViewSet(LoggingMixin, CustomViewSet):
                 customer_list = []
                 for customer in customer_qs:
                     data = {}
-                    data["user"] = customer.user
                     data["slug"] = customer.slug
                     data["furigana"] = customer.furigana
                     data["name_of_person_in_charge"] = customer.name_of_person_in_charge
@@ -83,7 +82,7 @@ class CustomerSearchManagerViewSet(LoggingMixin, CustomViewSet):
             
             # prepare customer response data
             if customer_filter_result[0] == True:
-                prepare_customer_data(holiday_qs=customer_filter_result[1])
+                prepare_customer_data(customer_qs=customer_filter_result[1])
                 result["status"] = True
             else:
                 result["status"] = False
