@@ -2,6 +2,38 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 import uuid
+import datetime
+from django.db.models import Q
+
+class CustomerQuerySet(models.query.QuerySet):
+
+    def latest(self):
+        return self.filter().order_by('-created_at')
+
+    def registrati(self, start_date, end_date):
+        return self.filter(created_at__range=[start_date, end_date])
+    
+    def reservati(self, start_date, end_date):
+        return self.filter(created_at__range=[start_date, end_date])
+
+    def search(self, query):
+        lookups = (Q(user__icontains=query) |
+                   Q(postal_code__icontains=query) |
+                   Q(address__icontains=query) |
+                   Q(building_name__icontains=query) |
+                   Q(contact_address__icontains=query) |
+                   Q(identification__icontains=query))
+        return self.filter(lookups).distinct()
+
+class CustomerManager(models.Manager):
+    def get_queryset(self):
+        return CustomerQuerySet(self.model, using=self._db)
+
+    def all(self):
+        return self.get_queryset()
+
+    def search(self, query):
+        return self.get_queryset().search(query)
 
 
 class Customer(models.Model):
@@ -30,3 +62,5 @@ class Customer(models.Model):
     
     def __str__(self):
         return self.user.get_dynamic_username()
+    objects = CustomerManager()
+    

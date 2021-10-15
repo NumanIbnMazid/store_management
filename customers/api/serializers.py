@@ -63,3 +63,9 @@ class CustomerUpdateSerializer(serializers.ModelSerializer):
         representation = super(CustomerUpdateSerializer, self).to_representation(instance)
         representation['user'] = UserCustomerSerializer(instance.user).data
         return representation
+
+
+class CustomerSearchSerializer(serializers.Serializer):
+    start_date = serializers.DateField()
+    end_date = serializers.DateField()
+     
