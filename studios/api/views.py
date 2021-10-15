@@ -37,8 +37,6 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
             self.serializer_class = StudioSerializer
         elif self.action in ["update"]:
             self.serializer_class = StudioUpdateSerializer
-        elif self.action in ["list_all"]:
-            self.serializer_class = StudioListSerializer
         else:
             self.serializer_class = StudioSerializer
         return self.serializer_class
