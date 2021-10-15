@@ -11,4 +11,5 @@ urlpatterns = [
     path("retrieve/<slug>", SpaceManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_space")),
     path("update/<slug>", SpaceManagerViewSet.as_view({"patch": "update"}, name="update_space")),
     path("delete/<slug>", SpaceManagerViewSet.as_view({"delete": "destroy"}, name="delete_space")),
+    path("list/<store_slug>", SpaceManagerViewSet.as_view({"get": "list"}, name="list_space")),
 ]

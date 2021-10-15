@@ -34,3 +34,4 @@ class PointSettingUpdateSerializer(serializers.ModelSerializer):
         model = PointSetting
         fields = "__all__"
         read_only_fields = ("slug","studio",)
+        

@@ -46,3 +46,4 @@ class CouponManagerViewSet(LoggingMixin, CustomViewSet):
             return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="Failed to retrieve the list!", error_code=400)
 
 
+

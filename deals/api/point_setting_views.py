@@ -18,8 +18,8 @@ class PointManagerViewSet(LoggingMixin, CustomViewSet):
     queryset = PointSetting.objects.all()
     lookup_field = "slug"
     
-    # def get_studio_id(self):
-    #     return get_studio_id_from_studio(selfObject=self, slug=self.kwargs.get("studio_slug"))
+    def get_studio_id(self):
+        return get_studio_id_from_studio(selfObject=self, slug=self.kwargs.get("studio_slug"))
     
     def get_serializer_class(self):
         if self.action in ["update"]:
@@ -28,9 +28,9 @@ class PointManagerViewSet(LoggingMixin, CustomViewSet):
             self.serializer_class = PointSettingSerializer
         return self.serializer_class
     
-    # def get_permissions(self):
-    #     permission_classes = [custom_permissions.IsStudioAdmin]
-    #     return [permission() for permission in permission_classes]
+    def get_permissions(self):
+        permission_classes = [custom_permissions.IsStudioAdmin]
+        return [permission() for permission in permission_classes]
     
     def _clean_data(self, data):
         if isinstance(data, bytes):

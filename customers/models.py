@@ -5,6 +5,7 @@ from utils.snippets import simple_random_string
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
+
 class Customer(models.Model):
     class Identification(models.IntegerChoices):
         ALREADY = 0, _("Already")
