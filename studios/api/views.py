@@ -2,7 +2,12 @@ from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
 from utils.helpers import ResponseWrapper
-from .serializers import StudioSerializer, StudioModeratorSerializer, StudioModeratorUpdateSerializer, StudioUpdateSerializer
+from .serializers import (
+    StudioSerializer, 
+    StudioModeratorSerializer, 
+    StudioModeratorUpdateSerializer, 
+    StudioUpdateSerializer,
+    )
 from studios.models import Studio, StudioModerator
 from utils.studio_getter_helper import (
     get_studio_id_from_studio
@@ -32,6 +37,8 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
             self.serializer_class = StudioSerializer
         elif self.action in ["update"]:
             self.serializer_class = StudioUpdateSerializer
+        elif self.action in ["list_all"]:
+            self.serializer_class = StudioListSerializer
         else:
             self.serializer_class = StudioSerializer
         return self.serializer_class
@@ -90,8 +97,6 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
             return ResponseWrapper(error_msg=serializer.errors, error_code=400, msg="update")
         except Exception as E:
             return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="update", error_code=400)
-    
-
 
 """
 ----------------------- * StudioModerator * -----------------------

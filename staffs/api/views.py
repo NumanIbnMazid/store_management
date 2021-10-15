@@ -6,6 +6,9 @@ from .serializers import (
     StaffSerializer, StaffUpdateSerializer
 )
 from staffs.models import Staff
+from utils.studio_getter_helper import (
+    get_studio_id_from_studio
+)
 
 
 class StaffAccountManagerViewSet(LoggingMixin, CustomViewSet):
@@ -13,6 +16,9 @@ class StaffAccountManagerViewSet(LoggingMixin, CustomViewSet):
     logging_methods = ['GET', 'POST', 'PATCH', 'DELETE']
     queryset = Staff.objects.all()
     lookup_field = 'slug'
+
+    # def get_studio_id(self):
+    #     return get_studio_id_from_studio(selfObject=self, slug=self.kwargs.get("studio_slug"))
 
     def get_serializer_class(self):
         if self.action in ["create"]:
@@ -56,3 +62,16 @@ class StaffAccountManagerViewSet(LoggingMixin, CustomViewSet):
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
         except Exception as E:
             return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="update", error_code=400)
+
+    # Dev comment-- Numan bhai how can I get studio staff I see here no relation staff with studio
+    def list(self, request, *args, **kwargs):
+        try:
+            studio_slug = kwargs.get("studio_slug")
+            qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(instance=qs, many=True)
+            return ResponseWrapper(data=serializer.data, msg='list')
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="list", error_code=400)
+
+

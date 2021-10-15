@@ -47,3 +47,6 @@
 # Get all studio list 
 
 # TODO: name valdiation with case(Upper, lower), SLug with UUID, studio-> User {} : validation, This field is required -> field name is required, User validatoin and studio validation raise together.
+
+# Numan bhai can you check the Plan models I'm not able to create a object -- slug uid 
+# Staff Module-- Numan bhai how can I get studio staff I see here no relation with staff and studio

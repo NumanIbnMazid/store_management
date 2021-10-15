@@ -25,6 +25,7 @@ urlpatterns = [
     path("retrieve/<slug>", PlanManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_plan")),
     path("update/<slug>", PlanManagerViewSet.as_view({"patch": "update"}, name="update_plan")),
     path("delete/<slug>", PlanManagerViewSet.as_view({"delete": "destroy"}, name="delete_plan")),
+    path("list/<space_slug>", PlanManagerViewSet.as_view({"get": "list"}, name="list_plan")),
 ]
 
 
