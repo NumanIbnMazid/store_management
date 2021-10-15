@@ -3,7 +3,8 @@ from django.dispatch import receiver
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.utils import timezone
-from utils.snippets import simple_random_string, simple_random_string_with_timestamp
+from utils.snippets import simple_random_string_with_timestamp
+import uuid
 
 
 def generate_username_from_email(email):
@@ -44,7 +45,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=254, unique=True)
     """ Additional Fields Starts """
     name = models.CharField(max_length=254, null=True, blank=True)
-    slug = models.SlugField(unique=True)
+    slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
     is_customer = models.BooleanField(default=False)
     is_studio_admin = models.BooleanField(default=False)
     is_studio_staff = models.BooleanField(default=False)
@@ -83,8 +84,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 @receiver(pre_save, sender=User)
-def update_username_and_slug_from_email(sender, instance, **kwargs):
-    """ Generates and updates username from user email and updates slug on User pre_save hook """
+def update_username_from_email(sender, instance, **kwargs):
+    """ Generates and updates username from user email on User pre_save hook """
     instance.username = generate_username_from_email(email=instance.email)
-    if not instance.slug:
-        instance.slug = simple_random_string()

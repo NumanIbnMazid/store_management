@@ -1,9 +1,9 @@
-from rest_framework import serializers
 from plans.models import OptionCategory, Option, Plan
 from drf_extra_fields.fields import HybridImageField
+from utils.mixins import DynamicMixinModelSerializer
 
 
-class OptionCategorySerializer(serializers.ModelSerializer):
+class OptionCategorySerializer(DynamicMixinModelSerializer):
     icon = HybridImageField(required=False)
     
     class Meta:
@@ -11,7 +11,8 @@ class OptionCategorySerializer(serializers.ModelSerializer):
         fields = ("number", "title", "studio", "icon",)
         read_only_fields = ("slug",)
         
-class OptionCategoryUpdateSerializer(serializers.ModelSerializer):
+
+class OptionCategoryUpdateSerializer(DynamicMixinModelSerializer):
     icon = HybridImageField(required=False)
     
     class Meta:
@@ -19,7 +20,8 @@ class OptionCategoryUpdateSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ("slug","number", "store",)
         
-class OptionSerializer(serializers.ModelSerializer):
+
+class OptionSerializer(DynamicMixinModelSerializer):
     icon = HybridImageField(required=False)
     
     class Meta:
@@ -27,7 +29,8 @@ class OptionSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ("slug",)
 
-class OptionUpdateSerializer(serializers.ModelSerializer):
+
+class OptionUpdateSerializer(DynamicMixinModelSerializer):
     icon = HybridImageField(required=False)
     
     class Meta:
@@ -35,7 +38,8 @@ class OptionUpdateSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ("slug","category","number",)
         
-class PlanSerializer(serializers.ModelSerializer):
+
+class PlanSerializer(DynamicMixinModelSerializer):
     image_1 = HybridImageField(required=False)
     image_2 = HybridImageField(required=False)
     image_3 = HybridImageField(required=False)
@@ -47,7 +51,8 @@ class PlanSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ("slug",)
         
-class PlanUpdateSerializer(serializers.ModelSerializer):
+
+class PlanUpdateSerializer(DynamicMixinModelSerializer):
     image_1 = HybridImageField(required=False)
     image_2 = HybridImageField(required=False)
     image_3 = HybridImageField(required=False)

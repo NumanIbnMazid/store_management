@@ -1,5 +1,11 @@
 from rest_framework.views import exception_handler
 from rest_framework.response import Response
+from django.core.exceptions import ValidationError
+from django.db import models
+from django.dispatch import receiver
+from django.utils.text import slugify
+from utils.snippets import simple_random_string, random_string_generator
+import uuid
 
 
 class ResponseWrapper(Response):
@@ -23,6 +29,21 @@ class ResponseWrapper(Response):
         if error_code is not None:
             status_by_default_for_gz = error_code
             response_success = False
+            
+        # manipulate dynamic msg
+        if msg is not None and not msg == "":
+            if msg.lower() == "list":
+                msg = "List retrieved successfully!" if response_success else "Failed to retrieve the list!"
+            elif msg.lower() == "create":
+                msg = "Created successfully!" if response_success else "Failed to create!"
+            elif msg.lower() == "update":
+                msg = "Updated successfully!" if response_success else "Failed to update!"
+            elif msg.lower() == "delete":
+                msg = "Deleted successfully!" if response_success else "Failed to delete!"
+            elif msg.lower() == "retrieve":
+                msg = "Object retrieved successfully!" if response_success else "Failed to retrieve the object!"
+            else:
+                pass
 
         output_data = {
             "error": {"code": error_code, "error_details": error_msg},
@@ -105,3 +126,76 @@ def populate_related_object_id(request, related_data_name):
         return False, "Invalid data type received!"
     
     return True, realated_object_id
+
+
+def model_cleaner(selfObj, qsFieldObjectList):
+    """[Dynamic Model Clean Method]
+
+    Args:
+        selfObj ([Model Instance]): [self]
+        qsFieldObjectList ([List]): [[{'qs': Model.objects.filter(title='abc'), 'field': 'title'}, ]]
+
+    Raises:
+        ValidationError: [Raises Django Validation Error]
+    """
+    
+    errors = {}
+    
+    for obj in qsFieldObjectList:
+        # perform validation
+        qs = obj.get("qs", selfObj.__class__.objects.filter(id=None))
+        field = obj.get("field", "Undefined")
+        if selfObj.pk:
+            qs = qs.exclude(pk=selfObj.pk)
+        if qs.exists():
+            value = getattr(selfObj, field)
+            errors[field] = [f"{selfObj.__class__.__name__} with this {field} ({value}) already exists!"]
+            
+    # raise exception
+    if len(errors):
+        raise ValidationError(
+            errors
+        )
+        
+
+def autoslugFromField(fieldname):
+    def decorator(model):
+        # some sanity checks first
+        assert hasattr(model, fieldname), f"Model has no field {fieldname!r}"
+        assert hasattr(model, "slug"), "Model is missing a slug field"
+
+        @receiver(models.signals.pre_save, sender=model, weak=False)
+        def generate_slug(sender, instance, *args, raw=False, **kwargs):
+            if not raw and not instance.slug:
+                source = getattr(instance, fieldname)
+                try:
+                    slug = slugify(source)
+                    Klass = instance.__class__
+                    qs_exists = Klass.objects.filter(slug=slug).exists()
+                    if qs_exists:
+                        new_slug = "{slug}-{randstr}".format(
+                            slug=slug,
+                            randstr=random_string_generator(size=4)
+                        )
+                        instance.slug = new_slug
+                    else:
+                        instance.slug = slug
+                except Exception as e:
+                    instance.slug = simple_random_string()
+        return model
+    return decorator
+        
+
+def autoslugFromUUID():
+    def decorator(model):
+        assert hasattr(model, "slug"), "Model is missing a slug field"
+
+        @receiver(models.signals.pre_save, sender=model, weak=False)
+        def generate_slug(sender, instance, *args, raw=False, **kwargs):
+            if not raw and not instance.slug:
+                try:
+                    instance.slug = str(uuid.uuid4())
+                except Exception as e:
+                    instance.slug = simple_random_string()
+        return model
+    return decorator

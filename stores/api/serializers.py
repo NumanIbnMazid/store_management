@@ -1,8 +1,9 @@
 from rest_framework import serializers
 from stores.models import Store, CustomBusinessDay
 from drf_extra_fields.fields import HybridImageField
+from utils.mixins import DynamicMixinModelSerializer
 
-class StoreSerializer(serializers.ModelSerializer):
+class StoreSerializer(DynamicMixinModelSerializer):
     image_1 = HybridImageField(required=False)
     image_2 = HybridImageField(required=False)
     image_3 = HybridImageField(required=False)
@@ -24,7 +25,7 @@ class StoreSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(f"Invalid data received `{day_of_week}`! Available `default_closed_day_of_weeks` are `{valid_day_of_weeks}`")
         return data
 
-class StoreUpdateSerializer(serializers.ModelSerializer):
+class StoreUpdateSerializer(DynamicMixinModelSerializer):
     image_1 = HybridImageField(required=False)
     image_2 = HybridImageField(required=False)
     image_3 = HybridImageField(required=False)
@@ -47,7 +48,7 @@ class StoreUpdateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(f"Invalid data received `{day_of_week}`! Available `default_closed_day_of_weeks` are `{valid_day_of_weeks}`")
         return data
 
-class CustomBusinessDaySerializer(serializers.ModelSerializer):
+class CustomBusinessDaySerializer(DynamicMixinModelSerializer):
     
     class Meta:
         model = CustomBusinessDay
@@ -75,7 +76,7 @@ class CustomBusinessDaySerializer(serializers.ModelSerializer):
         return data
 
 
-class CustomBusinessDayUpdateSerializer(serializers.ModelSerializer):
+class CustomBusinessDayUpdateSerializer(DynamicMixinModelSerializer):
     class Meta:
         model = CustomBusinessDay
         fields = "__all__"

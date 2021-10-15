@@ -1,37 +1,39 @@
-from rest_framework import serializers
 from deals.models import Coupon, PointSetting
+from utils.mixins import DynamicMixinModelSerializer
 
-class CouponSerializer(serializers.ModelSerializer):
-  
+
+class CouponSerializer(DynamicMixinModelSerializer):
+    
     class Meta:
         model = Coupon
         fields = "__all__"
         read_only_fields = ("slug",)
         
-    def validate(self, attrs):
-        instance = Coupon(**attrs)
-        instance.clean()
-        return attrs
-        
-class CouponUpdateSerializer(serializers.ModelSerializer):
+
+class CouponUpdateSerializer(DynamicMixinModelSerializer):
     
     class Meta:
         model = Coupon
         fields = "__all__"
         read_only_fields = ("slug","studio",)
+        
+    def validate(self, attrs):
+        instance = Coupon(**attrs)
+        instance.clean()
+        return attrs
 
 
-class PointSettingSerializer(serializers.ModelSerializer):
+class PointSettingSerializer(DynamicMixinModelSerializer):
       
     class Meta:
         model = PointSetting
         fields = "__all__"
         read_only_fields = ("slug",)
         
-class PointSettingUpdateSerializer(serializers.ModelSerializer):
+
+class PointSettingUpdateSerializer(DynamicMixinModelSerializer):
     
     class Meta:
         model = PointSetting
         fields = "__all__"
-        read_only_fields = ("slug","studio",)
-        
+        read_only_fields = ("slug", "studio",)

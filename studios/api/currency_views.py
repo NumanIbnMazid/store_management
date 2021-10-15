@@ -2,16 +2,14 @@ from .serializers import (CurrencySerializer, CurrencyUpdateSerializer)
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
-from studios.models import Studio, Currency
+from studios.models import Currency
 from utils.helpers import ResponseWrapper
-from utils.helpers import populate_related_object_id
-from rest_framework.parsers import MultiPartParser
 from utils.studio_getter_helper import (
     get_studio_id_from_studio
 )
 
 """
-    ----------------------- * Vat Tax * -----------------------
+    ----------------------- * Currency * -----------------------
 """
 
 class CurrencyManagerViewSet(LoggingMixin, CustomViewSet):
@@ -41,11 +39,14 @@ class CurrencyManagerViewSet(LoggingMixin, CustomViewSet):
 
     
     def list(self, request, *args, **kwargs):
-        studio_slug = kwargs.get("studio_slug")
-        qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(instance=qs, many=True)
-        return ResponseWrapper(data=serializer.data, msg='success')
+        try:
+            studio_slug = kwargs.get("studio_slug")
+            qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(instance=qs, many=True)
+            return ResponseWrapper(data=serializer.data, msg='list', status=200)
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="list", error_code=400)
 
    
 

@@ -7,9 +7,7 @@ from studios.models import Studio, StudioModerator
 from utils.studio_getter_helper import (
     get_studio_id_from_studio
 )
-from allauth.account import app_settings as allauth_settings
 from allauth.utils import email_address_exists
-from allauth.account.adapter import get_adapter
 
 
 """
@@ -76,12 +74,10 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
             if len(errors):
                 return ResponseWrapper(error_code=400, error_msg=errors, msg="Failed to create user!")
             
-            return ResponseWrapper(error_code=400, error_msg=serializer.errors)
-        except:
-            try:
-                return ResponseWrapper(error_msg=serializer.errors, msg="Failed to create!", error_code=400)
-            except Exception as E:
-                return ResponseWrapper(error_msg=str(E), msg="Failed to create!", error_code=400)
+            return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg="create")
+        
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="create", error_code=400)
 
     def update(self, request, *args, **kwargs):
         try:
@@ -91,12 +87,9 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
                 qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
                 serializer = self.serializer_class(instance=qs)
                 return ResponseWrapper(data=serializer.data, status=200)
-            return ResponseWrapper(error_msg=serializer.errors, error_code=400)
-        except:
-            try:
-                return ResponseWrapper(error_msg=serializer.errors, msg="Failed to update!", error_code=400)
-            except Exception as E:
-                return ResponseWrapper(error_msg=str(E), msg="Failed to update!", error_code=400)
+            return ResponseWrapper(error_msg=serializer.errors, error_code=400, msg="update")
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="update", error_code=400)
     
 
 
@@ -171,23 +164,20 @@ class StudioModeratorManagerViewSet(LoggingMixin, CustomViewSet):
                 moderator_instance.is_staff = True
                 # save moderator instacne
                 moderator_instance.save()
-                return ResponseWrapper(data=serializer.data, status=200)
-            return ResponseWrapper(error_code=400, error_msg=serializer.errors)
-        except:
-            try:
-                return ResponseWrapper(error_msg=serializer.errors, msg="Failed to create staff!", error_code=400)
-            except Exception as E:
-                return ResponseWrapper(error_msg=str(E), msg="Failed to create staff!", error_code=400)
+                return ResponseWrapper(data=serializer.data, status=200, msg="create")
+            return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg="create")
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="create", error_code=400)
 
     def destroy_staff(self, request, **kwargs):
         try:
             qs = self.queryset.filter(**kwargs).first()
             if qs:
                 qs.delete()
-                return ResponseWrapper(status=200, msg='deleted')
-            return ResponseWrapper(error_msg="failed to delete", error_code=400)
+                return ResponseWrapper(status=200, msg='delete')
+            return ResponseWrapper(error_msg="Failed to delete", error_code=400)
         except Exception as E:
-            return ResponseWrapper(error_msg=str(E), msg="Failed to delete!", error_code=400)
+            return ResponseWrapper(error_msg=str(E), msg="delete", error_code=400)
 
     def update(self, request, *args, **kwargs):
         try:
@@ -198,13 +188,10 @@ class StudioModeratorManagerViewSet(LoggingMixin, CustomViewSet):
                 serializer = self.serializer_class(instance=qs)
                 qs.user.name = request.data.get('user', {}).get("name", None)
                 qs.user.save()
-                return ResponseWrapper(data=serializer.data, status=200)
-            return ResponseWrapper(error_msg=serializer.errors, error_code=400)
-        except:
-            try:
-                return ResponseWrapper(error_msg=serializer.errors, msg="Failed to update!", error_code=400)
-            except Exception as E:
-                return ResponseWrapper(error_msg=str(E), msg="Failed to update!", error_code=400)
+                return ResponseWrapper(data=serializer.data, status=200, msg="update")
+            return ResponseWrapper(error_msg=serializer.errors, error_code=400, msg="update")
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="update", error_code=400)
     
     def list(self, request, *args, **kwargs):
         try:
@@ -212,9 +199,6 @@ class StudioModeratorManagerViewSet(LoggingMixin, CustomViewSet):
             qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(instance=qs, many=True)
-            return ResponseWrapper(data=serializer.data, msg='success')
-        except:
-            try:
-                return ResponseWrapper(error_msg=serializer.errors, msg="Failed to retrieve list!", error_code=400)
-            except Exception as E:
-                return ResponseWrapper(error_msg=str(E), msg="Failed to retrieve list!", error_code=400)
+            return ResponseWrapper(data=serializer.data, msg='list', status=200)
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="list", error_code=400)

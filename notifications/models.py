@@ -1,14 +1,11 @@
 from django.db import models
-from utils.snippets import unique_slug_generator, simple_random_string
-from utils.image_upload_helper import upload_store_image_path
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 from studios.models import Studio
+import uuid
 
 class Notification(models.Model):
     studio          = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_notification")
     title           = models.CharField(max_length=254, blank=True)
-    slug            = models.SlugField(unique=True)
+    slug            = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
     message         = models.TextField(max_length=1000, blank=True)
     link_url        = models.URLField(blank=True, null=True)
     pdf_url         = models.URLField(blank=True, null=True)
@@ -26,19 +23,5 @@ class Notification(models.Model):
     
     def __str__(self):
         return self.title
-
-
-
-@receiver(pre_save, sender=Notification)
-def update_notification_slug_on_pre_save(sender, instance, **kwargs):
-    """ Generates and updates store slug on Store pre_save hook """
-    if not instance.slug:
-        try:
-            instance.slug = unique_slug_generator(instance=instance, field=instance.name)
-        except Exception as E:
-            instance.slug = simple_random_string()
-
-
-
  
     
