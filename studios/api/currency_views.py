@@ -30,7 +30,10 @@ class CurrencyManagerViewSet(LoggingMixin, CustomViewSet):
         return self.serializer_class
     
     def get_permissions(self):
-        permission_classes = [custom_permissions.IsStudioAdmin]
+        if self.action in ["dynamic_list"]:
+            permission_classes = [custom_permissions.IsStudioStaff]
+        else:
+            permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
     
     def _clean_data(self, data):
@@ -47,17 +50,17 @@ class CurrencyManagerViewSet(LoggingMixin, CustomViewSet):
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='list', status=200)
         except Exception as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="list", error_code=400)
+            return ResponseWrapper(error_msg=str(E), msg="list", error_code=400)
 
     
     def dynamic_list(self, request, *args, **kwargs):
         try:
-            if request.user.is_superuser:
+            if request.user.is_superuser or request.user.is_staff:
                 qs = self.get_queryset()
             elif request.user.is_studio_admin or request.user.is_store_staff:
                 qs = self.get_queryset().filter(
                     Q(studio__slug__iexact=request.user.studio_user.slug) |
-                    Q(studio__slug__iexact=request.user.store_moderator_user.studio.slug)
+                    Q(studio__slug__iexact=request.user.store_moderator_user.store.all()[0].studio.slug)
                 )
             else:
                 qs = None
@@ -65,7 +68,7 @@ class CurrencyManagerViewSet(LoggingMixin, CustomViewSet):
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='list', status=200)
         except Exception as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="list", error_code=400)
+            return ResponseWrapper(error_msg=str(E), msg="list", error_code=400)
 
    
 

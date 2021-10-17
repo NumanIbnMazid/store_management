@@ -92,8 +92,11 @@ class StudioVatTaxSerializer(serializers.Serializer):
 class StudioNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Studio
-        fields = ["name"]
+        fields = ["name", "slug"]
+        
 class CurrencySerializer(DynamicMixinModelSerializer):
+    
+    studio_details = serializers.CharField(read_only=True)
 
     class Meta:
         model = Currency
@@ -101,9 +104,9 @@ class CurrencySerializer(DynamicMixinModelSerializer):
         read_only_fields = ("slug",)
         
     def to_representation(self, instance):
-        """ Modify representation of data integrating `user` OneToOne Field """
+        """ Modify representation of data integrating `studio` """
         representation = super(CurrencySerializer, self).to_representation(instance)
-        representation['studio'] = StudioNameSerializer(instance.studio).data
+        representation['studio_details'] = StudioNameSerializer(instance.studio).data
         return representation
         
 class CurrencyUpdateSerializer(DynamicMixinModelSerializer):
