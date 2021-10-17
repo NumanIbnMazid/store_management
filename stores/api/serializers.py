@@ -134,7 +134,8 @@ class StoreModeratorSerializer(DynamicMixinModelSerializer):
             raise serializers.ValidationError(register_serializer.errors)
         return ResponseWrapper(data=register_serializer.data, status=200)
     
-    # def create_staff(self, validated_data):
+    # def save(self, validated_data):
+    #     print("******* save is calling from serializer *******")
     #     stores = validated_data.pop('store')
     #     print(stores, "xxxxxxxxxxxxxxxxxx")
     #     moderators = StoreModerator.objects.create(**validated_data)
