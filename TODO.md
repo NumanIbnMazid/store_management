@@ -50,3 +50,5 @@
 
 # Numan bhai can you check the Plan models I'm not able to create a object -- slug uid 
 # Staff Module-- Numan bhai how can I get studio staff I see here no relation with staff and studio
+
+# Space many TO Many Save BUG

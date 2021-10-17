@@ -16,9 +16,13 @@ class UserSerializer(DynamicMixinModelSerializer):
         fields = [
             "id", "email", "username", "name", "slug", "is_studio_admin", "updated_at", "is_active", "last_login", "date_joined"
         ]
+        
+        
 """
 ----------------------- * Studio * -----------------------
 """
+
+
 class StudioSerializer(DynamicMixinModelSerializer):
     user = RegisterSerializer(read_only=True)
     slug = serializers.ReadOnlyField()
@@ -65,6 +69,7 @@ class StudioUpdateSerializer(DynamicMixinModelSerializer):
         return representation
 
     
+
 """
 ----------------------- * StudioModerator * -----------------------
 """

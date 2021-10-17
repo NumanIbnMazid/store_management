@@ -43,6 +43,7 @@ class PlanSerializer(DynamicMixinModelSerializer):
     image_1 = HybridImageField(required=False)
     image_2 = HybridImageField(required=False)
     image_3 = HybridImageField(required=False)
+    # space = serializers.PrimaryKeyRelatedField(many=True, queryset=Space.objects.all())
     
     class Meta:
         model = Plan

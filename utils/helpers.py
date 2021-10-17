@@ -128,7 +128,7 @@ def populate_related_object_id(request, related_data_name):
     return True, realated_object_id
 
 
-def model_cleaner(selfObj, qsFieldObjectList):
+def model_cleaner(selfObj, qsFieldObjectList, initialObject):
     """[Dynamic Model Clean Method]
 
     Args:
@@ -141,16 +141,22 @@ def model_cleaner(selfObj, qsFieldObjectList):
     
     errors = {}
     
-    for obj in qsFieldObjectList:
-        # perform validation
-        qs = obj.get("qs", selfObj.__class__.objects.filter(id=None))
-        field = obj.get("field", "Undefined")
-        if selfObj.pk:
-            qs = qs.exclude(pk=selfObj.pk)
-        if qs.exists():
-            value = getattr(selfObj, field)
-            errors[field] = [f"{selfObj.__class__.__name__} with this {field} ({value}) already exists!"]
+    try:
+    
+        for obj in qsFieldObjectList:
+            # perform validation
+            qs = obj.get("qs", selfObj.__class__.objects.filter(id=None))
+            field = obj.get("field", "Undefined")
+            if initialObject:
+                qs = qs.exclude(slug__iexact=initialObject.slug)
             
+            if qs.exists():
+                value = getattr(selfObj, field)
+                errors[field] = [f"{selfObj.__class__.__name__} with this {field} ({value}) already exists!"]
+                
+    except Exception as E:
+        errors["non-field-errors"] = [str(E)]
+    
     # raise exception
     if len(errors):
         raise ValidationError(

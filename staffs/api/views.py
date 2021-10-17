@@ -6,9 +6,6 @@ from .serializers import (
     StaffSerializer, StaffUpdateSerializer
 )
 from staffs.models import Staff
-from utils.studio_getter_helper import (
-    get_studio_id_from_studio
-)
 
 
 class StaffAccountManagerViewSet(LoggingMixin, CustomViewSet):
@@ -17,8 +14,6 @@ class StaffAccountManagerViewSet(LoggingMixin, CustomViewSet):
     queryset = Staff.objects.all()
     lookup_field = 'slug'
 
-    # def get_studio_id(self):
-    #     return get_studio_id_from_studio(selfObject=self, slug=self.kwargs.get("studio_slug"))
 
     def get_serializer_class(self):
         if self.action in ["create"]:
@@ -47,7 +42,7 @@ class StaffAccountManagerViewSet(LoggingMixin, CustomViewSet):
                 return ResponseWrapper(data=serializer.data, status=200)
             return ResponseWrapper(error_code=400, error_msg=serializer.errors)
         except Exception as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="create", error_code=400)
+            return ResponseWrapper(error_msg=str(E), msg="create", error_code=400)
 
     def update(self, request, *args, **kwargs):
         try:
@@ -61,9 +56,8 @@ class StaffAccountManagerViewSet(LoggingMixin, CustomViewSet):
                 return ResponseWrapper(data=serializer.data, status=200)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
         except Exception as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="update", error_code=400)
+            return ResponseWrapper(error_msg=str(E), msg="update", error_code=400)
 
-    # Dev comment-- Numan bhai how can I get studio staff I see here no relation staff with studio
     def list(self, request, *args, **kwargs):
         try:
             studio_slug = kwargs.get("studio_slug")
@@ -72,6 +66,6 @@ class StaffAccountManagerViewSet(LoggingMixin, CustomViewSet):
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='list')
         except Exception as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="list", error_code=400)
+            return ResponseWrapper(error_msg=str(E), msg="list", error_code=400)
 
 

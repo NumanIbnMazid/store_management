@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-import uuid
+from utils.helpers import autoslugFromUUID
 import datetime
 from django.db.models import Q
 
@@ -36,13 +36,14 @@ class CustomerManager(models.Manager):
         return self.get_queryset().search(query)
 
 
+@autoslugFromUUID()
 class Customer(models.Model):
     class Identification(models.IntegerChoices):
         ALREADY = 0, _("Already")
         YET = 1, _("Yet")
         
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name="customer_user")
-    slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
+    slug = models.SlugField(unique=True)
     furigana = models.CharField(max_length=100, blank=True, null=True)
     name_of_person_in_charge = models.PositiveIntegerField(blank=True, null=True)
     postal_code = models.CharField(max_length=50, blank=True, null=True)

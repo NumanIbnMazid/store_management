@@ -15,6 +15,7 @@ from utils.studio_getter_helper import (
 from allauth.utils import email_address_exists
 
 
+
 """
 ----------------------- * Studio * -----------------------
 """
@@ -35,7 +36,7 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
     def get_serializer_class(self):
         if self.action in ["create"]:
             self.serializer_class = StudioSerializer
-        elif self.action in ["update"]:
+        elif self.action in ["update", "put"]:
             self.serializer_class = StudioUpdateSerializer
         else:
             self.serializer_class = StudioSerializer
@@ -82,20 +83,23 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
             return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg="create")
         
         except Exception as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="create", error_code=400)
+            return ResponseWrapper(error_msg=str(E), msg="create", error_code=400)
 
     def update(self, request, *args, **kwargs):
         try:
             serializer_class = self.get_serializer_class()
-            serializer = serializer_class(data=request.data, partial=True)
+            serializer = serializer_class(data=request.data, partial=True, context={
+                "initialObject": self.get_object(), "requestObject": request
+            })
             if serializer.is_valid():
                 qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
                 serializer = self.serializer_class(instance=qs)
                 return ResponseWrapper(data=serializer.data, status=200)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400, msg="update")
         except Exception as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="update", error_code=400)
-
+            return ResponseWrapper(error_msg=str(E), msg="update", error_code=400)
+        
+        
 """
 ----------------------- * StudioModerator * -----------------------
 """
@@ -170,7 +174,7 @@ class StudioModeratorManagerViewSet(LoggingMixin, CustomViewSet):
                 return ResponseWrapper(data=serializer.data, status=200, msg="create")
             return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg="create")
         except Exception as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="create", error_code=400)
+            return ResponseWrapper(error_msg=str(E), msg="create", error_code=400)
 
     def destroy_staff(self, request, **kwargs):
         try:
@@ -185,7 +189,7 @@ class StudioModeratorManagerViewSet(LoggingMixin, CustomViewSet):
     def update(self, request, *args, **kwargs):
         try:
             serializer_class = self.get_serializer_class()
-            serializer = serializer_class(data=request.data, partial=True)
+            serializer = serializer_class(data=request.data, partial=True, context={"initialObject": self.get_object()})
             if serializer.is_valid():
                 qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
                 serializer = self.serializer_class(instance=qs)
@@ -194,7 +198,7 @@ class StudioModeratorManagerViewSet(LoggingMixin, CustomViewSet):
                 return ResponseWrapper(data=serializer.data, status=200, msg="update")
             return ResponseWrapper(error_msg=serializer.errors, error_code=400, msg="update")
         except Exception as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="update", error_code=400)
+            return ResponseWrapper(error_msg=str(E), msg="update", error_code=400)
     
     def list(self, request, *args, **kwargs):
         try:
@@ -204,4 +208,4 @@ class StudioModeratorManagerViewSet(LoggingMixin, CustomViewSet):
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='list', status=200)
         except Exception as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="list", error_code=400)
+            return ResponseWrapper(error_msg=str(E), msg="list", error_code=400)

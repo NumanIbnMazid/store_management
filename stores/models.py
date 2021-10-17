@@ -4,14 +4,15 @@ from utils.helpers import model_cleaner
 from studios.models import Studio
 from django.utils.translation import gettext_lazy as _
 from django.contrib.postgres.fields import ArrayField
-import uuid
+from utils.helpers import autoslugFromUUID
 
 
+@autoslugFromUUID()
 class Store(models.Model):
     
     name = models.CharField(max_length=150, unique=True)
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_stores")
-    slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
+    slug = models.SlugField(unique=True)
     default_closed_day_of_weeks = ArrayField(models.CharField(max_length=254), blank=True)
     address = models.CharField(max_length=254, blank=True, null=True)
     contact_1 = models.CharField(max_length=30, blank=True, null=True)
@@ -38,22 +39,24 @@ class Store(models.Model):
     def __str__(self):
         return self.name
     
-    def clean(self):
+    def clean(self, initialObject=None, requestObject=None):
+        studio_id = initialObject.studio.id if initialObject else self.studio.id if self.studio else None
         qsFieldObjectList = [
             {
-                "qs": self.__class__.objects.filter(name__iexact=self.name.lower()),
+                "qs": self.__class__.objects.filter(name__iexact=self.name.lower(), studio__id=studio_id),
                 "field": "name"
             }
         ]
-        model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList)
+        model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList, initialObject=initialObject)
 
 
+@autoslugFromUUID()
 class CustomBusinessDay(models.Model):
     class Status(models.IntegerChoices):
         CLOSED = 0, _("Closed")
         OPEN = 1, _("Open")
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name="store_custom_business_day")
-    slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
+    slug = models.SlugField(unique=True)
     date = models.DateField()
     status = models.PositiveSmallIntegerField(choices=Status.choices, default=1)
     details = models.TextField(blank=True, null=True)
@@ -68,14 +71,15 @@ class CustomBusinessDay(models.Model):
     def __str__(self):
         return str(self.date)
     
-    def clean(self):
+    def clean(self, initialObject=None, requestObject=None):
+        store_id = initialObject.store.id if initialObject else self.store.id if self.store else None
         qsFieldObjectList = [
             {
-                "qs": self.__class__.objects.filter(date=self.date, store=self.store),
+                "qs": self.__class__.objects.filter(date=self.date, store__id=store_id),
                 "field": "date"
             }
         ]
-        model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList)
+        model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList, initialObject=initialObject)
     
     def get_status_str(self):
         if self.status == 0:

@@ -19,6 +19,8 @@ class CustomModelAdminMixin(object):
 class DynamicMixinModelSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
+        initialObject = self.context.get("initialObject", None)
+        requestObject = self.context.get("requestObject", None)
         instance = self.Meta.model(**attrs)
-        instance.clean()
+        instance.clean(initialObject=initialObject, requestObject=requestObject)
         return attrs

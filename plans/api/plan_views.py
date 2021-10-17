@@ -36,6 +36,18 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
             data = data.decode(errors='ignore')
         return super(PlanManagerViewSet, self)._clean_data(data)
     
+    def create(self, request):
+        try:
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(data=request.data)
+            if serializer.is_valid():
+                qs = serializer.save()
+                serializer = self.serializer_class(instance=qs)
+                return ResponseWrapper(data=serializer.data, msg="create", status=200)
+            return ResponseWrapper(error_msg=serializer.errors, msg="create", error_code=400)
+        except Exception as E:
+            return ResponseWrapper(error_msg=str(E), msg="create", error_code=400)
+    
     def list(self, request, *args, **kwargs):
         try:
             space_slug = kwargs.get("space_slug")
@@ -44,5 +56,5 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='list')
         except Exception as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="list", error_code=400)
+            return ResponseWrapper(error_msg=str(E), msg="list", error_code=400)
 

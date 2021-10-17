@@ -17,12 +17,6 @@ class CouponUpdateSerializer(DynamicMixinModelSerializer):
         fields = "__all__"
         read_only_fields = ("slug","studio",)
         
-    def validate(self, attrs):
-        instance = Coupon(**attrs)
-        instance.clean()
-        return attrs
-
-
 class PointSettingSerializer(DynamicMixinModelSerializer):
       
     class Meta:

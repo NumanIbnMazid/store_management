@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from django.utils import timezone
 from utils.snippets import simple_random_string_with_timestamp
-import uuid
+from utils.helpers import autoslugFromUUID
 
 
 def generate_username_from_email(email):
@@ -40,12 +40,13 @@ class UserManager(BaseUserManager):
         return user
 
 
+@autoslugFromUUID()
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=254, unique=True)
     username = models.CharField(max_length=254, unique=True)
     """ Additional Fields Starts """
     name = models.CharField(max_length=254, null=True, blank=True)
-    slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
+    slug = models.SlugField(unique=True)
     is_customer = models.BooleanField(default=False)
     is_studio_admin = models.BooleanField(default=False)
     is_studio_staff = models.BooleanField(default=False)

@@ -219,7 +219,65 @@ class IsStudioStaff(permissions.BasePermission):
         return False
 
 
+
+
 # Module Level Permissions
+
+def checker_initial(request, module_name):
+    
+    # ByPass if user is super_user
+    if request.user.is_superuser:
+        return True
+
+    module_in_request = request.data.get(module_name)
+
+    # ByPass if module not given
+    if module_in_request == None or module_in_request == "":
+        return True
+    if (type(module_in_request) == list or type(module_in_request) == tuple) and len(module_in_request) <= 0:
+        return True
+    
+    pass
+
+
+
+def get_module_pk_list(request, module_name):
+    
+    module_in_request = request.data.get(module_name)
+    module_name = module_name.lower()
+    
+    module_list = []
+    
+    # manipulate module list
+    if type(module_in_request) == list or type(module_in_request) == tuple:
+        module_list = [int(i) for i in module_in_request]
+    elif type(module_in_request) == str:
+        module_list = [int(i) for i in module_in_request.split()]
+    elif type(module_in_request) == int:
+        module_list.append(module_in_request)
+    else:
+        raise ValueError(f"Invalid data type received for {module_in_request}!")
+    return module_list
+
+
+
+def get_module_permission_result(module_pk_list, queryset, module_name):
+    # If not access permission
+    if not len(module_pk_list) == len(queryset):
+        access_restricted_list = []
+        for element in module_pk_list:
+            if element not in queryset:
+                access_restricted_list.append(element)
+                
+        is_plural = False if len(access_restricted_list) <= 1 else True
+
+        message = f"You can only access those `{module_name.title()}` objects that are valid for your `Studio`! Access restricted for `{module_name.title()}` {'objects' if is_plural == True else 'object'}: {access_restricted_list}."
+            
+        return False, message
+    return True, None
+
+
+
 
 def module_permission_checker(request, queryset, module_name):
     """[Checks Module Level Permissions]
@@ -328,26 +386,59 @@ class StoreAccessPermission(permissions.BasePermission):
 
 """ ******* `Space` Module Access Permission ******* """
 
+# class SpaceAccessPermission(permissions.BasePermission):
+    
+#     message = "Permission Denied!"
+
+#     def has_permission(self, request, view):
+#         # Module QuerySet
+#         qs = Space.objects.filter(
+#             Q(store__studio__user__slug=request.user.slug) | Q(store__studio__studio_moderators__user__slug=request.user.slug)
+#         ).values_list('id', flat=True)
+#         # check module permission
+#         permission_result = module_permission_checker(request=request, queryset=qs, module_name="space")
+        
+#         # Verify Permission
+#         if permission_result[0] == False:
+#             self.message = permission_result[-1]
+#             return False
+        
+#         return True
+
 class SpaceAccessPermission(permissions.BasePermission):
     
     message = "Permission Denied!"
 
     def has_permission(self, request, view):
-        # Module QuerySet
-        qs = Space.objects.filter(
-            Q(store__studio__user__slug=request.user.slug) | Q(store__studio__studio_moderators__user__slug=request.user.slug)
-        ).values_list('id', flat=True)
         
-        # check module permission
-        permission_result = module_permission_checker(request=request, queryset=qs, module_name="space")
+        module_name = "space"
+        
+        # initial ByPass Checking
+        initial_checker_result = checker_initial(request=request, module_name=module_name)
+        
+        if initial_checker_result:
+            return True
+        
+        # get module pk list
+        module_pk_list = get_module_pk_list(request=request, module_name=module_name)
+        
+        # permission checker queryset
+        qs = Space.objects.filter(
+            Q(Q(store__studio__user__slug__iexact=request.user.slug) | 
+            Q(store__studio__studio_moderators__user__slug__iexact=request.user.slug)) &
+            Q(id__in=module_pk_list)
+        ).values_list('id', flat=True)
+        # get module permission result
+        module_permission_result = get_module_permission_result(
+            module_pk_list=module_pk_list, queryset=qs, module_name=module_name
+        )
         
         # Verify Permission
-        if permission_result[0] == False:
-            self.message = permission_result[-1]
+        if module_permission_result[0] == False:
+            self.message = module_permission_result[-1]
             return False
-        
-        return True
 
+        return True
 
 """ ******* `Plan` Module Access Permission ******* """
 

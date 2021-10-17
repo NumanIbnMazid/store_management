@@ -4,12 +4,14 @@ from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from utils.helpers import model_cleaner
-import uuid
+from utils.helpers import autoslugFromUUID
 
+
+@autoslugFromUUID()
 class Studio(models.Model):
-    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="studio_user")
+    user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name="studio_user")
     name = models.CharField(max_length=254)
-    slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
+    slug = models.SlugField(unique=True)
     country = models.CharField(max_length=50, blank=True, null=True)
     zip_code = models.CharField(max_length=15, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
@@ -34,20 +36,21 @@ class Studio(models.Model):
     def __str__(self):
         return self.name
     
-    
-    def clean(self):
+    def clean(self, initialObject=None, requestObject=None):
         qsFieldObjectList = [
             {
                 "qs": self.__class__.objects.filter(name__iexact=self.name.lower()),
                 "field": "name"
             }
         ]
-        model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList)
-    
+        model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList, initialObject=initialObject)
+
+
+@autoslugFromUUID()
 class StudioModerator(models.Model):
     user = models.OneToOneField(get_user_model(), related_name='studio_moderator_user', on_delete=models.CASCADE)
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_moderators")
-    slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
+    slug = models.SlugField(unique=True)
     contact = models.CharField(max_length=30, blank=True, null=True)
     address = models.CharField(max_length=254, blank=True, null=True)
     # is_admin = models.BooleanField(default=False)
@@ -64,10 +67,10 @@ class StudioModerator(models.Model):
         return self.slug
 
 
-
+@autoslugFromUUID()
 class VatTax(models.Model):
     studio = models.OneToOneField(Studio, on_delete=models.CASCADE, related_name="studio_vattax")
-    slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
+    slug = models.SlugField(unique=True)
     vat = models.IntegerField(default=0)
     tax = models.IntegerField(default=0)
     other_service = models.IntegerField(default=0)
@@ -83,10 +86,12 @@ class VatTax(models.Model):
     def __str__(self):
         return self.studio.name
 
+
+@autoslugFromUUID()
 class Currency(models.Model):
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_currency")
     country = models.CharField(max_length=50)
-    slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
+    slug = models.SlugField(unique=True)
     currency = models.CharField(max_length=50, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -99,14 +104,15 @@ class Currency(models.Model):
     def __str__(self):
         return self.studio.name
     
-    def clean(self):
+    def clean(self, initialObject=None, requestObject=None):
+        studio_id = initialObject.studio.id if initialObject else self.studio.id if self.studio else None
         qsFieldObjectList = [
             {
-                "qs": self.__class__.objects.filter(currency__iexact=self.currency.lower()),
+                "qs": self.__class__.objects.filter(currency__iexact=self.currency.lower(), studio__id=studio_id),
                 "field": "currency"
             }
         ]
-        model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList)
+        model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList, initialObject=initialObject)
 
 
 
