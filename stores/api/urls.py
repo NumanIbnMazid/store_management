@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from .views import StoreManagerViewSet, CustomBusinessDayManagerViewSet
+from .views import StoreManagerViewSet, CustomBusinessDayManagerViewSet, StoreModeratorManagerViewSet
 from .business_day_views import BusinessDayManagerViewSet
 
 
@@ -13,6 +13,15 @@ urlpatterns = [
     path("update/<slug>", StoreManagerViewSet.as_view({"patch": "update"}, name="update_store")),
     path("delete/<slug>", StoreManagerViewSet.as_view({"delete": "destroy"}, name="delete_store")),
     path("list/<studio_slug>", StoreManagerViewSet.as_view({"get": "list"}, name="list_store")),
+    
+     # ==============================*** StudioModerator URLS ***==============================
+    # path("moderator/create/admin", StoreModeratorManagerViewSet.as_view({'post': 'create_admin'}, name='create_studio_admin')),
+    path("moderator/create/staff", StoreModeratorManagerViewSet.as_view({'post': 'create_staff'}, name='create_store_staff')),
+    path("moderator/retrieve/<slug>", StoreModeratorManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_store_moderator")),
+    path("moderator/update/<slug>", StoreModeratorManagerViewSet.as_view({"patch": "update"}, name="update_store_moderator")),
+    # path("moderator/delete/admin/<slug>", StoreModeratorManagerViewSet.as_view({"delete": "destroy_admin"}, name="delete_store_admin")),
+    path("moderator/delete/staff/<slug>", StoreModeratorManagerViewSet.as_view({"delete": "destroy_staff"}, name="delete_store_staff")),
+    path("moderator/list/staff/<store_slug>", StoreModeratorManagerViewSet.as_view({"get": "list"}, name="list_store_staff")),
     
     # ==============================*** CustomClosedDay URLS ***==============================
     path("custom-business-day/create", CustomBusinessDayManagerViewSet.as_view({'post': 'create'}, name='create_custom_business_day')),

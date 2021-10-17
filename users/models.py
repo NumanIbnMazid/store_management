@@ -49,7 +49,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     slug = models.SlugField(unique=True)
     is_customer = models.BooleanField(default=False)
     is_studio_admin = models.BooleanField(default=False)
-    is_studio_staff = models.BooleanField(default=False)
+    is_store_staff = models.BooleanField(default=False)
     updated_at = models.DateTimeField(auto_now=True, verbose_name='updated at')
     """ Additional Fields Ends """
     is_staff = models.BooleanField(default=False)

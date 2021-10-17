@@ -1,8 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
 from utils.helpers import model_cleaner
 from utils.helpers import autoslugFromUUID
 
@@ -44,27 +42,6 @@ class Studio(models.Model):
             }
         ]
         model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList, initialObject=initialObject)
-
-
-@autoslugFromUUID()
-class StudioModerator(models.Model):
-    user = models.OneToOneField(get_user_model(), related_name='studio_moderator_user', on_delete=models.CASCADE)
-    studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_moderators")
-    slug = models.SlugField(unique=True)
-    contact = models.CharField(max_length=30, blank=True, null=True)
-    address = models.CharField(max_length=254, blank=True, null=True)
-    # is_admin = models.BooleanField(default=False)
-    is_staff = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        verbose_name = 'StudioModerator'
-        verbose_name_plural = 'StudioModerators'
-        ordering = ["-created_at"]
-
-    def __str__(self):
-        return self.slug
 
 
 @autoslugFromUUID()
@@ -113,30 +90,3 @@ class Currency(models.Model):
             }
         ]
         model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList, initialObject=initialObject)
-
-
-
-"""
-*** Pre-Save, Post-Save and Pre-Delete Hooks ***
-"""
-
-@receiver(post_delete, sender=StudioModerator)
-def delete_moderator_users_on_studio_pre_delete(sender, instance, **kwargs):
-    """ Deletes Studio Moderator Users on `Studio` pre_delete hook """
-    try:
-        user_qs = get_user_model().objects.filter(id=instance.user.id)
-        if user_qs:
-            user_qs.delete()
-    except Exception as E:
-        raise Exception(f"Failed to delete `User` on `StudioModerator` post_delete hook. Exception: {str(E)}")
-
-
-@receiver(post_delete, sender=StudioModerator)
-def delete_users_on_studio_moderator_pre_delete(sender, instance, **kwargs):
-    """ Deletes Users on `StudioModerator` pre_delete hook """
-    try:
-        user_qs = get_user_model().objects.filter(slug=instance.user.slug)
-        if user_qs:
-            user_qs.delete()
-    except Exception as E:
-        raise Exception(f"Failed to delete `User` on `StudioModerator` post_delete hook. Exception: {str(E)}")

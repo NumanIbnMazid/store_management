@@ -5,6 +5,9 @@ from studios.models import Studio
 from django.utils.translation import gettext_lazy as _
 from django.contrib.postgres.fields import ArrayField
 from utils.helpers import autoslugFromUUID
+from django.contrib.auth import get_user_model
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 
 @autoslugFromUUID()
@@ -48,10 +51,35 @@ class Store(models.Model):
             }
         ]
         model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList, initialObject=initialObject)
+        
+
+@autoslugFromUUID()
+class StoreModerator(models.Model):
+    
+    user = models.OneToOneField(get_user_model(), related_name='store_moderator_user', on_delete=models.CASCADE)
+    store = models.ManyToManyField(Store, related_name="store_moderators")
+    slug = models.SlugField(unique=True)
+    contact = models.CharField(max_length=30, blank=True, null=True)
+    address = models.CharField(max_length=254, blank=True, null=True)
+    is_staff = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Store Moderator'
+        verbose_name_plural = 'Store Moderators'
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.slug
+    
+    def clean(self, initialObject=None, requestObject=None):
+        pass
 
 
 @autoslugFromUUID()
 class CustomBusinessDay(models.Model):
+    
     class Status(models.IntegerChoices):
         CLOSED = 0, _("Closed")
         OPEN = 1, _("Open")
@@ -92,3 +120,18 @@ class CustomBusinessDay(models.Model):
         elif self.status == 1:
             return "custom_business_day"
         return "default_business_day"
+
+
+"""
+*** Pre-Save, Post-Save and Pre-Delete Hooks ***
+"""
+
+@receiver(post_delete, sender=StoreModerator)
+def delete_users_on_store_moderator_pre_delete(sender, instance, **kwargs):
+    """ Deletes Users on `StoreModerator` pre_delete hook """
+    try:
+        user_qs = get_user_model().objects.filter(slug=instance.user.slug)
+        if user_qs:
+            user_qs.delete()
+    except Exception as E:
+        raise Exception(f"Failed to delete `User` on `StoreModerator` post_delete hook. Exception: {str(E)}")

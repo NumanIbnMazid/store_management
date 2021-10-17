@@ -13,7 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = [
-            "email", "username", "name", "slug", "is_customer", "is_studio_admin", "is_studio_staff", "is_staff", "is_superuser", "is_active", "updated_at", "last_login", "date_joined"
+            "email", "username", "name", "slug", "is_customer", "is_studio_admin", "is_store_staff", "is_staff", "is_superuser", "is_active", "updated_at", "last_login", "date_joined"
         ]
 
 class UserUpdateSerializer(serializers.ModelSerializer):

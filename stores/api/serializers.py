@@ -1,7 +1,11 @@
 from rest_framework import serializers
-from stores.models import Store, CustomBusinessDay
+from stores.models import Store, CustomBusinessDay, StoreModerator
 from drf_extra_fields.fields import HybridImageField
 from utils.mixins import DynamicMixinModelSerializer
+from django.contrib.auth import get_user_model
+from users.api.serializers import (RegisterSerializer)
+from django.db import transaction
+from utils.helpers import ResponseWrapper
 
 class StoreSerializer(DynamicMixinModelSerializer):
     image_1 = HybridImageField(required=False)
@@ -81,3 +85,73 @@ class CustomBusinessDayUpdateSerializer(DynamicMixinModelSerializer):
         model = CustomBusinessDay
         fields = "__all__"
         read_only_fields = ("slug", "store",)
+
+
+"""
+----------------------- * StoreModerator * -----------------------
+"""
+
+""" *** Studio Moderator *** """
+class UserStoreModeratorSerializer(DynamicMixinModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = [
+            "id", "email", "username", "name", "slug", "updated_at", "is_active", "last_login", "date_joined"
+        ]
+
+
+class UserStoreModeratorUpdateSerializer(DynamicMixinModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ["name"]
+
+
+class StoreModeratorSerializer(DynamicMixinModelSerializer):
+    user = RegisterSerializer(read_only=True)
+
+    class Meta:
+        model = StoreModerator
+        fields = "__all__"
+        read_only_fields = ("is_staff", "slug",)
+
+    def to_representation(self, instance):
+        """ Modify representation of data integrating `user` OneToOne Field """
+        representation = super(StoreModeratorSerializer, self).to_representation(instance)
+        representation['user'] = UserStoreModeratorSerializer(instance.user).data
+        return representation
+
+    @transaction.atomic
+    def save_base_user(self, request):
+        user_data = request.data.get("user", {})
+        register_serializer = RegisterSerializer(data=user_data)
+        if register_serializer.is_valid():
+            instance = register_serializer.save(request)
+            # alter is_store_staff = True
+            instance.is_store_staff = True
+            instance.save()
+            return instance
+        if register_serializer.errors:
+            raise serializers.ValidationError(register_serializer.errors)
+        return ResponseWrapper(data=register_serializer.data, status=200)
+    
+    # def create_staff(self, validated_data):
+    #     stores = validated_data.pop('store')
+    #     print(stores, "xxxxxxxxxxxxxxxxxx")
+    #     moderators = StoreModerator.objects.create(**validated_data)
+    #     for store in stores:
+    #         moderators.tags.add(store)
+    #     return moderators
+
+
+class StoreModeratorUpdateSerializer(DynamicMixinModelSerializer):
+    user = UserStoreModeratorUpdateSerializer(read_only=True)
+    
+    class Meta:
+        model = StoreModerator
+        fields = ["user", "contact", "address"]
+
+    def to_representation(self, instance):
+        """ Modify representation of data integrating `user` OneToOne Field """
+        representation = super(StoreModeratorUpdateSerializer, self).to_representation(instance)
+        representation['user'] = UserStoreModeratorSerializer(instance.user).data
+        return representation

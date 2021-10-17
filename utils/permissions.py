@@ -185,7 +185,7 @@ class IsStudioStaff(permissions.BasePermission):
                         # *** Check Base Permission ***
                         if request.user.is_studio_admin and studio.user == request.user:
                             return True
-                        elif request.user.is_studio_staff == True and request.user.studio_moderator_user.studio == studio:
+                        elif request.user.is_store_staff == True and request.user.studio_moderator_user.studio == studio:
                             return True
                         elif request.user.studio_moderator_user.is_staff == True and request.user.studio_moderator_user.studio == studio:
                             return True
@@ -200,7 +200,7 @@ class IsStudioStaff(permissions.BasePermission):
             # if not view function has get_studio_id method
             else:
                 # *** Check Base Permission ***
-                if request.user.is_studio_admin or request.user.is_studio_staff or request.user.studio_moderator_user.is_staff:
+                if request.user.is_studio_admin or request.user.is_store_staff or request.user.studio_moderator_user.is_staff:
                     return True
                 else:
                     return False
@@ -214,7 +214,7 @@ class IsStudioStaff(permissions.BasePermission):
         if request.user.is_superuser:
             return True
         # Base Permission
-        if request.user.is_studio_admin == True or request.user.is_studio_staff == True or request.user.studio_moderator_user.is_staff == True:
+        if request.user.is_studio_admin == True or request.user.is_store_staff == True or request.user.studio_moderator_user.is_staff == True:
             return True
         return False
 
