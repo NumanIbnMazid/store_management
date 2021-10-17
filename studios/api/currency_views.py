@@ -7,6 +7,7 @@ from utils.helpers import ResponseWrapper
 from utils.studio_getter_helper import (
     get_studio_id_from_studio
 )
+from django.db.models import Q
 
 """
     ----------------------- * Currency * -----------------------
@@ -42,6 +43,24 @@ class CurrencyManagerViewSet(LoggingMixin, CustomViewSet):
         try:
             studio_slug = kwargs.get("studio_slug")
             qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(instance=qs, many=True)
+            return ResponseWrapper(data=serializer.data, msg='list', status=200)
+        except Exception as E:
+            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="list", error_code=400)
+
+    
+    def dynamic_list(self, request, *args, **kwargs):
+        try:
+            if request.user.is_superuser:
+                qs = self.get_queryset()
+            elif request.user.is_studio_admin or request.user.is_store_staff:
+                qs = self.get_queryset().filter(
+                    Q(studio__slug__iexact=request.user.studio_user.slug) |
+                    Q(studio__slug__iexact=request.user.store_moderator_user.studio.slug)
+                )
+            else:
+                qs = None
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='list', status=200)

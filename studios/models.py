@@ -62,6 +62,9 @@ class VatTax(models.Model):
 
     def __str__(self):
         return self.studio.name
+    
+    def clean(self, initialObject=None, requestObject=None):
+        pass
 
 
 @autoslugFromUUID()

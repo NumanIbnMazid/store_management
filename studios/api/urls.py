@@ -29,4 +29,5 @@ urlpatterns = [
     path("currency/update/<slug>", CurrencyManagerViewSet.as_view({"patch": "update"}, name="update_currency")),
     path("currency/delete/<slug>", CurrencyManagerViewSet.as_view({"delete": "destroy"}, name="delete_currency")),
     path("currency/list/<studio_slug>", CurrencyManagerViewSet.as_view({"get": "list"}, name="list_currency")),
+    path("currency/dynamic-list", CurrencyManagerViewSet.as_view({"get": "dynamic_list"}, name="currency_dynamic_list")),
 ]

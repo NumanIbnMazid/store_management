@@ -8,6 +8,7 @@ from .serializers import (
     )
 from studios.models import Studio
 from allauth.utils import email_address_exists
+from django.http import JsonResponse
 
 
 
