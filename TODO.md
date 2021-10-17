@@ -52,3 +52,5 @@
 # Staff Module-- Numan bhai how can I get studio staff I see here no relation with staff and studio
 
 # Space many TO Many Save BUG
+
+# Studio Create with User password too short Error response Fix

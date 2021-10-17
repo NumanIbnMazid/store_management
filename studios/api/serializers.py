@@ -5,6 +5,7 @@ from django.db import transaction
 from users.api.serializers import (RegisterSerializer)
 from utils.helpers import ResponseWrapper
 from utils.mixins import DynamicMixinModelSerializer
+from rest_framework.validators import ValidationError
 
 
 """
@@ -40,22 +41,37 @@ class StudioSerializer(DynamicMixinModelSerializer):
 
     @transaction.atomic
     def save_base_user(self, request):
+        user_data = request.data.get("user", {})
+        register_serializer = RegisterSerializer(data=user_data)
+        if register_serializer.is_valid(raise_exception=True):
+            instance = register_serializer.save(request)
+            # alter is_studio_admin = True
+            instance.is_studio_admin = True
+            # alter is_store_staff = True
+            instance.is_store_staff = True
+            instance.save()
+            return instance
+        if register_serializer.errors:
+            raise serializers.ValidationError(register_serializer.errors)
+        raise serializers.ValidationError(register_serializer.errors)
+        
+    def to_internal_value(self, data):
+        """Flatten nested error dict."""
         try:
-            user_data = request.data.get("user", {})
-            register_serializer = RegisterSerializer(data=user_data)
-            if register_serializer.is_valid(raise_exception=True):
-                instance = register_serializer.save(request)
-                # alter is_studio_admin = True
-                instance.is_studio_admin = True
-                # alter is_store_staff = True
-                instance.is_store_staff = True
-                instance.save()
-                return instance
-            if register_serializer.errors:
-                raise serializers.ValidationError(register_serializer.errors)
-            return ResponseWrapper(data=register_serializer.data, status=200)
-        except Exception as E:
-            raise serializers.ValidationError(E)
+            return super().to_internal_value(data)
+        except ValidationError as error:
+            print("except block is calling from to_internal_value *******")
+            if not isinstance(error.detail, dict) or not self._list_fields:
+                raise error
+            errors = {}
+            for key, value in error.detail.items():
+                if key in self._list_fields and isinstance(value, dict):
+                    # flatten nested dict out into parent dict
+                    for list_key, list_value in value.items():
+                        errors[f"{key}/{list_key}"] = list_value
+                else:
+                    errors[key] = value
+            raise ValidationError(errors)
 
 
 class StudioUpdateSerializer(DynamicMixinModelSerializer):

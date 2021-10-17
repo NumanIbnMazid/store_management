@@ -45,6 +45,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'EXCEPTION_HANDLER': 'utils.helpers.custom_exception_handler',
+    # 'EXCEPTION_HANDLER': 'utils.custom_exception_handler.handle_exception',
 }
 
 """
