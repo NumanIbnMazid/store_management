@@ -22,6 +22,7 @@ urlpatterns = [
     path("vattax/delete/<slug>", VatTaxManagerViewSet.as_view({"delete": "destroy"}, name="delete_vat_tax")),
     path("vattax", VatTaxManagerViewSet.as_view({"post": "studio_vat_tax"}, name="studio_vat_tax")),
     path("vattax/list/<studio_slug>", VatTaxManagerViewSet.as_view({"get": "list"}, name="list_studio_vat_tax")),
+    path("vattax/dynamic-list", CurrencyManagerViewSet.as_view({"get": "dynamic_list"}, name="vattax_dynamic_list")),
 
     # ==============================*** Currency URLS ***==============================
     path("currency/create", CurrencyManagerViewSet.as_view({'post': 'create'}, name='create_currency')),

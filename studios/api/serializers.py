@@ -70,14 +70,27 @@ class StudioUpdateSerializer(DynamicMixinModelSerializer):
         representation = super(StudioUpdateSerializer, self).to_representation(instance)
         representation['user'] = UserSerializer(instance.user).data
         return representation
+    
+
+class StudioShortInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Studio
+        fields = ["name", "slug"]
 
     
 
 class VatTaxSerializer(DynamicMixinModelSerializer):
+    studio_details = serializers.CharField(read_only=True)
     class Meta:
         model = VatTax
         fields = "__all__"
         read_only_fields = ("slug",)
+    
+    def to_representation(self, instance):
+        """ Modify representation of data integrating `studio` """
+        representation = super(VatTaxSerializer, self).to_representation(instance)
+        representation['studio_details'] = StudioShortInfoSerializer(instance.studio).data
+        return representation
         
 class VatTaxUpdateSerializer(DynamicMixinModelSerializer):
     class Meta:
@@ -88,12 +101,6 @@ class VatTaxUpdateSerializer(DynamicMixinModelSerializer):
 class StudioVatTaxSerializer(serializers.Serializer):
     studio = serializers.IntegerField()
 
-
-class StudioNameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Studio
-        fields = ["name", "slug"]
-        
 class CurrencySerializer(DynamicMixinModelSerializer):
     
     studio_details = serializers.CharField(read_only=True)
@@ -106,7 +113,7 @@ class CurrencySerializer(DynamicMixinModelSerializer):
     def to_representation(self, instance):
         """ Modify representation of data integrating `studio` """
         representation = super(CurrencySerializer, self).to_representation(instance)
-        representation['studio_details'] = StudioNameSerializer(instance.studio).data
+        representation['studio_details'] = StudioShortInfoSerializer(instance.studio).data
         return representation
         
 class CurrencyUpdateSerializer(DynamicMixinModelSerializer):

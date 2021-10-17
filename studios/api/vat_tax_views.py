@@ -7,6 +7,7 @@ from utils.helpers import ResponseWrapper
 from utils.studio_getter_helper import (
     get_studio_id_from_studio
 )
+from django.db.models import Q
 
 """
     ----------------------- * Vat Tax * -----------------------
@@ -24,7 +25,6 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
     def get_serializer_class(self):
         if self.action in ["update"]:
             self.serializer_class = VatTaxUpdateSerializer
-        
         elif self.action in ["studio_vat_tax"]:
             self.serializer_class = StudioVatTaxSerializer
         else:
@@ -32,7 +32,10 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
         return self.serializer_class
     
     def get_permissions(self):
-        permission_classes = [custom_permissions.IsStudioAdmin]
+        if self.action in ["dynamic_list"]:
+            permission_classes = [custom_permissions.IsStudioStaff]
+        else:
+            permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
     
     def _clean_data(self, data):
@@ -48,7 +51,24 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='success')
         except Exception as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="list", error_code=400)
+            return ResponseWrapper(error_msg=str(E), msg="list", error_code=400)
+        
+    def dynamic_list(self, request, *args, **kwargs):
+        try:
+            if request.user.is_superuser or request.user.is_staff:
+                qs = self.get_queryset()
+            elif request.user.is_studio_admin or request.user.is_store_staff:
+                qs = self.get_queryset().filter(
+                    Q(studio__slug__iexact=request.user.studio_user.slug) |
+                    Q(studio__slug__iexact=request.user.store_moderator_user.store.all()[0].studio.slug)
+                )
+            else:
+                qs = None
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(instance=qs, many=True)
+            return ResponseWrapper(data=serializer.data, msg='list', status=200)
+        except Exception as E:
+            return ResponseWrapper(error_msg=str(E), msg="list", error_code=400)
     
     def get_studio_vat_tax(self, studio_id):
         qs = VatTax.objects.filter(studio=studio_id)
@@ -95,7 +115,7 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
                 return ResponseWrapper(data=result, msg="retrieve", status=200)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400, msg="retrieve")
         except Exception as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="retrieve", error_code=400)
+            return ResponseWrapper(error_msg=str(E), msg="retrieve", error_code=400)
 
    
 
