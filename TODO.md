@@ -55,6 +55,6 @@
 
 # Studio Create with User password too short Error response Fix
 
-# IsStoreStaff Permission Fix
+# IsStoreStaff Permission Fix (Used on VatTax Dynamic List)
 
 # Fix is_studio_admin on Factory Boy Commands
