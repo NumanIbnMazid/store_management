@@ -34,6 +34,18 @@ class CustomAPILoginView(LoginView):
         # get refresh token for the logged in user
         refresh = RefreshToken.for_user(self.request.user)
         
+        # get if user has studio
+        studio = {}
+        if self.request.user.is_studio_admin or self.request.user.is_store_staff:
+            try:
+                studio_rel = self.request.user.studio_user if self.request.user.is_studio_admin else \
+                    self.request.user.store_moderator_user.store.all()[0].studio
+                studio["id"] = studio_rel.id
+                studio["slug"] = studio_rel.slug
+                studio["name"] = studio_rel.name
+            except Exception as E:
+                raise Exception(f"Failed to get user's relation with studio! Exception: {str(E)}")
+        
         # customize response
         custom_response_data = {
             "jwt_token": {
@@ -41,6 +53,7 @@ class CustomAPILoginView(LoginView):
                 "access": str(refresh.access_token)
             },
             "user": user_data,
+            "studio": studio,
             "key": key
         }
         # update original response
