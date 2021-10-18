@@ -3,7 +3,7 @@ from django.db.models import Q
 from spaces.models import Space
 from studios.models import Studio
 from plans.models import Plan, OptionCategory, Option
-from stores.models import Store
+from stores.models import Store, StoreModerator
 from studio_calendar.models import StudioCalendar, BusinessDay, BusinessHour
 
 
@@ -187,7 +187,87 @@ class IsStudioStaff(permissions.BasePermission):
                             return True
                         elif request.user.is_store_staff == True and request.user.store_moderator_user.studio == studio:
                             return True
-                        elif request.user.store_moderator_user.is_staff == True and request.user.store_moderator_user.studio == studio:
+                        elif request.user.store_moderator_user.is_staff == True and request.user.store_moderator_user.store.all()[0].studio == studio:
+                            return True
+                        else:
+                            return False
+                    else:
+                        self.message = f"Studio {studio_id[-1]} not found! Thus failed to provide required permissions for Studio Management."
+                        return False
+                else:
+                    self.message = studio_id[-1]
+                    return False
+            # if not view function has get_studio_id method
+            else:
+                # *** Check Base Permission ***
+                if request.user.is_studio_admin or request.user.is_store_staff or request.user.store_moderator_user.is_staff:
+                    return True
+                else:
+                    return False
+        except Exception as E:
+            return False
+
+
+    def has_object_permission(self, request, view, obj):
+        if not bool(request.user and request.user.is_authenticated):
+            return False
+        if request.user.is_superuser:
+            return True
+        # Base Permission
+        if request.user.is_studio_admin == True or request.user.is_store_staff == True or request.user.store_moderator_user.is_staff == True:
+            return True
+        return False
+
+
+
+
+class IsStoreStaff(permissions.BasePermission):
+    """
+    Permission: IsStoreStaff
+    """
+
+    message = "`IsStoreStaff` permission required."
+
+    def has_permission(self, request, view):
+        """
+        Return `True` if permission is granted, `False` otherwise.
+        """
+        if not bool(request.user and request.user.is_authenticated):
+            return False
+        if request.user.is_superuser:
+            return True
+        
+        # Base Permission
+        try:
+            # if view function has get_studio_id method
+            if hasattr(view, 'get_studio_id'):
+                # get studio id from viewset
+                studio_id = view.get_studio_id()
+
+                if studio_id[0] == True:
+                    # query studio from studio_id passed by viewset
+                    studio_qs = Studio.objects.filter(id=int(studio_id[-1]))
+                    # check if studio exists
+                    if studio_qs.exists():
+                        # get studio object
+                        studio = studio_qs.first()
+                        
+                        store_moderator_qs = StoreModerator.objects.filter(
+                            store__in=[1, 2]
+                        )
+                        
+                        print(store_moderator_qs, "*****************************8")
+                        
+                        if store_moderator_qs:
+                            for store_moderator in store_moderator_qs:
+                                print(f"******* {store_moderator.user.email} *******")
+                        
+                        # *** Check Base Permission ***
+                        if request.user.is_studio_admin and studio.user == request.user:
+                            return True
+                        elif request.user.is_store_staff == True and request.user.store_moderator_user.studio == studio:
+                            return True
+                        elif request.user.store_moderator_user.is_staff == True and request.user.store_moderator_user.store.all()[0].studio == studio:
                             return True
                         else:
                             return False

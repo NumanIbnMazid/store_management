@@ -13,7 +13,7 @@ from django.dispatch import receiver
 @autoslugFromUUID()
 class Store(models.Model):
     
-    name = models.CharField(max_length=150, unique=True)
+    name = models.CharField(max_length=150)
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_stores")
     slug = models.SlugField(unique=True)
     default_closed_day_of_weeks = ArrayField(models.CharField(max_length=254), blank=True)

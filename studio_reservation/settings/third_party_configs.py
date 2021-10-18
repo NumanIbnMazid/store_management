@@ -133,3 +133,10 @@ SWAGGER_SETTINGS = {
         'rest_framework.parsers.JSONParser',
     ],
 }
+
+"""
+----------------------- * Django Faker * -----------------------
+"""
+
+FAKER_LOCALE = None     # settings.LANGUAGE_CODE is loaded
+FAKER_PROVIDERS = None  # faker.DEFAULT_PROVIDERS is loaded (all)

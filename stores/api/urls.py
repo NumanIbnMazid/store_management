@@ -38,4 +38,8 @@ urlpatterns = [
             {"post": "get_business_days_by_year"}, name="get_business_days_by_year"
         )
     ),
+    path("get-business-days-by-range", BusinessDayManagerViewSet.as_view(
+            {"post": "get_business_days_by_range"}, name="get_business_days_by_range"
+        )
+    ),
 ]

@@ -85,6 +85,7 @@ INTERNAL_APP_URL_PATTERNS = [
     path("calendar/", include(("studio_calendar.api.urls", "studio_calendar"), namespace="studio_calendar")),
     path("deal/", include(("deals.api.urls", "deals"), namespace="deals")),
     path("notification/", include(("notifications.api.urls", "notifications"), namespace="notifications")),
+    path("utilities/", include(("utilities.api.urls", "utilities"), namespace="utilities")),
 ]
 
 """ URL Patterns - Main """

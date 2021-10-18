@@ -50,7 +50,7 @@ class VatTax(models.Model):
     slug = models.SlugField(unique=True)
     vat = models.IntegerField(default=0)
     tax = models.IntegerField(default=0)
-    other_service = models.IntegerField(default=0)
+    other_service = models.IntegerField(default=0, blank=True, null=True)
     is_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

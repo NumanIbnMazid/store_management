@@ -54,3 +54,5 @@
 # Space many TO Many Save BUG
 
 # Studio Create with User password too short Error response Fix
+
+# IsStoreStaff Permission Fix
