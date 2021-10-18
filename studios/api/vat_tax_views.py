@@ -50,7 +50,7 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='success')
-        except Exception as E:
+        except AttributeError as E:
             return ResponseWrapper(error_msg=str(E), msg="list", error_code=400)
         
     def dynamic_list(self, request, *args, **kwargs):
@@ -67,7 +67,7 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='list', status=200)
-        except Exception as E:
+        except AttributeError as E:
             return ResponseWrapper(error_msg=str(E), msg="list", error_code=400)
     
     def get_studio_vat_tax(self, studio_id):
@@ -114,7 +114,7 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
                         
                 return ResponseWrapper(data=result, msg="retrieve", status=200)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400, msg="retrieve")
-        except Exception as E:
+        except AttributeError as E:
             return ResponseWrapper(error_msg=str(E), msg="retrieve", error_code=400)
 
    

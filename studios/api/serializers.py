@@ -3,9 +3,7 @@ from studios.models import Studio, VatTax, Currency
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from users.api.serializers import (RegisterSerializer)
-from utils.helpers import ResponseWrapper
 from utils.mixins import DynamicMixinModelSerializer
-from rest_framework.validators import ValidationError
 
 
 """
@@ -55,23 +53,6 @@ class StudioSerializer(DynamicMixinModelSerializer):
             raise serializers.ValidationError(register_serializer.errors)
         raise serializers.ValidationError(register_serializer.errors)
         
-    def to_internal_value(self, data):
-        """Flatten nested error dict."""
-        try:
-            return super().to_internal_value(data)
-        except ValidationError as error:
-            print("except block is calling from to_internal_value *******")
-            if not isinstance(error.detail, dict) or not self._list_fields:
-                raise error
-            errors = {}
-            for key, value in error.detail.items():
-                if key in self._list_fields and isinstance(value, dict):
-                    # flatten nested dict out into parent dict
-                    for list_key, list_value in value.items():
-                        errors[f"{key}/{list_key}"] = list_value
-                else:
-                    errors[key] = value
-            raise ValidationError(errors)
 
 
 class StudioUpdateSerializer(DynamicMixinModelSerializer):

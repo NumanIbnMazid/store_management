@@ -8,7 +8,6 @@ from .serializers import (
     )
 from studios.models import Studio
 from allauth.utils import email_address_exists
-from users.api.serializers import (RegisterSerializer)
 
 
 
@@ -72,31 +71,15 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
                 return ResponseWrapper(data=serializer.data, status=200)
             else:
                 errors.update(serializer.errors)
-                
-            # register_serializer = RegisterSerializer(data=request.data.get("user", {}), partial=True)
-            # errors = {}
-            # if register_serializer.is_valid(raise_exception=True):
-            #     user_instance = register_serializer.save(request=request)
-            #     # alter is_studio_admin = True
-            #     user_instance.is_studio_admin = True
-            #     # alter is_store_staff = True
-            #     user_instance.is_store_staff = True
-            # else:
-            #     errors.update(register_serializer.errors)
-                
-            # if serializer.is_valid(raise_exception=False):
-            #     studio_instance = serializer.save(user=user_instance)
-            #     return ResponseWrapper(data=serializer.data, status=200)
-            # else:
-            #     errors.update(serializer.errors)
             
             if len(errors):
                 return ResponseWrapper(error_code=400, error_msg=errors, msg="Failed to create user!")
             
             return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg="create")
         
-        except Exception as E:
+        except AttributeError as E:
             return ResponseWrapper(error_msg=str(E), msg="create", error_code=400)
+
 
     def update(self, request, *args, **kwargs):
         try:
@@ -109,5 +92,6 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
                 serializer = self.serializer_class(instance=qs)
                 return ResponseWrapper(data=serializer.data, status=200)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400, msg="update")
-        except Exception as E:
+        
+        except AttributeError as E:
             return ResponseWrapper(error_msg=str(E), msg="update", error_code=400)

@@ -88,5 +88,5 @@ class UserManagerViewSet(LoggingMixin, CustomViewSet):
             instance = self.request.user
             serializer = self.get_serializer(instance)
             return ResponseWrapper(data=serializer.data, msg="retrieve", status=200)
-        except Exception as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="retrieve", error_code=400)
+        except AttributeError as E:
+            return ResponseWrapper(error_msg=str(E), msg="retrieve", error_code=400)

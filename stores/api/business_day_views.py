@@ -88,8 +88,8 @@ class BusinessDayManagerViewSet(CustomViewSet):
                 return ResponseWrapper(data=result, status=200)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
         
-        except Exception as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="Failed to get the result!", error_code=400)
+        except AttributeError as E:
+            return ResponseWrapper(error_msg=str(E), msg="Failed to get the result!", error_code=400)
     
     
     def get_business_days_by_year(self, request, *args, **kwargs):
@@ -184,5 +184,5 @@ class BusinessDayManagerViewSet(CustomViewSet):
                 return ResponseWrapper(data=result, status=200)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
         
-        except Exception as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="Failed to get the result!", error_code=400)
+        except AttributeError as E:
+            return ResponseWrapper(error_msg=str(E), msg="Failed to get the result!", error_code=400)

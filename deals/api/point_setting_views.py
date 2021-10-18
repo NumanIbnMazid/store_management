@@ -37,6 +37,6 @@ class PointSettingManagerViewSet(LoggingMixin, CustomViewSet):
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='list')
-        except Exception as E:
+        except AttributeError as E:
             return ResponseWrapper(error_msg=str(E), msg="list", error_code=400)
 
