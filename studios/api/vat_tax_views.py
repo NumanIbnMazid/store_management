@@ -33,7 +33,7 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
     
     def get_permissions(self):
         if self.action in ["dynamic_list"]:
-            permission_classes = [custom_permissions.IsStudioStaff]
+            permission_classes = [custom_permissions.IsStudioAdmin]
         else:
             permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]

@@ -72,7 +72,7 @@ class StudioUpdateSerializer(DynamicMixinModelSerializer):
 class StudioShortInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Studio
-        fields = ["name", "slug"]
+        fields = ["id", "name", "slug"]
 
     
 

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from stores.models import Store, CustomBusinessDay, StoreModerator
+from studios.models import Studio
 from drf_extra_fields.fields import HybridImageField
 from utils.mixins import DynamicMixinModelSerializer
 from django.contrib.auth import get_user_model
@@ -7,7 +8,19 @@ from users.api.serializers import (RegisterSerializer)
 from django.db import transaction
 from utils.helpers import ResponseWrapper
 
+
+class StudioShortInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Studio
+        fields = ["id", "name", "slug"]
+
+class StoreShortInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Store
+        fields = ["id", "name", "slug"]
+
 class StoreSerializer(DynamicMixinModelSerializer):
+    studio_details = serializers.CharField(read_only=True)
     image_1 = HybridImageField(required=False)
     image_2 = HybridImageField(required=False)
     image_3 = HybridImageField(required=False)
@@ -28,8 +41,15 @@ class StoreSerializer(DynamicMixinModelSerializer):
             if day_of_week.title() not in valid_day_of_weeks:
                 raise serializers.ValidationError(f"Invalid data received `{day_of_week}`! Available `default_closed_day_of_weeks` are `{valid_day_of_weeks}`")
         return data
+    
+    def to_representation(self, instance):
+        """ Modify representation of data integrating `studio` """
+        representation = super(StoreSerializer, self).to_representation(instance)
+        representation['studio_details'] = StudioShortInfoSerializer(instance.studio).data
+        return representation
 
 class StoreUpdateSerializer(DynamicMixinModelSerializer):
+    studio_details = serializers.CharField(read_only=True)
     image_1 = HybridImageField(required=False)
     image_2 = HybridImageField(required=False)
     image_3 = HybridImageField(required=False)
@@ -51,8 +71,15 @@ class StoreUpdateSerializer(DynamicMixinModelSerializer):
             if day_of_week.title() not in valid_day_of_weeks:
                 raise serializers.ValidationError(f"Invalid data received `{day_of_week}`! Available `default_closed_day_of_weeks` are `{valid_day_of_weeks}`")
         return data
+    
+    def to_representation(self, instance):
+        """ Modify representation of data integrating `studio` """
+        representation = super(StoreUpdateSerializer, self).to_representation(instance)
+        representation['studio_details'] = StudioShortInfoSerializer(instance.studio).data
+        return representation
 
 class CustomBusinessDaySerializer(DynamicMixinModelSerializer):
+    store_details = serializers.CharField(read_only=True)
     
     class Meta:
         model = CustomBusinessDay
@@ -78,13 +105,26 @@ class CustomBusinessDaySerializer(DynamicMixinModelSerializer):
         if custom_business_day_qs:
             raise serializers.ValidationError(f"Date `{date}` is alerady exists in Custom Closed Day!")
         return data
+    
+    def to_representation(self, instance):
+        """ Modify representation of data integrating `studio` """
+        representation = super(CustomBusinessDaySerializer, self).to_representation(instance)
+        representation['store_details'] = StoreShortInfoSerializer(instance.store).data
+        return representation
 
 
 class CustomBusinessDayUpdateSerializer(DynamicMixinModelSerializer):
+    store_details = serializers.CharField(read_only=True)
     class Meta:
         model = CustomBusinessDay
         fields = "__all__"
         read_only_fields = ("slug", "store",)
+        
+    def to_representation(self, instance):
+        """ Modify representation of data integrating `studio` """
+        representation = super(CustomBusinessDayUpdateSerializer, self).to_representation(instance)
+        representation['store_details'] = StoreShortInfoSerializer(instance.store).data
+        return representation
 
 
 """
@@ -96,9 +136,9 @@ class UserStoreModeratorSerializer(DynamicMixinModelSerializer):
     class Meta:
         model = get_user_model()
         fields = [
-            "id", "email", "username", "name", "slug", "updated_at", "is_active", "last_login", "date_joined"
+            "id", "email", "username", "name", "slug", "is_store_staff", "updated_at", "is_active", "last_login", "date_joined"
         ]
-
+        
 
 class UserStoreModeratorUpdateSerializer(DynamicMixinModelSerializer):
     class Meta:
@@ -108,6 +148,7 @@ class UserStoreModeratorUpdateSerializer(DynamicMixinModelSerializer):
 
 class StoreModeratorSerializer(DynamicMixinModelSerializer):
     user = RegisterSerializer(read_only=True)
+    store_details = serializers.CharField(read_only=True)
 
     class Meta:
         model = StoreModerator
@@ -118,6 +159,7 @@ class StoreModeratorSerializer(DynamicMixinModelSerializer):
         """ Modify representation of data integrating `user` OneToOne Field """
         representation = super(StoreModeratorSerializer, self).to_representation(instance)
         representation['user'] = UserStoreModeratorSerializer(instance.user).data
+        representation['store_details'] = [StoreShortInfoSerializer(storeData).data for storeData in instance.store.all()]
         return representation
 
     @transaction.atomic
@@ -167,13 +209,15 @@ class StoreModeratorSerializer(DynamicMixinModelSerializer):
 
 class StoreModeratorUpdateSerializer(DynamicMixinModelSerializer):
     user = UserStoreModeratorUpdateSerializer(read_only=True)
+    store_details = serializers.CharField(read_only=True)
     
     class Meta:
         model = StoreModerator
-        fields = ["user", "contact", "address"]
+        fields = ["user", "contact", "address", "store_details"]
 
     def to_representation(self, instance):
         """ Modify representation of data integrating `user` OneToOne Field """
         representation = super(StoreModeratorUpdateSerializer, self).to_representation(instance)
         representation['user'] = UserStoreModeratorSerializer(instance.user).data
+        representation['store_details'] = StoreShortInfoSerializer(instance.store).data
         return representation

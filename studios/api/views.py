@@ -5,6 +5,7 @@ from utils.helpers import ResponseWrapper
 from .serializers import (
     StudioSerializer,
     StudioUpdateSerializer,
+    StudioShortInfoSerializer
     )
 from studios.models import Studio
 from allauth.utils import email_address_exists
@@ -33,6 +34,8 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
             self.serializer_class = StudioSerializer
         elif self.action in ["update", "put"]:
             self.serializer_class = StudioUpdateSerializer
+        elif self.action in ["list_with_short_info"]:
+            self.serializer_class = StudioShortInfoSerializer
         else:
             self.serializer_class = StudioSerializer
         return self.serializer_class
@@ -95,3 +98,12 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
         
         except AttributeError as E:
             return ResponseWrapper(error_msg=str(E), msg="update", error_code=400)
+        
+    def list_with_short_info(self, request):
+        try:
+            qs = self.get_queryset()
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(instance=qs, many=True)
+            return ResponseWrapper(data=serializer.data, msg="list", status=200)
+        except AttributeError as E:
+           return ResponseWrapper(error_msg=str(E), msg="list", error_code=400)
