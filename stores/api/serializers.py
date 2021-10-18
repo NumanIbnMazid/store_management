@@ -157,7 +157,6 @@ class StoreModeratorSerializer(DynamicMixinModelSerializer):
 
     def to_representation(self, instance):
         """ Modify representation of data integrating `user` OneToOne Field """
-        print(instance.store.all(), "xxxxxxxxxxxxxxx")
         representation = super(StoreModeratorSerializer, self).to_representation(instance)
         representation['user'] = UserStoreModeratorSerializer(instance.user).data
         representation['store_details'] = [StoreShortInfoSerializer(storeData).data for storeData in instance.store.all()]
