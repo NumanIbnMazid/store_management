@@ -58,3 +58,5 @@
 # IsStoreStaff Permission Fix
 
 # Fix is_studio_admin on Factory Boy Commands
+
+# Studio Modarator qs = Studio.objects.filter(Q(user__slug=request.user.slug) | Q(studio_moderators__user__slug=request.user.slug) Permission PY

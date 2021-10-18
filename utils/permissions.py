@@ -450,7 +450,8 @@ class StoreAccessPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # Module QuerySet
         qs = Store.objects.filter(
-            Q(studio__user__slug=request.user.slug) | Q(studio__studio_moderators__user__slug=request.user.slug)
+            Q(studio__user__slug=request.user.slug) | Q(
+                store_moderators__user__slug__in=[request.user.slug])
         ).values_list('id', flat=True)
         
         # check module permission

@@ -20,3 +20,14 @@ studioData = {
     "instagram": "",
     "twitter": ""
 }
+
+validator_data = {
+    "user":
+    {"name": "Karim",
+     "email": "karim@example.com",
+     "password1": "test12345",
+     "password2": "test12345"},
+    "contact": "string",
+    "address": "string",
+    "store": [695]
+}

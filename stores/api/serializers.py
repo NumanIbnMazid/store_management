@@ -143,6 +143,27 @@ class StoreModeratorSerializer(DynamicMixinModelSerializer):
     #         moderators.tags.add(store)
     #     return moderators
 
+    def create(self, validated_data, request):
+        user = validated_data.pop('user')
+        register_serializer = RegisterSerializer(data=user)
+        if register_serializer.is_valid():
+            user_instance = register_serializer.save(request)
+            
+            # alter is_store_staff = True
+            user_instance.is_store_staff = True
+            user_instance.save()
+            store = validated_data.pop('store')
+            store_moderator = StoreModerator.objects.create(
+                **validated_data, user=user_instance)
+            for each_store in store:
+                store_moderator.store.add(each_store)
+            store_moderator.save()
+            return store_moderator
+
+        if register_serializer.errors:
+            raise serializers.ValidationError(register_serializer.errors)
+        return ResponseWrapper(data=register_serializer.data, status=200)
+
 
 class StoreModeratorUpdateSerializer(DynamicMixinModelSerializer):
     user = UserStoreModeratorUpdateSerializer(read_only=True)

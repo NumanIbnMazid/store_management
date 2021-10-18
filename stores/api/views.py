@@ -131,7 +131,10 @@ class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
     def get_permissions(self):
         if self.action in ["create_admin", "destroy_admin"]:
             permission_classes = [custom_permissions.IsSuperUser]
-        elif self.action in ["create_staff", "destroy_staff","list"]:
+        elif self.action in ["create_staff"]:
+            permission_classes = [custom_permissions.IsStudioAdmin, custom_permissions.StoreAccessPermission]
+
+        elif self.action in ["destroy_staff","list"]:
             permission_classes = [custom_permissions.IsStudioAdmin]
         else:
             permission_classes = [custom_permissions.IsStudioAdmin]
@@ -167,19 +170,9 @@ class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
         try:
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(data=request.data, partial=True)
-            if serializer.is_valid(raise_exception=True):
-                user_instance = serializer.save_base_user(request)
-                # update is_store_staff in user model
-                user_instance.is_store_staff = True
-                user_instance.save()
-                # save studio moderator
-                moderator_instance = serializer.save(user=user_instance)
-                # update is_staff = True to make user studio staff
-                moderator_instance.is_staff = True
-                # save moderator instacne
-                moderator_instance.save()
-                return ResponseWrapper(data=serializer.data, status=200, msg="create")
-            return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg="create")
+            studio_modarator = serializer.create(request.data, request)
+            serializer = self.serializer_class(instance=studio_modarator)
+            return ResponseWrapper(data=serializer.data, status=200, msg="create")
         except AttributeError as E:
             return ResponseWrapper(error_msg=str(E), msg="create", error_code=400)
 
