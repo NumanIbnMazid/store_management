@@ -56,3 +56,5 @@
 # Studio Create with User password too short Error response Fix
 
 # IsStoreStaff Permission Fix
+
+# Fix is_studio_admin on Factory Boy Commands

@@ -11,7 +11,9 @@ from deals.models import Coupon, PointSetting
 import factory
 from factory.django import DjangoModelFactory
 import random
-
+from factory import fuzzy
+import datetime
+from django.utils import timezone
 
 # Defining a factory
 
@@ -20,9 +22,11 @@ import random
 class UserFactory(DjangoModelFactory):
     class Meta:
         model = get_user_model()
+        django_get_or_create = ('email',)
 
     name = factory.Faker("first_name")
     email = factory.Faker("email")
+    password = factory.PostGenerationMethodCall('set_password', 'test12345')
 
 
 # Using a factory with auto-generated data
@@ -62,6 +66,7 @@ class StudioFactory(DjangoModelFactory):
         model = Studio
 
     user = factory.SubFactory(UserFactory)
+    name = factory.Faker("name")
 
 
 # Using a factory with auto-generated data
@@ -75,7 +80,8 @@ class VatTaxFactory(DjangoModelFactory):
         model = VatTax
 
     studio = factory.SubFactory(StudioFactory)
-
+    vat = factory.Faker('pyint', min_value=0, max_value=23)
+    tax = factory.Faker('pyint', min_value=0, max_value=23)
 
 # Using a factory with auto-generated data
 # vattax = VatTaxFactory()
@@ -88,6 +94,9 @@ class CurrencyFactory(DjangoModelFactory):
         model = Currency
 
     studio = factory.SubFactory(StudioFactory)
+    currency = fuzzy.FuzzyChoice([
+        "YEN", "CIRCLE", "TAKA", "RUPEE", "DOLLAR"
+    ])
 
 
 # Using a factory with auto-generated data
@@ -103,9 +112,7 @@ class StoreFactory(DjangoModelFactory):
 
     studio = factory.SubFactory(StudioFactory)
     name = factory.Sequence(lambda n: 'Store {0}'.format(n))
-    default_closed_day_of_weeks = [random.choice([
-        "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
-    ])]
+    default_closed_day_of_weeks = ["Saturday", "Sunday"]
 
 
 # Using a factory with auto-generated data
@@ -168,6 +175,7 @@ class OptionCategoryFactory(DjangoModelFactory):
         model = OptionCategory
 
     studio = factory.SubFactory(StudioFactory)
+    number = random.randint(1, 1000)
 
 
 # Using a factory with auto-generated data
@@ -181,6 +189,7 @@ class OptionFactory(DjangoModelFactory):
         model = Option
 
     option_category = factory.SubFactory(OptionCategoryFactory)
+    number = random.randint(1, 1000)
 
 
 # Using a factory with auto-generated data
@@ -221,9 +230,24 @@ class PlanFactory(DjangoModelFactory):
 class CouponFactory(DjangoModelFactory):
     class Meta:
         model = Coupon
-
+        exclude = ("now", "year", "month", "day")
+    # non db fields starts
+    now = datetime.datetime.now()
+    year = int(now.year)
+    month = int(now.month)
+    day = int(now.day)
+    # non db field ends
     studio = factory.SubFactory(StudioFactory)
-
+    name = factory.Sequence(lambda n: f'coupon {n+1}')
+    code = fuzzy.FuzzyText(prefix="code_")
+    start_date = factory.fuzzy.FuzzyDate(
+        datetime.date(year, abs(month - 7) if abs(month - 7) <= 12 else month, abs(day - 7) if abs(day - 7) <= 29 else day),
+        datetime.date(year, abs(month + 3) if abs(month + 3) <= 12 else month, abs(day + 3) if abs(day + 3) <= 29 else day),
+    )
+    end_date = factory.LazyAttribute(lambda o: o.start_date + datetime.timedelta(days=random.randint(1, 123)))
+    percentage_discount = fuzzy.FuzzyInteger(low=0, high=23)
+    fixed_amount_discount = fuzzy.FuzzyInteger(low=0, high=786)
+    
 
 # Using a factory with auto-generated data
 # coupon = CouponFactory()

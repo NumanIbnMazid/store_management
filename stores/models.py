@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.postgres.fields import ArrayField
 from utils.helpers import autoslugFromUUID
 from django.contrib.auth import get_user_model
-from django.db.models.signals import post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 
@@ -71,7 +71,7 @@ class StoreModerator(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return self.slug
+        return self.user.get_dynamic_username()
     
     def clean(self, initialObject=None, requestObject=None):
         pass
@@ -135,3 +135,13 @@ def delete_users_on_store_moderator_pre_delete(sender, instance, **kwargs):
             user_qs.delete()
     except Exception as E:
         raise Exception(f"Failed to delete `User` on `StoreModerator` post_delete hook. Exception: {str(E)}")
+
+
+
+@receiver(post_save, sender=StoreModerator)
+def update_user_fields_on_store_moderator_create(sender, instance, **kwargs):
+    """ Deletes Users on `StoreModerator` post_save hook """
+    try:
+        instance.user.is_store_staff = True
+    except Exception as E:
+        raise Exception(f"Failed to update `User` on `StoreModerator` post_save hook. Exception: {str(E)}")

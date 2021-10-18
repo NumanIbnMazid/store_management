@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 from utils.helpers import model_cleaner
 from utils.helpers import autoslugFromUUID
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 @autoslugFromUUID()
@@ -93,3 +95,12 @@ class Currency(models.Model):
             }
         ]
         model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList, initialObject=initialObject)
+        
+        
+@receiver(post_save, sender=Studio)
+def update_user_fields_on_studio_create(sender, instance, **kwargs):
+    """ Deletes Users on `Studio` post_save hook """
+    try:
+        instance.user.is_studio_admin = True
+    except Exception as E:
+        raise Exception(f"Failed to update `User` on `Studio` post_save hook. Exception: {str(E)}")
