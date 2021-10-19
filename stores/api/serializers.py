@@ -8,6 +8,9 @@ from users.api.serializers import (RegisterSerializer)
 from django.db import transaction
 from utils.helpers import ResponseWrapper
 
+"""
+----------------------- * Store * -----------------------
+"""
 
 class StudioShortInfoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -79,6 +82,11 @@ class StoreUpdateSerializer(DynamicMixinModelSerializer):
         representation = super(StoreUpdateSerializer, self).to_representation(instance)
         representation['studio_details'] = StudioShortInfoSerializer(instance.studio).data
         return representation
+    
+
+"""
+----------------------- * CustomBusinessDay * -----------------------
+"""
 
 class CustomBusinessDaySerializer(DynamicMixinModelSerializer):
     store_details = serializers.CharField(read_only=True)
