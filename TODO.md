@@ -60,3 +60,9 @@
 # Fix is_studio_admin on Factory Boy Commands
 
 # Studio Modarator qs = Studio.objects.filter(Q(user__slug=request.user.slug) | Q(store_moderators__user__slug=request.user.slug) Permission PY
+
+# BUG: Store Moderator Create with store id [0]
+
+# Bug: Store MOderator Create with different Studio's Store
+
+# Bug Store Moderator Create with empty store

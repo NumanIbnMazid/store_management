@@ -140,37 +140,12 @@ class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
             permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
 
-    # def create_admin(self, request, *args, **kwargs):
-    #     serializer_class = self.get_serializer_class()
-    #     serializer = serializer_class(data=request.data, partial=True)
-    #     if serializer.is_valid(raise_exception=True):
-    #         user_instance = serializer.save_base_user(request)
-    #         # update is_studio_admin and is_store_staff in user model
-    #         user_instance.is_studio_admin = True
-    #         user_instance.is_store_staff = True
-    #         user_instance.save()
-    #         # save studio moderator
-    #         moderator_instance = serializer.save(user=user_instance)
-    #         # update is_admin and is_staff = True to make user studio admin
-    #         moderator_instance.is_admin = True
-    #         moderator_instance.is_staff = True
-    #         # save moderator instacne
-    #         moderator_instance.save()
-    #         return ResponseWrapper(data=serializer.data, status=200)
-    #     return ResponseWrapper(error_code=400, error_msg=serializer.errors)
-    
-    # def destroy_admin(self, request, **kwargs):
-    #     qs = self.queryset.filter(**kwargs).first()
-    #     if qs:
-    #         qs.delete()
-    #         return ResponseWrapper(status=200, msg='deleted')
-    #     return ResponseWrapper(error_msg="failed to delete", error_code=400)
 
     def create_staff(self, request, *args, **kwargs):
         try:
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(data=request.data, partial=True)
-            studio_modarator = serializer.create(request.data, request)
+            studio_modarator = serializer.save(request.data, request)
             serializer = self.serializer_class(instance=studio_modarator)
             return ResponseWrapper(data=serializer.data, status=200, msg="create")
         except AttributeError as E:
@@ -189,7 +164,9 @@ class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
     def update(self, request, *args, **kwargs):
         try:
             serializer_class = self.get_serializer_class()
-            serializer = serializer_class(data=request.data, partial=True, context={"initialObject": self.get_object()})
+            serializer = serializer_class(data=request.data, partial=True, context={
+                "initialObject": self.get_object(), "requestObject": request
+            })
             if serializer.is_valid():
                 qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
                 serializer = self.serializer_class(instance=qs)

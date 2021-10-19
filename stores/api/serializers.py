@@ -148,14 +148,49 @@ class UserStoreModeratorUpdateSerializer(DynamicMixinModelSerializer):
         fields = ["name"]
 
 
+class StoreIDSerializer(DynamicMixinModelSerializer):
+    class Meta:
+        model = Store
+        fields = ["id"]
+        extra_kwargs = {'id': {'required': True}}
+
+
 class StoreModeratorSerializer(DynamicMixinModelSerializer):
     user = RegisterSerializer(read_only=True)
     store_details = serializers.CharField(read_only=True)
+    store = serializers.PrimaryKeyRelatedField(queryset=Store.objects.all(), many=True)
 
     class Meta:
         model = StoreModerator
         fields = "__all__"
         read_only_fields = ("is_staff", "slug",)
+        
+    def validate_store(self, value):
+        if value == None or value == "":
+            raise serializers.ValidationError({"store": "Expected List!"})
+        
+        if not type(value) == list:
+            raise serializers.ValidationError({"store": "Expected List!"})
+        
+        if type(value) == list and len(value) <= 0:
+            raise serializers.ValidationError({"store": "Store list can't be empty!"})
+        
+        else:
+            store_qs = Store.objects.filter(
+                id__in=value
+            ).values_list("id", flat=True)
+            if store_qs:
+                if not len(store_qs) == len(value):
+                    restricted_stores = []
+                    for v in value:
+                        if v not in store_qs:
+                            restricted_stores.append(v)
+                    if len(restricted_stores) >= 1:
+                        raise serializers.ValidationError({"store": f"Invalid store: {restricted_stores}"})
+            else:
+                raise serializers.ValidationError({"store": f"Store ({value}) not found!"})
+
+        return value
 
     def to_representation(self, instance):
         """ Modify representation of data integrating `user` OneToOne Field """
@@ -163,6 +198,7 @@ class StoreModeratorSerializer(DynamicMixinModelSerializer):
         representation['user'] = UserStoreModeratorSerializer(instance.user).data
         representation['store_details'] = [StoreShortInfoSerializer(storeData).data for storeData in instance.store.all()]
         return representation
+
 
     @transaction.atomic
     def save_base_user(self, request):
@@ -187,26 +223,34 @@ class StoreModeratorSerializer(DynamicMixinModelSerializer):
     #         moderators.tags.add(store)
     #     return moderators
 
-    def create(self, validated_data, request):
-        user = validated_data.pop('user')
-        register_serializer = RegisterSerializer(data=user)
-        if register_serializer.is_valid():
-            user_instance = register_serializer.save(request)
+    @transaction.atomic
+    def save(self, validated_data, request):
+        
+        try:
+            user = validated_data.pop('user')
+            register_serializer = RegisterSerializer(data=user)
             
-            # alter is_store_staff = True
-            user_instance.is_store_staff = True
-            user_instance.save()
-            store = validated_data.pop('store')
-            store_moderator = StoreModerator.objects.create(
-                **validated_data, user=user_instance)
-            for each_store in store:
-                store_moderator.store.add(each_store)
-            store_moderator.save()
-            return store_moderator
+            self.validate_store(value=validated_data.get('store', []))
+            
+            if register_serializer.is_valid():
+                user_instance = register_serializer.save(request)
+                
+                # alter is_store_staff = True
+                user_instance.is_store_staff = True
+                user_instance.save()
+                store = validated_data.pop('store')
+                store_moderator = StoreModerator.objects.create(**validated_data, user=user_instance)
+                for each_store in store:
+                    store_moderator.store.add(each_store)
+                store_moderator.save()
+                return store_moderator
 
-        if register_serializer.errors:
-            raise serializers.ValidationError(register_serializer.errors)
-        return ResponseWrapper(data=register_serializer.data, status=200)
+            if register_serializer.errors:
+                raise serializers.ValidationError(register_serializer.errors)
+            return ResponseWrapper(data=register_serializer.data, status=200)
+        
+        except AttributeError as E:
+            raise serializers.ValidationError(str(E))
 
 
 class StoreModeratorUpdateSerializer(DynamicMixinModelSerializer):
@@ -221,5 +265,5 @@ class StoreModeratorUpdateSerializer(DynamicMixinModelSerializer):
         """ Modify representation of data integrating `user` OneToOne Field """
         representation = super(StoreModeratorUpdateSerializer, self).to_representation(instance)
         representation['user'] = UserStoreModeratorSerializer(instance.user).data
-        representation['store_details'] = StoreShortInfoSerializer(instance.store).data
+        representation['store_details'] = [StoreShortInfoSerializer(storeData).data for storeData in instance.user.store_moderator_user.store.all()]
         return representation
