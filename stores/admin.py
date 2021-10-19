@@ -11,8 +11,8 @@ class StoreAdmin(CustomModelAdminMixin, admin.ModelAdmin):
 
 admin.site.register(Store, StoreAdmin)
 
-class StoreModeratorAdmin(CustomModelAdminMixin, admin.ModelAdmin):
-    pass
+class StoreModeratorAdmin(admin.ModelAdmin):
+    list_display = ["user", "get_stores", "slug", "contact", "address", "is_staff", "created_at", "updated_at"]
 
     class Meta:
         model = StoreModerator

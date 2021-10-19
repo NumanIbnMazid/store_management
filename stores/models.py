@@ -75,6 +75,10 @@ class StoreModerator(models.Model):
     
     def clean(self, initialObject=None, requestObject=None):
         pass
+    
+    def get_stores(self):
+        store_ids = [st.id for st in self.store.all()]
+        return store_ids
 
 
 @autoslugFromUUID()

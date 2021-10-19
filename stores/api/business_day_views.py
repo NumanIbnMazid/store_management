@@ -31,7 +31,7 @@ class BusinessDayManagerViewSet(CustomViewSet):
     
     def get_permissions(self):
         if self.action in ["check_single_business_day_status", "get_business_days_by_year", "get_business_days_by_range"]:
-            permission_classes = [custom_permissions.IsStoreStaff]
+            permission_classes = [custom_permissions.IsStoreStaff, custom_permissions.StoreAccessPermission]
         else:
             permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]

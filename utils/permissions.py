@@ -185,7 +185,7 @@ class IsStudioStaff(permissions.BasePermission):
                         # *** Check Base Permission ***
                         if request.user.is_studio_admin and studio.user == request.user:
                             return True
-                        elif request.user.is_store_staff == True and request.user.store_moderator_user.studio == studio:
+                        elif request.user.is_store_staff == True and request.user.store_moderator_user.store.all()[0].studio == studio:
                             return True
                         elif request.user.store_moderator_user.is_staff == True and request.user.store_moderator_user.store.all()[0].studio == studio:
                             return True
@@ -252,20 +252,10 @@ class IsStoreStaff(permissions.BasePermission):
                         # get studio object
                         studio = studio_qs.first()
                         
-                        store_moderator_qs = StoreModerator.objects.filter(
-                            store__in=[1, 2]
-                        )
-                        
-                        print(store_moderator_qs, "*****************************8")
-                        
-                        if store_moderator_qs:
-                            for store_moderator in store_moderator_qs:
-                                print(f"******* {store_moderator.user.email} *******")
-                        
                         # *** Check Base Permission ***
                         if request.user.is_studio_admin and studio.user == request.user:
                             return True
-                        elif request.user.is_store_staff == True and request.user.store_moderator_user.studio == studio:
+                        elif request.user.is_store_staff == True and request.user.store_moderator_user.store.all()[0].studio == studio:
                             return True
                         elif request.user.store_moderator_user.is_staff == True and request.user.store_moderator_user.store.all()[0].studio == studio:
                             return True
@@ -399,7 +389,7 @@ def module_permission_checker(request, queryset, module_name):
         raise ValueError(f"Invalid data type received for {module_in_request}!")
     
     # re-filter queryset to check module id exists in queryset
-    queryset = queryset.filter(Q(id__in=module_list)).values_list('id', flat=True)
+    queryset = queryset.filter(Q(id__in=module_list)).values_list('id', flat=True).distinct()
     
     # If not access permission
     if not len(module_list) == len(queryset):
@@ -427,8 +417,8 @@ class StudioAccessPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # Module QuerySet
         qs = Studio.objects.filter(
-            Q(user__slug=request.user.slug) | Q(studio_moderators__user__slug=request.user.slug)
-        ).values_list('id', flat=True)
+            Q(user__slug=request.user.slug) | Q(store_moderators__user__slug=request.user.slug)
+        ).values_list('id', flat=True).distinct()
         
         # check module permission
         permission_result = module_permission_checker(request=request, queryset=qs, module_name="studio")
@@ -450,10 +440,8 @@ class StoreAccessPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # Module QuerySet
         qs = Store.objects.filter(
-            Q(studio__user__slug=request.user.slug) | Q(
-                store_moderators__user__slug__in=[request.user.slug])
-        ).values_list('id', flat=True)
-        
+            Q(studio__user__slug=request.user.slug) | Q(store_moderators__user__slug__in=[request.user.slug])
+        ).values_list('id', flat=True).distinct()
         # check module permission
         permission_result = module_permission_checker(request=request, queryset=qs, module_name="store")
         
@@ -474,8 +462,8 @@ class StoreAccessPermission(permissions.BasePermission):
 #     def has_permission(self, request, view):
 #         # Module QuerySet
 #         qs = Space.objects.filter(
-#             Q(store__studio__user__slug=request.user.slug) | Q(store__studio__studio_moderators__user__slug=request.user.slug)
-#         ).values_list('id', flat=True)
+#             Q(store__studio__user__slug=request.user.slug) | Q(store__store_moderators__user__slug=request.user.slug)
+#         ).values_list('id', flat=True).distinct()
 #         # check module permission
 #         permission_result = module_permission_checker(request=request, queryset=qs, module_name="space")
         
@@ -506,9 +494,9 @@ class SpaceAccessPermission(permissions.BasePermission):
         # permission checker queryset
         qs = Space.objects.filter(
             Q(Q(store__studio__user__slug__iexact=request.user.slug) | 
-            Q(store__studio__studio_moderators__user__slug__iexact=request.user.slug)) &
+            Q(store__studio__store_moderators__user__slug__iexact=request.user.slug)) &
             Q(id__in=module_pk_list)
-        ).values_list('id', flat=True)
+        ).values_list('id', flat=True).distinct()
         # get module permission result
         module_permission_result = get_module_permission_result(
             module_pk_list=module_pk_list, queryset=qs, module_name=module_name
@@ -530,13 +518,13 @@ class PlanAccessPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # Space QuerySet
         space_qs = Space.objects.filter(
-            Q(store__studio__user__slug=request.user.slug) | Q(store__studio__studio_moderators__user__slug=request.user.slug)
-        ).values_list('id', flat=True)
+            Q(store__studio__user__slug=request.user.slug) | Q(store__studio__store_moderators__user__slug=request.user.slug)
+        ).values_list('id', flat=True).distinct()
         
         # Module QuerySet
         qs = Plan.objects.filter(
             Q(space__id__in=list(space_qs))
-        ).values_list('id', flat=True)
+        ).values_list('id', flat=True).distinct()
         
         # check module permission
         permission_result = module_permission_checker(request=request, queryset=qs, module_name="plan")
@@ -559,8 +547,8 @@ class OptionCategoryAccessPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # Module QuerySet
         qs = OptionCategory.objects.filter(
-            Q(studio__user__slug=request.user.slug) | Q(studio__studio_moderators__user__slug=request.user.slug)
-        ).values_list('id', flat=True)
+            Q(studio__user__slug=request.user.slug) | Q(studio__store_moderators__user__slug=request.user.slug)
+        ).values_list('id', flat=True).distinct()
 
         # check module permission
         permission_result = module_permission_checker(request=request, queryset=qs, module_name="option_category")
@@ -583,8 +571,8 @@ class OptionAccessPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # Module QuerySet
         qs = Option.objects.filter(
-            Q(option_category__studio__user__slug=request.user.slug) | Q(option_category__studio__studio_moderators__user__slug=request.user.slug)
-        ).values_list('id', flat=True)
+            Q(option_category__studio__user__slug=request.user.slug) | Q(option_category__studio__store_moderators__user__slug=request.user.slug)
+        ).values_list('id', flat=True).distinct()
 
         # check module permission
         permission_result = module_permission_checker(request=request, queryset=qs, module_name="option")
@@ -607,8 +595,8 @@ class StudioCalendarAccessPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # Module QuerySet
         qs = StudioCalendar.objects.filter(
-            Q(studio__user__slug=request.user.slug) | Q(studio__studio_moderators__user__slug=request.user.slug)
-        ).values_list('id', flat=True)
+            Q(studio__user__slug=request.user.slug) | Q(studio__store_moderators__user__slug=request.user.slug)
+        ).values_list('id', flat=True).distinct()
 
         # check module permission
         permission_result = module_permission_checker(request=request, queryset=qs, module_name="studio_calendar")
@@ -631,8 +619,8 @@ class BusinessDayAccessPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # Module QuerySet
         qs = BusinessDay.objects.filter(
-            Q(store__studio__user__slug=request.user.slug) | Q(store__studio__studio_moderators__user__slug=request.user.slug)
-        ).values_list('id', flat=True)
+            Q(store__studio__user__slug=request.user.slug) | Q(store__studio__store_moderators__user__slug=request.user.slug)
+        ).values_list('id', flat=True).distinct()
 
         # check module permission
         permission_result = module_permission_checker(request=request, queryset=qs, module_name="space")
@@ -655,8 +643,8 @@ class BusinessHourAccessPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # Module QuerySet
         qs = BusinessHour.objects.filter(
-            Q(store__studio__user__slug=request.user.slug) | Q(store__studio__studio_moderators__user__slug=request.user.slug)
-        ).values_list('id', flat=True)
+            Q(store__studio__user__slug=request.user.slug) | Q(store__studio__store_moderators__user__slug=request.user.slug)
+        ).values_list('id', flat=True).distinct()
 
         # check module permission
         permission_result = module_permission_checker(request=request, queryset=qs, module_name="space")
