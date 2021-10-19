@@ -66,3 +66,5 @@
 # Bug: Store MOderator Create with different Studio's Store
 
 # Bug Store Moderator Create with empty store
+
+# TODO: Store Moderator Create for System Super Admin => Options: User, Studio, Store (Studio Select API, Stores for Studio (Slug))
