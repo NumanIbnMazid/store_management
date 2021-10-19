@@ -29,6 +29,7 @@ class StoreSerializer(DynamicMixinModelSerializer):
         model = Store
         fields = "__all__"
         read_only_fields = ("slug",)
+        extra_kwargs = {'default_closed_day_of_weeks': {'required': True}}
         
     def validate(self, data):
         default_closed_day_of_weeks = data.get("default_closed_day_of_weeks")
@@ -58,6 +59,7 @@ class StoreUpdateSerializer(DynamicMixinModelSerializer):
         model = Store
         fields = "__all__"
         read_only_fields = ("slug", "studio",)
+        extra_kwargs = {'default_closed_day_of_weeks': {'required': True}}
         
     def validate(self, data):
         default_closed_day_of_weeks = data.get("default_closed_day_of_weeks")

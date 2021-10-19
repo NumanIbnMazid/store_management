@@ -415,19 +415,37 @@ class StudioAccessPermission(permissions.BasePermission):
     message = "Permission Denied!"
 
     def has_permission(self, request, view):
-        # Module QuerySet
+        
+        module_name = "studio"
+
+        # initial ByPass Checking
+        initial_checker_result = checker_initial(
+            request=request, module_name=module_name)
+
+        if initial_checker_result:
+            return True
+
+        # get module pk list
+        module_pk_list = get_module_pk_list(
+            request=request, module_name=module_name)
+
+        # permission checker queryset
         qs = Studio.objects.filter(
-            Q(user__slug=request.user.slug) | Q(store_moderators__user__slug=request.user.slug)
+            Q(Q(user__slug__iexact=request.user.slug) | Q(
+                studio_stores__store_moderators__user__slug__in=[request.user.slug])) &
+            Q(id__in=module_pk_list)
         ).values_list('id', flat=True).distinct()
         
-        # check module permission
-        permission_result = module_permission_checker(request=request, queryset=qs, module_name="studio")
-        
+        # get module permission result
+        module_permission_result = get_module_permission_result(
+            module_pk_list=module_pk_list, queryset=qs, module_name=module_name
+        )
+
         # Verify Permission
-        if permission_result[0] == False:
-            self.message = permission_result[-1]
+        if module_permission_result[0] == False:
+            self.message = module_permission_result[-1]
             return False
-        
+
         return True
 
 
@@ -438,41 +456,40 @@ class StoreAccessPermission(permissions.BasePermission):
     message = "Permission Denied!"
 
     def has_permission(self, request, view):
-        # Module QuerySet
+        
+        module_name = "store"
+
+        # initial ByPass Checking
+        initial_checker_result = checker_initial(
+            request=request, module_name=module_name)
+
+        if initial_checker_result:
+            return True
+
+        # get module pk list
+        module_pk_list = get_module_pk_list(
+            request=request, module_name=module_name)
+
+        # permission checker queryset
         qs = Store.objects.filter(
-            Q(studio__user__slug=request.user.slug) | Q(store_moderators__user__slug__in=[request.user.slug])
+            Q(Q(studio__user__slug__iexact=request.user.slug) | Q(store_moderators__user__slug__in=[request.user.slug])) &
+            Q(id__in=module_pk_list)
         ).values_list('id', flat=True).distinct()
-        # check module permission
-        permission_result = module_permission_checker(request=request, queryset=qs, module_name="store")
-        
+
+        # get module permission result
+        module_permission_result = get_module_permission_result(
+            module_pk_list=module_pk_list, queryset=qs, module_name=module_name
+        )
+
         # Verify Permission
-        if permission_result[0] == False:
-            self.message = permission_result[-1]
+        if module_permission_result[0] == False:
+            self.message = module_permission_result[-1]
             return False
-        
+
         return True
 
 
 """ ******* `Space` Module Access Permission ******* """
-
-# class SpaceAccessPermission(permissions.BasePermission):
-    
-#     message = "Permission Denied!"
-
-#     def has_permission(self, request, view):
-#         # Module QuerySet
-#         qs = Space.objects.filter(
-#             Q(store__studio__user__slug=request.user.slug) | Q(store__store_moderators__user__slug=request.user.slug)
-#         ).values_list('id', flat=True).distinct()
-#         # check module permission
-#         permission_result = module_permission_checker(request=request, queryset=qs, module_name="space")
-        
-#         # Verify Permission
-#         if permission_result[0] == False:
-#             self.message = permission_result[-1]
-#             return False
-        
-#         return True
 
 class SpaceAccessPermission(permissions.BasePermission):
     
@@ -494,9 +511,10 @@ class SpaceAccessPermission(permissions.BasePermission):
         # permission checker queryset
         qs = Space.objects.filter(
             Q(Q(store__studio__user__slug__iexact=request.user.slug) | 
-            Q(store__studio__store_moderators__user__slug__iexact=request.user.slug)) &
+            Q(store__store_moderators__user__slug__in=[request.user.slug])) &
             Q(id__in=module_pk_list)
         ).values_list('id', flat=True).distinct()
+        
         # get module permission result
         module_permission_result = get_module_permission_result(
             module_pk_list=module_pk_list, queryset=qs, module_name=module_name
@@ -516,24 +534,37 @@ class PlanAccessPermission(permissions.BasePermission):
     message = "Permission Denied!"
 
     def has_permission(self, request, view):
-        # Space QuerySet
-        space_qs = Space.objects.filter(
-            Q(store__studio__user__slug=request.user.slug) | Q(store__studio__store_moderators__user__slug=request.user.slug)
-        ).values_list('id', flat=True).distinct()
         
-        # Module QuerySet
+        module_name = "plan"
+
+        # initial ByPass Checking
+        initial_checker_result = checker_initial(
+            request=request, module_name=module_name)
+
+        if initial_checker_result:
+            return True
+
+        # get module pk list
+        module_pk_list = get_module_pk_list(
+            request=request, module_name=module_name)
+
+        # permission checker queryset
         qs = Plan.objects.filter(
-            Q(space__id__in=list(space_qs))
+            Q(Q(space__store__studio__user__slug__in=[request.user.slug]) |
+              Q(space__store__store_moderators__user__slug__in=[request.user.slug])) &
+            Q(id__in=module_pk_list)
         ).values_list('id', flat=True).distinct()
-        
-        # check module permission
-        permission_result = module_permission_checker(request=request, queryset=qs, module_name="plan")
-        
+
+        # get module permission result
+        module_permission_result = get_module_permission_result(
+            module_pk_list=module_pk_list, queryset=qs, module_name=module_name
+        )
+
         # Verify Permission
-        if permission_result[0] == False:
-            self.message = permission_result[-1]
+        if module_permission_result[0] == False:
+            self.message = module_permission_result[-1]
             return False
-        
+
         return True
 
 
@@ -545,17 +576,35 @@ class OptionCategoryAccessPermission(permissions.BasePermission):
     message = "Permission Denied!"
 
     def has_permission(self, request, view):
-        # Module QuerySet
+        
+        module_name = "option_category"
+
+        # initial ByPass Checking
+        initial_checker_result = checker_initial(
+            request=request, module_name=module_name)
+
+        if initial_checker_result:
+            return True
+
+        # get module pk list
+        module_pk_list = get_module_pk_list(
+            request=request, module_name=module_name)
+
+        # permission checker queryset
         qs = OptionCategory.objects.filter(
-            Q(studio__user__slug=request.user.slug) | Q(studio__store_moderators__user__slug=request.user.slug)
+            Q(Q(studio__user__slug__iexact=request.user.slug) | Q(
+                studio__store__store_moderators__user__slug__in=[request.user.slug])) &
+            Q(id__in=module_pk_list)
         ).values_list('id', flat=True).distinct()
 
-        # check module permission
-        permission_result = module_permission_checker(request=request, queryset=qs, module_name="option_category")
+        # get module permission result
+        module_permission_result = get_module_permission_result(
+            module_pk_list=module_pk_list, queryset=qs, module_name=module_name
+        )
 
         # Verify Permission
-        if permission_result[0] == False:
-            self.message = permission_result[-1]
+        if module_permission_result[0] == False:
+            self.message = module_permission_result[-1]
             return False
 
         return True
@@ -569,17 +618,35 @@ class OptionAccessPermission(permissions.BasePermission):
     message = "Permission Denied!"
 
     def has_permission(self, request, view):
-        # Module QuerySet
-        qs = Option.objects.filter(
-            Q(option_category__studio__user__slug=request.user.slug) | Q(option_category__studio__store_moderators__user__slug=request.user.slug)
-        ).values_list('id', flat=True).distinct()
+        
+        module_name = "option"
 
-        # check module permission
-        permission_result = module_permission_checker(request=request, queryset=qs, module_name="option")
+        # initial ByPass Checking
+        initial_checker_result = checker_initial(
+            request=request, module_name=module_name)
+
+        if initial_checker_result:
+            return True
+
+        # get module pk list
+        module_pk_list = get_module_pk_list(
+            request=request, module_name=module_name)
+
+        # permission checker queryset
+        qs = Option.objects.filter(
+            Q(Q(option_category__studio__user__slug__iexact=request.user.slug) | Q(
+                option_category__studio__store__store_moderators__user__slug__in=[request.user.slug])) &
+            Q(id__in=module_pk_list)
+        ).values_list('id', flat=True).distinct()
+        
+        # get module permission result
+        module_permission_result = get_module_permission_result(
+            module_pk_list=module_pk_list, queryset=qs, module_name=module_name
+        )
 
         # Verify Permission
-        if permission_result[0] == False:
-            self.message = permission_result[-1]
+        if module_permission_result[0] == False:
+            self.message = module_permission_result[-1]
             return False
 
         return True
@@ -589,6 +656,7 @@ class OptionAccessPermission(permissions.BasePermission):
 
 
 class StudioCalendarAccessPermission(permissions.BasePermission):
+    # TODO: Has to be removed!
 
     message = "Permission Denied!"
 
@@ -617,20 +685,39 @@ class BusinessDayAccessPermission(permissions.BasePermission):
     message = "Permission Denied!"
 
     def has_permission(self, request, view):
-        # Module QuerySet
-        qs = BusinessDay.objects.filter(
-            Q(store__studio__user__slug=request.user.slug) | Q(store__studio__store_moderators__user__slug=request.user.slug)
-        ).values_list('id', flat=True).distinct()
 
-        # check module permission
-        permission_result = module_permission_checker(request=request, queryset=qs, module_name="space")
+        module_name = "business_day"
+
+        # initial ByPass Checking
+        initial_checker_result = checker_initial(
+            request=request, module_name=module_name)
+
+        if initial_checker_result:
+            return True
+
+        # get module pk list
+        module_pk_list = get_module_pk_list(
+            request=request, module_name=module_name)
+
+        # permission checker queryset
+        qs = BusinessDay.objects.filter(
+            Q(Q(store__studio__user__slug__iexact=request.user.slug) | Q(store__store_moderators__user__slug__in=[request.user.slug])) &
+            Q(id__in=module_pk_list)
+        ).values_list('id', flat=True).distinct()
+        
+        # get module permission result
+        module_permission_result = get_module_permission_result(
+            module_pk_list=module_pk_list, queryset=qs, module_name=module_name
+        )
 
         # Verify Permission
-        if permission_result[0] == False:
-            self.message = permission_result[-1]
+        if module_permission_result[0] == False:
+            self.message = module_permission_result[-1]
             return False
 
         return True
+    
+    
 
 
 """ ******* `BusinessHour` Module Access Permission ******* """
@@ -641,17 +728,34 @@ class BusinessHourAccessPermission(permissions.BasePermission):
     message = "Permission Denied!"
 
     def has_permission(self, request, view):
-        # Module QuerySet
+        
+        module_name = "business_hour"
+
+        # initial ByPass Checking
+        initial_checker_result = checker_initial(
+            request=request, module_name=module_name)
+
+        if initial_checker_result:
+            return True
+
+        # get module pk list
+        module_pk_list = get_module_pk_list(
+            request=request, module_name=module_name)
+
+        # permission checker queryset
         qs = BusinessHour.objects.filter(
-            Q(store__studio__user__slug=request.user.slug) | Q(store__studio__store_moderators__user__slug=request.user.slug)
+            Q(Q(store__studio__user__slug__iexact=request.user.slug) | Q(store__store_moderators__user__slug__in=[request.user.slug])) &
+            Q(id__in=module_pk_list)
         ).values_list('id', flat=True).distinct()
 
-        # check module permission
-        permission_result = module_permission_checker(request=request, queryset=qs, module_name="space")
+        # get module permission result
+        module_permission_result = get_module_permission_result(
+            module_pk_list=module_pk_list, queryset=qs, module_name=module_name
+        )
 
         # Verify Permission
-        if permission_result[0] == False:
-            self.message = permission_result[-1]
+        if module_permission_result[0] == False:
+            self.message = module_permission_result[-1]
             return False
 
         return True
