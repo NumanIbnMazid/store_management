@@ -54,7 +54,7 @@ class PlanSerializer(DynamicMixinModelSerializer):
         ]
         read_only_fields = ("slug",)
     
-    def save(self, validated_data, request):
+    def save(self, validated_data):
         try:
             space = validated_data.pop('space')
             option = validated_data.pop('option')

@@ -25,7 +25,8 @@ class OptionManagerViewSet(LoggingMixin, CustomViewSet):
         return self.serializer_class
     
     def get_permissions(self):
-        permission_classes = [custom_permissions.IsStudioAdmin]
+        permission_classes = [custom_permissions.IsStudioAdmin,
+                              custom_permissions.OptionAccessPermission]
         return [permission() for permission in permission_classes]
     
     def _clean_data(self, data):

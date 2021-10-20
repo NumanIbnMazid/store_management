@@ -252,7 +252,6 @@ class StoreModeratorSerializer(DynamicMixinModelSerializer):
                     store_moderator.store.add(each_store)
                 store_moderator.save()
                 return store_moderator
-
             if register_serializer.errors:
                 raise serializers.ValidationError(register_serializer.errors)
             return ResponseWrapper(data=register_serializer.data, status=200)

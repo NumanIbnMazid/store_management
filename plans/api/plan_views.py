@@ -28,7 +28,7 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
     def get_permissions(self):
         if self.action in ["create"]:
             permission_classes = [
-                custom_permissions.IsStudioAdmin
+                custom_permissions.IsStudioAdmin, custom_permissions.OptionAccessPermission, custom_permissions.SpaceAccessPermission
             ]
         else:    
             permission_classes = [
@@ -45,7 +45,7 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
         try:
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(data=request.data, partial=True)
-            plan = serializer.save(request.data, request)
+            plan = serializer.save(request.data)
             serializer = self.serializer_class(instance=plan)
             return ResponseWrapper(data=serializer.data, status=200, msg="create")
         except AttributeError as E:

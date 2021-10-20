@@ -26,7 +26,8 @@ class OptionCategoryManagerViewSet(LoggingMixin, CustomViewSet):
         return self.serializer_class
     
     def get_permissions(self):
-        permission_classes = [custom_permissions.IsStudioAdmin]
+        permission_classes = [
+            custom_permissions.IsStudioAdmin, custom_permissions.OptionCategoryAccessPermission]
         return [permission() for permission in permission_classes]
     
     

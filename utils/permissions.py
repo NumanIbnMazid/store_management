@@ -635,7 +635,7 @@ class OptionAccessPermission(permissions.BasePermission):
         # permission checker queryset
         qs = Option.objects.filter(
             Q(Q(option_category__studio__user__slug__iexact=request.user.slug) | Q(
-                option_category__studio__store__store_moderators__user__slug__in=[request.user.slug])) &
+                option_category__studio__studio_stores__store_moderators__user__slug__in=[request.user.slug])) &
             Q(id__in=module_pk_list)
         ).values_list('id', flat=True).distinct()
         
