@@ -239,7 +239,7 @@ class StoreModeratorSerializer(DynamicMixinModelSerializer):
             register_serializer = RegisterSerializer(data=user)
             
             self.validate_store(value=validated_data.get('store', []))
-            
+
             if register_serializer.is_valid():
                 user_instance = register_serializer.save(request)
                 

@@ -26,9 +26,14 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
         return self.serializer_class
     
     def get_permissions(self):
-        permission_classes = [
-            custom_permissions.IsStudioAdmin, custom_permissions.SpaceAccessPermission, custom_permissions.OptionAccessPermission
-        ]
+        if self.action in ["create"]:
+            permission_classes = [
+                custom_permissions.IsStudioAdmin
+            ]
+        else:    
+            permission_classes = [
+                custom_permissions.IsStudioAdmin, custom_permissions.SpaceAccessPermission, custom_permissions.OptionAccessPermission
+            ]
         return [permission() for permission in permission_classes]
     
     def _clean_data(self, data):
@@ -39,15 +44,13 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
     def create(self, request):
         try:
             serializer_class = self.get_serializer_class()
-            serializer = serializer_class(data=request.data)
-            if serializer.is_valid():
-                qs = serializer.save()
-                serializer = self.serializer_class(instance=qs)
-                return ResponseWrapper(data=serializer.data, msg="create", status=200)
-            return ResponseWrapper(error_msg=serializer.errors, msg="create", error_code=400)
+            serializer = serializer_class(data=request.data, partial=True)
+            plan = serializer.save(request.data, request)
+            serializer = self.serializer_class(instance=plan)
+            return ResponseWrapper(data=serializer.data, status=200, msg="create")
         except AttributeError as E:
             return ResponseWrapper(error_msg=str(E), msg="create", error_code=400)
-    
+
     def list(self, request, *args, **kwargs):
         try:
             space_slug = kwargs.get("space_slug")
