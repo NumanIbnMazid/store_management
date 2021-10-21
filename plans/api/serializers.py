@@ -10,7 +10,7 @@ class OptionCategorySerializer(DynamicMixinModelSerializer):
     
     class Meta:
         model = OptionCategory
-        fields = ("number", "title", "studio", "icon",)
+        fields = ("number", "title", "studio", "icon", "slug")
         read_only_fields = ("slug",)
         
 
