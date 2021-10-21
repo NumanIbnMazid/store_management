@@ -51,7 +51,7 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='success')
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="list", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="list")
         
     
     def get_studio_vat_tax(self, studio_id):
@@ -100,7 +100,7 @@ class VatTaxManagerViewSet(LoggingMixin, CustomViewSet):
             return ResponseWrapper(error_msg=serializer.errors, error_code=400, msg="retrieve")
         
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="Failed to get the result!", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="Failed to get the result!")
 
    
 

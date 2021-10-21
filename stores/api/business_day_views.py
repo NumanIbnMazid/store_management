@@ -93,7 +93,7 @@ class BusinessDayManagerViewSet(CustomViewSet):
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
         
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="Failed to get the result!", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="Failed to get the result!")
         
         
         
@@ -217,7 +217,7 @@ class BusinessDayManagerViewSet(CustomViewSet):
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
         
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="Failed to get the result!", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="Failed to get the result!")
     
     
     def get_business_days_by_range(self, request, *args, **kwargs):
@@ -261,4 +261,4 @@ class BusinessDayManagerViewSet(CustomViewSet):
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
         
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="Failed to get the result", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="Failed to get the result!")

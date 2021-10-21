@@ -102,4 +102,4 @@ class UserManagerViewSet(LoggingMixin, CustomViewSet):
             serializer = self.get_serializer(instance)
             return ResponseWrapper(data=serializer.data, msg="retrieve", status=200)
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="retrieve", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="retrieve")

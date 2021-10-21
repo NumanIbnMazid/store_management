@@ -41,7 +41,7 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='success')
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="list", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="list")
     
     
     def _clean_data(self, data):
@@ -101,7 +101,7 @@ class CustomBusinessDayManagerViewSet(LoggingMixin, CustomViewSet):
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
         
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="update", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="update")
 
 
         
@@ -149,7 +149,7 @@ class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
             serializer = self.serializer_class(instance=studio_modarator)
             return ResponseWrapper(data=serializer.data, status=200, msg="create")
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="create", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="create")
 
     def destroy_staff(self, request, **kwargs):
         try:
@@ -159,7 +159,7 @@ class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
                 return ResponseWrapper(status=200, msg='delete')
             return ResponseWrapper(error_msg="Failed to delete", error_code=400)
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="delete", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="delete")
 
     def update(self, request, *args, **kwargs):
         try:
@@ -175,7 +175,7 @@ class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
                 return ResponseWrapper(data=serializer.data, status=200, msg="update")
             return ResponseWrapper(error_msg=serializer.errors, error_code=400, msg="update")
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="update", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="update")
     
     def list(self, request, *args, **kwargs):
         try:
@@ -185,4 +185,4 @@ class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='list', status=200)
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="list", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="list")

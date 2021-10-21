@@ -12,7 +12,7 @@ class CustomViewSet(viewsets.ModelViewSet):
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg="list", status=200)
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="list", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="list")
        
     def dynamic_list(self, request, *args, **kwargs):
         try:
@@ -29,7 +29,7 @@ class CustomViewSet(viewsets.ModelViewSet):
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='list', status=200)
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="list", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="list")
 
     def create(self, request):
         try:
@@ -41,7 +41,7 @@ class CustomViewSet(viewsets.ModelViewSet):
                 return ResponseWrapper(data=serializer.data, msg="create", status=200)
             return ResponseWrapper(error_msg=serializer.errors, msg="create", error_code=400)
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="create", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="create")
 
     def update(self, request, **kwargs):
         try:
@@ -55,7 +55,7 @@ class CustomViewSet(viewsets.ModelViewSet):
                 return ResponseWrapper(data=serializer.data, msg="update", status=200)
             return ResponseWrapper(error_msg=serializer.errors, msg="update", error_code=400)
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="update", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="update")
 
     def destroy(self, request, **kwargs):
         try:
@@ -65,7 +65,7 @@ class CustomViewSet(viewsets.ModelViewSet):
                 return ResponseWrapper(msg="delete", status=200)
             return ResponseWrapper(error_msg="Failed to delete!", msg="delete", error_code=400)
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="delete", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="delete")
 
     def retrieve(self, request, *args, **kwargs):
         try:
@@ -73,6 +73,6 @@ class CustomViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(instance)
             return ResponseWrapper(data=serializer.data, msg="retrieve", status=200)
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="retrieve", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="retrieve")
     
     

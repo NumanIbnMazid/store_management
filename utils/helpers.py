@@ -1,3 +1,4 @@
+from django.http.response import Http404
 from rest_framework.views import exception_handler
 from rest_framework.response import Response
 from django.core.exceptions import ValidationError
@@ -65,18 +66,21 @@ def custom_exception_handler(exc, context):
     """
     Override Django Rest Framework's default exception to adopt system's response object's structure
     """
+    
     response = exception_handler(exc, context)
+    response_parent = {
+        "error": {
+            "code": None,
+            "error_details": None
+        },
+        "data": None,
+        "status": False,
+        "status_code": None,
+        "message": "Failed"
+    }
+    
     try:
-        response_parent = {
-            "error": {
-                "code": None,
-                "error_details": None
-            },
-            "data": None,
-            "status": False,
-            "status_code": None,
-            "message": "Failed"
-        }
+        
         response_parent["error"]["error_details"] = response.data
 
         if response is not None:
@@ -86,8 +90,12 @@ def custom_exception_handler(exc, context):
         response.data = response_parent
 
     except Exception as E:
+        
         if response is not None:
-            response.data['status_code'] = response.status_code
+            response_parent["error"]["error_details"] = str(E)
+            response_parent["error"]["code"] = response.status_code
+            response_parent["status_code"] = response.status_code
+            response.data = response_parent
 
     return response
 
@@ -272,23 +280,35 @@ def validate_many_to_many_list(value, model, fieldName, allowBlank=False):
     return value
 
 
-def get_exception_error_msg(errorObj):
-    """[Populates Exception Message from Exception Object]
+def get_exception_error_msg(errorObj, msg=None):
+    """[Populates Exception Message from Exception Object and returns Response]
 
     Args:
         errorObj ([Exception]): [ex: E]
+        msg ([String]): [ex: "update"]
 
     Returns:
-        [Object]: [Error Message Object]
+        [Response]
     """
+    try:
+        error_details = {}
+        if msg:
+            msg = msg
+        else:
+            msg = "Failed!"
+        
+        if isinstance(errorObj, Http404):
+            return ResponseWrapper(error_msg="Object not found!", msg=msg, error_code=404)
+        
+        if hasattr(errorObj, 'detail'):
+            error_details = errorObj.detail
+        else:
+            try:
+                error_details["details"] = errorObj.__str__()
+            except:
+                error_details["details"] = str(errorObj)
+                
+        return ResponseWrapper(error_msg=error_details, msg=msg, error_code=400)
     
-    error_details = {}
-    if hasattr(errorObj, 'detail'):
-        error_details = errorObj.detail
-    else:
-        try:
-            error_details["details"] = errorObj
-        except:
-            error_details["details"] = str(errorObj)
-            
-    return error_details
+    except Exception as E:
+        return ResponseWrapper(error_msg=str(E), msg=msg, error_code=400)

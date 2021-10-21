@@ -81,7 +81,7 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
             return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg="create")
         
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="create", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="create")
 
 
     def update(self, request, *args, **kwargs):
@@ -97,7 +97,7 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
             return ResponseWrapper(error_msg=serializer.errors, error_code=400, msg="update")
         
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="update", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="update")
         
     def list_with_short_info(self, request):
         try:
@@ -106,4 +106,4 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg="list", status=200)
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="list", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="list")

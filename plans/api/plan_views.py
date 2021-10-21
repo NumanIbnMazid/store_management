@@ -49,7 +49,7 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
             serializer = self.serializer_class(instance=plan)
             return ResponseWrapper(data=serializer.data, status=200, msg="create")
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="create", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="create")
         
     def update(self, request, **kwargs):
         try:
@@ -64,7 +64,7 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
             return ResponseWrapper(error_msg=serializer.errors, msg="update", error_code=400)
         
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="update", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="update")
 
     def list(self, request, *args, **kwargs):
         try:
@@ -74,5 +74,5 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='list')
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="list", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="list")
 

@@ -61,7 +61,7 @@ class AccountManagerViewSet(LoggingMixin, CustomViewSet):
                 return ResponseWrapper(data=serializer.data, status=200)
             return ResponseWrapper(error_code=400, error_msg=serializer.errors)
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="create", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="create")
 
     def update(self, request, *args, **kwargs):
         try:
@@ -75,7 +75,7 @@ class AccountManagerViewSet(LoggingMixin, CustomViewSet):
                 return ResponseWrapper(data=serializer.data, status=200)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
         except Exception as E:
-            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="update", error_code=400)
+            return get_exception_error_msg(errorObj=E, msg="update")
 
 
      
