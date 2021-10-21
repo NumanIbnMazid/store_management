@@ -1,6 +1,6 @@
 from .serializers import (
     StoreSerializer, StoreUpdateSerializer, CustomBusinessDaySerializer, CustomBusinessDayUpdateSerializer, StoreModeratorSerializer,
-    StoreModeratorUpdateSerializer
+    StoreModeratorUpdateSerializer, StoreShortInfoSerializer
 )
 from stores.models import Store, CustomBusinessDay, StoreModerator
 from rest_framework_tracking.mixins import LoggingMixin
@@ -24,6 +24,8 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
     def get_serializer_class(self):
         if self.action in ["update"]:
             self.serializer_class = StoreUpdateSerializer
+        elif self.action in ["list_with_short_info"]:
+            self.serializer_class = StoreShortInfoSerializer
         else:
             self.serializer_class = StoreSerializer
         return self.serializer_class
@@ -34,6 +36,16 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
 
 
     def list(self, request, *args, **kwargs):
+        try:
+            studio_slug = kwargs.get("studio_slug")
+            qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(instance=qs, many=True)
+            return ResponseWrapper(data=serializer.data, msg='success')
+        except Exception as E:
+            return get_exception_error_msg(errorObj=E, msg="list")
+
+    def list_with_short_info(self, request, *args, **kwargs):
         try:
             studio_slug = kwargs.get("studio_slug")
             qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
@@ -122,7 +134,7 @@ class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
     def get_serializer_class(self):
         if self.action in ["create_admin"]:
             self.serializer_class = StoreModeratorSerializer
-        if self.action in ["update"]:
+        elif self.action in ["update"]:
             self.serializer_class = StoreModeratorUpdateSerializer
         else:
             self.serializer_class = StoreModeratorSerializer

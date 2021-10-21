@@ -30,7 +30,7 @@ class CustomViewSet(viewsets.ModelViewSet):
             return ResponseWrapper(data=serializer.data, msg='list', status=200)
         except Exception as E:
             return get_exception_error_msg(errorObj=E, msg="list")
-
+        
     def create(self, request):
         try:
             serializer_class = self.get_serializer_class()

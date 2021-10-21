@@ -14,6 +14,7 @@ urlpatterns = [
     path("delete/<slug>", StoreManagerViewSet.as_view({"delete": "destroy"}, name="delete_store")),
     path("list/<studio_slug>", StoreManagerViewSet.as_view({"get": "list"}, name="list_store")),
     path("dynamic-list", StoreManagerViewSet.as_view({"get": "dynamic_list"}, name="store_dynamic_list")),
+    path("list-with-short-info/<studio_slug>", StoreManagerViewSet.as_view({"get": "list_with_short_info"}, name="store_list_with_short_info")),
     
      # ==============================*** StudioModerator URLS ***==============================
     # path("moderator/create/admin", StoreModeratorManagerViewSet.as_view({'post': 'create_admin'}, name='create_studio_admin')),
