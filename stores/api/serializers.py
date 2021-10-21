@@ -67,7 +67,7 @@ class StoreUpdateSerializer(DynamicMixinModelSerializer):
     def validate(self, data):
         default_closed_day_of_weeks = data.get("default_closed_day_of_weeks")
         valid_day_of_weeks = [
-            "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
+            'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
         ]
         if not type(default_closed_day_of_weeks) == list:
             raise serializers.ValidationError("Invalid data type received! Expected List/Array.")

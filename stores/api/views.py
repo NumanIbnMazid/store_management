@@ -37,6 +37,7 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
     def update(self, request, **kwargs):
         try:
             serializer_class = self.get_serializer_class()
+            print(request.data, "*** Request Data from Viewset ***")
             serializer = serializer_class(data=request.data, partial=True, context={
                 "initialObject": self.get_object(), "requestObject": request
             })
