@@ -50,6 +50,19 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
             return ResponseWrapper(data=serializer.data, status=200, msg="create")
         except AttributeError as E:
             return ResponseWrapper(error_msg=str(E), msg="create", error_code=400)
+    
+    # def update(self, request, **kwargs):
+    #     try:
+    #         serializer_class = self.get_serializer_class()
+    #         serializer = serializer_class(data=request.data, partial=True, context={
+    #             "initialObject": self.get_object(), "requestObject": request
+    #         })
+    #         qs = serializer.update_plan(instance=self.get_object(
+    #         ), validated_data=request.data)
+    #         serializer = self.serializer_class(instance=qs)
+    #         return ResponseWrapper(data=serializer.data, msg="update", status=200)
+    #     except AttributeError as E:
+    #         return ResponseWrapper(error_msg=str(E), msg="update", error_code=400)
 
     def list(self, request, *args, **kwargs):
         try:

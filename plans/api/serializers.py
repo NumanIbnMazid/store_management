@@ -85,3 +85,26 @@ class PlanUpdateSerializer(DynamicMixinModelSerializer):
             "title", "space", "option", "hourly_price", "daily_price", "image_1", "image_1_reference", "image_1_comment", "image_2", "image_2_reference", "image_2_comment", "image_3", "image_3_reference", "image_3_comment", "is_active", "explanatory_comment", "details"
         ]
         read_only_fields = ("slug",)
+    
+    def update_plan(self, validated_data, instance):
+        try:
+            print("______vd__f___", instance.id)
+            space = validated_data.pop('space')
+            option = validated_data.pop('option')
+            plan_obj = Plan.objects.update_or_create(**validated_data)
+            if plan_obj:
+                for each_space in space:
+                    plan_obj.space.add(each_space)
+                    plan_obj.id.add(instance.id)
+                for each_option in option:
+                    plan_obj.option.add(each_option)
+                    
+                plan_obj.save()
+                return plan_obj
+            serializer = PlanSerializer(data=plan_obj)
+            if serializer.errors:
+                raise serializers.ValidationError(serializer.errors)
+            return ResponseWrapper(data=serializer.data, status=200)
+
+        except AttributeError as E:
+            raise serializers.ValidationError(str(E))
