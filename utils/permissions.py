@@ -296,8 +296,8 @@ class IsStoreStaff(permissions.BasePermission):
 def checker_initial(request, module_name):
     
     # ByPass if user is super_user
-    if request.user.is_superuser:
-        return True
+    # if request.user.is_superuser:
+    #     return True
 
     module_in_request = request.data.get(module_name)
 
@@ -328,7 +328,6 @@ def get_module_pk_list(request, module_name):
     else:
         raise ValueError(f"Invalid data type received for {module_in_request}!")
     return module_list
-
 
 
 def get_module_permission_result(module_pk_list, queryset, module_name):
@@ -460,22 +459,29 @@ class StoreAccessPermission(permissions.BasePermission):
         module_name = "store"
 
         # initial ByPass Checking
-        initial_checker_result = checker_initial(
-            request=request, module_name=module_name)
+        initial_checker_result = checker_initial(request=request, module_name=module_name)
 
         if initial_checker_result:
             return True
 
         # get module pk list
-        module_pk_list = get_module_pk_list(
-            request=request, module_name=module_name)
+        module_pk_list = get_module_pk_list(request=request, module_name=module_name)
 
         # permission checker queryset
-        qs = Store.objects.filter(
-            Q(Q(studio__user__slug__iexact=request.user.slug) | Q(store_moderators__user__slug__in=[request.user.slug])) &
-            Q(id__in=module_pk_list)
-        ).values_list('id', flat=True).distinct()
-
+        qs = None
+        if request.user.is_superuser:
+            qs = Store.objects.filter(id__in=module_pk_list).values_list("studio__id", flat=True).distinct()
+            if len(set(qs)) >= 2:
+                self.message = self.message + f" You are trying to access `store` object from different Studio {set(qs)}."
+                return False
+            else:
+                return True
+        else:
+            qs = Store.objects.filter(
+                Q(Q(studio__user__slug__iexact=request.user.slug) | Q(store_moderators__user__slug__in=[request.user.slug])) &
+                Q(id__in=module_pk_list)
+            ).values_list('id', flat=True).distinct()
+            
         # get module permission result
         module_permission_result = get_module_permission_result(
             module_pk_list=module_pk_list, queryset=qs, module_name=module_name
@@ -509,11 +515,20 @@ class SpaceAccessPermission(permissions.BasePermission):
         module_pk_list = get_module_pk_list(request=request, module_name=module_name)
         
         # permission checker queryset
-        qs = Space.objects.filter(
-            Q(Q(store__studio__user__slug__iexact=request.user.slug) | 
-            Q(store__store_moderators__user__slug__in=[request.user.slug])) &
-            Q(id__in=module_pk_list)
-        ).values_list('id', flat=True).distinct()
+        qs = None
+        if request.user.is_superuser:
+            qs = Space.objects.filter(id__in=module_pk_list).values_list("store__studio__id", flat=True).distinct()
+            if len(set(qs)) >= 2:
+                self.message = self.message + f" You are trying to access `space` object from different Studio {set(qs)}."
+                return False
+            else:
+                return True
+        else:
+            qs = Space.objects.filter(
+                Q(Q(store__studio__user__slug__iexact=request.user.slug) | 
+                Q(store__store_moderators__user__slug__in=[request.user.slug])) &
+                Q(id__in=module_pk_list)
+            ).values_list('id', flat=True).distinct()
         
         # get module permission result
         module_permission_result = get_module_permission_result(
@@ -549,11 +564,20 @@ class PlanAccessPermission(permissions.BasePermission):
             request=request, module_name=module_name)
 
         # permission checker queryset
-        qs = Plan.objects.filter(
-            Q(Q(space__store__studio__user__slug__in=[request.user.slug]) |
-              Q(space__store__store_moderators__user__slug__in=[request.user.slug])) &
-            Q(id__in=module_pk_list)
-        ).values_list('id', flat=True).distinct()
+        qs = None
+        if request.user.is_superuser:
+            qs = Plan.objects.filter(id__in=module_pk_list).values_list("space__store__studio__id", flat=True).distinct()
+            if len(set(qs)) >= 2:
+                self.message = self.message + f" You are trying to access `plan` object from different Studio {set(qs)}."
+                return False
+            else:
+                return True
+        else:
+            qs = Plan.objects.filter(
+                Q(Q(space__store__studio__user__slug__in=[request.user.slug]) |
+                Q(space__store__store_moderators__user__slug__in=[request.user.slug])) &
+                Q(id__in=module_pk_list)
+            ).values_list('id', flat=True).distinct()
 
         # get module permission result
         module_permission_result = get_module_permission_result(
@@ -591,11 +615,20 @@ class OptionCategoryAccessPermission(permissions.BasePermission):
             request=request, module_name=module_name)
 
         # permission checker queryset
-        qs = OptionCategory.objects.filter(
-            Q(Q(studio__user__slug__iexact=request.user.slug) | Q(
-                studio__store__store_moderators__user__slug__in=[request.user.slug])) &
-            Q(id__in=module_pk_list)
-        ).values_list('id', flat=True).distinct()
+        qs = None
+        if request.user.is_superuser:
+            qs = OptionCategory.objects.filter(id__in=module_pk_list).values_list("studio__id", flat=True).distinct()
+            if len(set(qs)) >= 2:
+                self.message = self.message + f" You are trying to access `option_category` object from different Studio {set(qs)}."
+                return False
+            else:
+                return True
+        else:
+            qs = OptionCategory.objects.filter(
+                Q(Q(studio__user__slug__iexact=request.user.slug) | Q(
+                    studio__store__store_moderators__user__slug__in=[request.user.slug])) &
+                Q(id__in=module_pk_list)
+            ).values_list('id', flat=True).distinct()
 
         # get module permission result
         module_permission_result = get_module_permission_result(
@@ -633,11 +666,20 @@ class OptionAccessPermission(permissions.BasePermission):
             request=request, module_name=module_name)
 
         # permission checker queryset
-        qs = Option.objects.filter(
-            Q(Q(option_category__studio__user__slug__iexact=request.user.slug) | Q(
-                option_category__studio__studio_stores__store_moderators__user__slug__in=[request.user.slug])) &
-            Q(id__in=module_pk_list)
-        ).values_list('id', flat=True).distinct()
+        qs = None
+        if request.user.is_superuser:
+            qs = Option.objects.filter(id__in=module_pk_list).values_list("option_category__studio__id", flat=True).distinct()
+            if len(set(qs)) >= 2:
+                self.message = self.message + f" You are trying to access `space` object from different Studio {set(qs)}."
+                return False
+            else:
+                return True
+        else:
+            qs = Option.objects.filter(
+                Q(Q(option_category__studio__user__slug__iexact=request.user.slug) | Q(
+                    option_category__studio__studio_stores__store_moderators__user__slug__in=[request.user.slug])) &
+                Q(id__in=module_pk_list)
+            ).values_list('id', flat=True).distinct()
         
         # get module permission result
         module_permission_result = get_module_permission_result(
@@ -700,10 +742,19 @@ class BusinessDayAccessPermission(permissions.BasePermission):
             request=request, module_name=module_name)
 
         # permission checker queryset
-        qs = BusinessDay.objects.filter(
-            Q(Q(store__studio__user__slug__iexact=request.user.slug) | Q(store__store_moderators__user__slug__in=[request.user.slug])) &
-            Q(id__in=module_pk_list)
-        ).values_list('id', flat=True).distinct()
+        qs = None
+        if request.user.is_superuser:
+            qs = BusinessDay.objects.filter(id__in=module_pk_list).values_list("store__studio__id", flat=True).distinct()
+            if len(set(qs)) >= 2:
+                self.message = self.message + f" You are trying to access `business_day` object from different Studio {set(qs)}."
+                return False
+            else:
+                return True
+        else:
+            qs = BusinessDay.objects.filter(
+                Q(Q(store__studio__user__slug__iexact=request.user.slug) | Q(store__store_moderators__user__slug__in=[request.user.slug])) &
+                Q(id__in=module_pk_list)
+            ).values_list('id', flat=True).distinct()
         
         # get module permission result
         module_permission_result = get_module_permission_result(
@@ -743,10 +794,19 @@ class BusinessHourAccessPermission(permissions.BasePermission):
             request=request, module_name=module_name)
 
         # permission checker queryset
-        qs = BusinessHour.objects.filter(
-            Q(Q(store__studio__user__slug__iexact=request.user.slug) | Q(store__store_moderators__user__slug__in=[request.user.slug])) &
-            Q(id__in=module_pk_list)
-        ).values_list('id', flat=True).distinct()
+        qs = None
+        if request.user.is_superuser:
+            qs = BusinessHour.objects.filter(id__in=module_pk_list).values_list("store__studio__id", flat=True).distinct()
+            if len(set(qs)) >= 2:
+                self.message = self.message + f" You are trying to access `business_hour` object from different Studio {set(qs)}."
+                return False
+            else:
+                return True
+        else:
+            qs = BusinessHour.objects.filter(
+                Q(Q(store__studio__user__slug__iexact=request.user.slug) | Q(store__store_moderators__user__slug__in=[request.user.slug])) &
+                Q(id__in=module_pk_list)
+            ).values_list('id', flat=True).distinct()
 
         # get module permission result
         module_permission_result = get_module_permission_result(
