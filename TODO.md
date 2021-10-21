@@ -74,3 +74,7 @@
 # TODO: Image Upload validation with Size, Type
 
 # TODO: Business Hour
+
+# Store Update Validation with Image URL
+
+# This field is required -> Name field is required!

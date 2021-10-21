@@ -33,6 +33,20 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
     def get_permissions(self):
         permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
+    
+    def update(self, request, **kwargs):
+        try:
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(data=request.data, partial=True, context={
+                "initialObject": self.get_object(), "requestObject": request
+            })
+            if serializer.is_valid():
+                qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
+                serializer = self.serializer_class(instance=qs)
+                return ResponseWrapper(data=serializer.data, msg="update", status=200)
+            return ResponseWrapper(error_msg=serializer.errors, msg="update", error_code=400)
+        except Exception as E:
+            return get_exception_error_msg(errorObj=E, msg="update")
 
 
     def list(self, request, *args, **kwargs):
