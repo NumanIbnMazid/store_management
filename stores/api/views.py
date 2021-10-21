@@ -143,7 +143,7 @@ class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
     def get_permissions(self):
         if self.action in ["create_admin", "destroy_admin"]:
             permission_classes = [custom_permissions.IsSuperUser]
-        elif self.action in ["create_staff"]:
+        elif self.action in ["create_staff", "update"]:
             permission_classes = [custom_permissions.IsStudioAdmin, custom_permissions.StoreAccessPermission]
 
         elif self.action in ["destroy_staff","list"]:
@@ -172,22 +172,22 @@ class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
             return ResponseWrapper(error_msg="Failed to delete", error_code=400)
         except Exception as E:
             return get_exception_error_msg(errorObj=E, msg="delete")
-
-    def update(self, request, *args, **kwargs):
+        
+    def update(self, request, **kwargs):
         try:
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(data=request.data, partial=True, context={
                 "initialObject": self.get_object(), "requestObject": request
             })
-            if serializer.is_valid():
-                qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
+            qs = serializer.update(instance=self.get_object(), validated_data=request.data)
+            if serializer.is_valid(raise_exception=True):
                 serializer = self.serializer_class(instance=qs)
-                qs.user.name = request.data.get('user', {}).get("name", None)
-                qs.user.save()
-                return ResponseWrapper(data=serializer.data, status=200, msg="update")
-            return ResponseWrapper(error_msg=serializer.errors, error_code=400, msg="update")
+                return ResponseWrapper(data=serializer.data, msg="update", status=200)
+            return ResponseWrapper(error_msg=serializer.errors, msg="update", error_code=400)
+        
         except Exception as E:
             return get_exception_error_msg(errorObj=E, msg="update")
+
     
     def list(self, request, *args, **kwargs):
         try:
