@@ -26,13 +26,13 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
         return self.serializer_class
     
     def get_permissions(self):
-        if self.action in ["create"]:
+        if self.action in ["create", "update"]:
             permission_classes = [
                 custom_permissions.IsStudioAdmin, custom_permissions.OptionAccessPermission, custom_permissions.SpaceAccessPermission
             ]
         else:    
             permission_classes = [
-                custom_permissions.IsStudioAdmin, custom_permissions.SpaceAccessPermission, custom_permissions.OptionAccessPermission
+                custom_permissions.IsStudioAdmin
             ]
         return [permission() for permission in permission_classes]
     
