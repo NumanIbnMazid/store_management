@@ -1,8 +1,8 @@
 from plans.models import OptionCategory, Option, Plan
 from drf_extra_fields.fields import HybridImageField
+from spaces.models import Space
 from utils.mixins import DynamicMixinModelSerializer
-from utils.helpers import ResponseWrapper
-from rest_framework import serializers
+from utils.helpers import validate_many_to_many_list
 
 
 class OptionCategorySerializer(DynamicMixinModelSerializer):
@@ -54,24 +54,24 @@ class PlanSerializer(DynamicMixinModelSerializer):
         read_only_fields = ("slug",)
     
     def save(self, validated_data):
-        try:
-            space = validated_data.pop('space')
-            option = validated_data.pop('option')
-            plan_obj = Plan.objects.create(**validated_data)
-            if plan_obj:
-                for each_space in space:
-                    plan_obj.space.add(each_space)
-                for each_option in option:
-                    plan_obj.option.add(each_option)
-                plan_obj.save()
-                return plan_obj
-            serializer = PlanSerializer(data=plan_obj)
-            if serializer.errors:
-                raise serializers.ValidationError(serializer.errors)
-            return ResponseWrapper(data=serializer.data, status=200)
+        space = validated_data.pop('space')
+        option = validated_data.pop('option')
         
-        except AttributeError as E:
-            raise serializers.ValidationError(str(E))
+        # validate data
+        validate_many_to_many_list(value=space, model=Space, fieldName="space", allowBlank=False)
+        validate_many_to_many_list(value=option, model=Option, fieldName="option", allowBlank=True)
+        
+        plan_obj = Plan.objects.create(**validated_data)
+        
+        if plan_obj:
+            for each_space in space:
+                plan_obj.space.add(each_space)
+            for each_option in option:
+                plan_obj.option.add(each_option)
+            plan_obj.save()
+            
+        # return plan object
+        return plan_obj
 
 class PlanUpdateSerializer(DynamicMixinModelSerializer):
     image_1 = HybridImageField(required=False)
@@ -85,23 +85,27 @@ class PlanUpdateSerializer(DynamicMixinModelSerializer):
         ]
         read_only_fields = ("slug",)
         
-    def update(self, validated_data):
-        try:
-            space = validated_data.pop('space')
-            option = validated_data.pop('option')
-            print(self.instance, "***********")
-            plan_obj = Plan.objects.update(**validated_data)
-            if plan_obj:
-                for each_space in space:
-                    plan_obj.space.add(each_space)
-                for each_option in option:
-                    plan_obj.option.add(each_option)
-                plan_obj.save()
-                return plan_obj
-            serializer = PlanSerializer(data=plan_obj)
-            if serializer.errors:
-                raise serializers.ValidationError(serializer.errors)
-            return ResponseWrapper(data=serializer.data, status=200)
-
-        except AttributeError as E:
-            raise serializers.ValidationError(str(E))
+        
+    def update(self, instance, validated_data):
+        space = validated_data.pop('space')
+        option = validated_data.pop('option')
+        
+        # validate data
+        validate_many_to_many_list(value=space, model=Space, fieldName="space", allowBlank=False)
+        validate_many_to_many_list(value=option, model=Option, fieldName="option", allowBlank=True)
+        
+        instance = super(PlanUpdateSerializer, self).update(instance, validated_data)
+        
+        # clear existing many to many fields
+        instance.space.clear()
+        instance.option.clear()
+        
+        if instance:
+            for each_space in space:
+                instance.space.add(each_space)
+            for each_option in option:
+                instance.option.add(each_option)
+            # save instance
+            instance.save()
+        # return updated instance
+        return instance

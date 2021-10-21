@@ -4,7 +4,7 @@ from .business_day_serializers import (
     SingleBusinessDayCheckerSerializer, BusinessDaySerializer, YearBusinessDaysCheckerSerializer, RangeBusinessDaysCheckerSerializer
 )
 from utils import permissions as custom_permissions
-from utils.helpers import ResponseWrapper
+from utils.helpers import ResponseWrapper, get_exception_error_msg
 from utils.studio_getter_helper import get_studio_id_from_store
 import datetime
 from dateutil import parser
@@ -92,8 +92,8 @@ class BusinessDayManagerViewSet(CustomViewSet):
                 return ResponseWrapper(data=result, status=200)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
         
-        except AttributeError as E:
-            return ResponseWrapper(error_msg=str(E), msg="Failed to get the result!", error_code=400)
+        except Exception as E:
+            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="Failed to get the result!", error_code=400)
         
         
         
@@ -216,8 +216,8 @@ class BusinessDayManagerViewSet(CustomViewSet):
                 return ResponseWrapper(data=result, status=200)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
         
-        except AttributeError as E:
-            return ResponseWrapper(error_msg=str(E), msg="Failed to get the result!", error_code=400)
+        except Exception as E:
+            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="Failed to get the result!", error_code=400)
     
     
     def get_business_days_by_range(self, request, *args, **kwargs):
@@ -260,5 +260,5 @@ class BusinessDayManagerViewSet(CustomViewSet):
                 return ResponseWrapper(data=result, status=200)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
         
-        except AttributeError as E:
-            return ResponseWrapper(error_msg=str(E), msg="Failed to get the result!", error_code=400)
+        except Exception as E:
+            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="Failed to get the result", error_code=400)

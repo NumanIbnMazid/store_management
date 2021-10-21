@@ -1,7 +1,7 @@
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
-from utils.helpers import ResponseWrapper
+from utils.helpers import ResponseWrapper, get_exception_error_msg
 from .serializers import (
     StaffSerializer, StaffUpdateSerializer
 )
@@ -41,8 +41,8 @@ class StaffAccountManagerViewSet(LoggingMixin, CustomViewSet):
                 staff_instance = serializer.save(user=user_instance)
                 return ResponseWrapper(data=serializer.data, status=200)
             return ResponseWrapper(error_code=400, error_msg=serializer.errors)
-        except AttributeError as E:
-            return ResponseWrapper(error_msg=str(E), msg="create", error_code=400)
+        except Exception as E:
+            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="create", error_code=400)
 
     def update(self, request, *args, **kwargs):
         try:
@@ -55,8 +55,8 @@ class StaffAccountManagerViewSet(LoggingMixin, CustomViewSet):
                 qs.user.save()
                 return ResponseWrapper(data=serializer.data, status=200)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
-        except AttributeError as E:
-            return ResponseWrapper(error_msg=str(E), msg="update", error_code=400)
+        except Exception as E:
+            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="update", error_code=400)
 
     def list(self, request, *args, **kwargs):
         try:
@@ -65,7 +65,7 @@ class StaffAccountManagerViewSet(LoggingMixin, CustomViewSet):
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='list')
-        except AttributeError as E:
-            return ResponseWrapper(error_msg=str(E), msg="list", error_code=400)
+        except Exception as E:
+            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="list", error_code=400)
 
 

@@ -6,6 +6,7 @@ from django.dispatch import receiver
 from django.utils.text import slugify
 from utils.snippets import simple_random_string, random_string_generator
 import uuid
+from rest_framework import serializers
 
 
 class ResponseWrapper(Response):
@@ -223,3 +224,71 @@ def autoslugFromUUID():
                     instance.slug = simple_random_string()
         return model
     return decorator
+
+
+def validate_many_to_many_list(value, model, fieldName, allowBlank=False):
+    """[Validates ManyToMany Field id List]
+
+    Args:
+        value ([List]): [mant to mant ids]
+        model ([Django Model Class]): [Django Model Class]
+        fieldName ([String]): [Many to Many Field Name]
+        allowBlank (bool, optional): [If allow blank]. Defaults to False.
+
+    Raises:
+        serializers.ValidationError: [description]
+
+    Returns:
+        [List]: [Validate Value List]
+    """
+    
+    if value == None or value == "":
+        raise serializers.ValidationError({fieldName: "Expected List!"})
+
+    if not type(value) == list:
+        raise serializers.ValidationError({fieldName: "Expected List!"})
+    
+    if allowBlank == False:
+        if type(value) == list and len(value) <= 0:
+            raise serializers.ValidationError({fieldName: f"`{fieldName}` list can't be empty!"})
+    else:
+        if type(value) == list and len(value) <= 0:
+            return value
+
+    qs = model.objects.filter(id__in=value).values_list("id", flat=True)
+    
+    if qs:
+        if not len(qs) == len(value):
+            restricted_ids = []
+            for v in value:
+                if v not in qs:
+                    restricted_ids.append(v)
+            if len(restricted_ids) >= 1:
+                raise serializers.ValidationError(
+                    {fieldName: f"Invalid {fieldName}: {restricted_ids}"})
+    else:
+        raise serializers.ValidationError({fieldName: f"`{fieldName}` ({value}) not found!"})
+    
+    return value
+
+
+def get_exception_error_msg(errorObj):
+    """[Populates Exception Message from Exception Object]
+
+    Args:
+        errorObj ([Exception]): [ex: E]
+
+    Returns:
+        [Object]: [Error Message Object]
+    """
+    
+    error_details = {}
+    if hasattr(errorObj, 'detail'):
+        error_details = errorObj.detail
+    else:
+        try:
+            error_details["details"] = errorObj
+        except:
+            error_details["details"] = str(errorObj)
+            
+    return error_details

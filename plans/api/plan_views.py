@@ -3,7 +3,7 @@ from plans.models import Plan
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
-from utils.helpers import ResponseWrapper
+from utils.helpers import ResponseWrapper, get_exception_error_msg
 from utils.studio_getter_helper import (
     get_studio_id_from_space
 )
@@ -48,8 +48,8 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
             plan = serializer.save(request.data)
             serializer = self.serializer_class(instance=plan)
             return ResponseWrapper(data=serializer.data, status=200, msg="create")
-        except AttributeError as E:
-            return ResponseWrapper(error_msg=str(E), msg="create", error_code=400)
+        except Exception as E:
+            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="create", error_code=400)
         
     def update(self, request, **kwargs):
         try:
@@ -57,13 +57,14 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
             serializer = serializer_class(data=request.data, partial=True, context={
                 "initialObject": self.get_object(), "requestObject": request
             })
-            if serializer.is_valid():
-                qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
+            qs = serializer.update(instance=self.get_object(), validated_data=request.data)
+            if serializer.is_valid(raise_exception=True):
                 serializer = self.serializer_class(instance=qs)
                 return ResponseWrapper(data=serializer.data, msg="update", status=200)
             return ResponseWrapper(error_msg=serializer.errors, msg="update", error_code=400)
-        except AttributeError as E:
-            return ResponseWrapper(error_msg=str(E), msg="update", error_code=400)
+        
+        except Exception as E:
+            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="update", error_code=400)
 
     def list(self, request, *args, **kwargs):
         try:
@@ -72,6 +73,6 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='list')
-        except AttributeError as E:
-            return ResponseWrapper(error_msg=str(E), msg="list", error_code=400)
+        except Exception as E:
+            return ResponseWrapper(error_msg=get_exception_error_msg(errorObj=E), msg="list", error_code=400)
 
