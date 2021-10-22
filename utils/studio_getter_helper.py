@@ -150,3 +150,5 @@ def get_studio_id_from_option_category(selfObject, slug=None):
                 return False, "Failed to get `OptionCategory`! Thus failed to provide required permissions for Studio Management."
         else:
             return True, selfObject.request.user.studio_user.id if selfObject.request.user.studio_user.id else selfObject.request.user.store_moderator_user.store.all()[0].studio.id
+
+

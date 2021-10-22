@@ -83,7 +83,6 @@ class StoreModerator(models.Model):
 
 @autoslugFromUUID()
 class CustomBusinessDay(models.Model):
-    
     class Status(models.IntegerChoices):
         CLOSED = 0, _("Closed")
         OPEN = 1, _("Open")
@@ -124,6 +123,36 @@ class CustomBusinessDay(models.Model):
         elif self.status == 1:
             return "custom_business_day"
         return "default_business_day"
+
+
+@autoslugFromUUID()
+class StoreBusinessHour(models.Model):
+    store = models.OneToOneField(Store, on_delete=models.CASCADE, related_name="store_business_hours")
+    slug = models.SlugField(unique=True)
+    saturday_opening_time = models.TimeField()
+    saturday_closing_time = models.TimeField()
+    sunday_opening_time = models.TimeField()
+    sunday_closing_time = models.TimeField()
+    monday_opening_time = models.TimeField()
+    monday_closing_time = models.TimeField()
+    tuesday_opening_time = models.TimeField()
+    tuesday_closing_time = models.TimeField()
+    wednesday_opening_time = models.TimeField()
+    wednesday_closing_time = models.TimeField()
+    thursday_opening_time = models.TimeField()
+    thursday_closing_time = models.TimeField()
+    friday_opening_time = models.TimeField()
+    friday_closing_time = models.TimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Store Business Hour'
+        verbose_name_plural = 'Store Business Hours'
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return str(self.date)
 
 
 """

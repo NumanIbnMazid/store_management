@@ -7,6 +7,8 @@ from django.contrib.auth import get_user_model
 from users.api.serializers import (RegisterSerializer)
 from django.db import transaction
 from utils.helpers import ResponseWrapper, validate_many_to_many_list
+from stores.models import StoreBusinessHour
+from utils.mixins import DynamicMixinModelSerializer
 
 """
 ----------------------- * Store * -----------------------
@@ -266,3 +268,19 @@ class StoreModeratorUpdateSerializer(DynamicMixinModelSerializer):
             instance.save()
         # return updated instance
         return instance
+
+
+class StoreBusinessHourSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StoreBusinessHour
+        fields = "__all__"
+        read_only_fields = ("slug",)
+
+
+class StoreBusinessHourUpdateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StoreBusinessHour
+        fields = "__all__"
+        read_only_fields = ("slug", "store",)

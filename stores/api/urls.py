@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import StoreManagerViewSet, CustomBusinessDayManagerViewSet, StoreModeratorManagerViewSet
 from .business_day_views import BusinessDayManagerViewSet
+from .store_business_hours import StoreBusinessHourManagerViewSet
 
 
 router = DefaultRouter()
@@ -46,4 +47,16 @@ urlpatterns = [
             {"post": "get_business_days_by_range"}, name="get_business_days_by_range"
         )
     ),
+
+    # ==============================*** Store Business Hours URLS ***==============================
+    path("store-business-hour/create", StoreBusinessHourManagerViewSet.as_view(
+        {'post': 'create'}, name='create_store_business_hour')),
+    path("store-business-hour/retrieve/<slug>", StoreBusinessHourManagerViewSet.as_view(
+        {"get": "retrieve"}, name="retrieve_store_business_hour")),
+    path("store-business-hour/update/<slug>", StoreBusinessHourManagerViewSet.as_view(
+        {"patch": "update"}, name="update_store_business_hour")),
+    path("store-business-hour/delete/<slug>", StoreBusinessHourManagerViewSet.as_view(
+        {"delete": "destroy"}, name="delete_store_business_hour")),
+    path("store-business-hour/dynamic-list", StoreBusinessHourManagerViewSet.as_view(
+        {"get": "dynamic_list"}, name="custom_store_business_hour")),
 ]
