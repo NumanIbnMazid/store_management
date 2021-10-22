@@ -8,6 +8,7 @@ from django.utils.text import slugify
 from utils.snippets import simple_random_string, random_string_generator
 import uuid
 from rest_framework import serializers
+from utils.snippets import url_check
 
 
 class ResponseWrapper(Response):
@@ -278,6 +279,26 @@ def validate_many_to_many_list(value, model, fieldName, allowBlank=False):
         raise serializers.ValidationError({fieldName: f"`{fieldName}` ({value}) not found!"})
     
     return value
+
+
+def process_image_data(data: dict, image_fields: list) -> dict:
+    """[Processes image data from request]
+
+    Args:
+        data ([Dictionary]): [request data object]
+        image_fields ([List]): [List of image fields in request]
+
+    Returns:
+        [Dictionary]: [Request data object with processed image data]
+    """
+    
+    for field in image_fields:
+        image = data.get(field, None)
+
+        if url_check(image):
+            data.pop(field, None)
+
+    return data
 
 
 def get_exception_error_msg(errorObj, msg=None):

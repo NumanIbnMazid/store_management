@@ -9,7 +9,7 @@ from utils.helpers import autoslugFromUUID
 class Space(models.Model):
     name = models.CharField(max_length=150)
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name="store_spaces")
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=254)
     image_1 = models.ImageField(upload_to=upload_space_image_path, blank=True, null=True)
     image_1_reference = models.CharField(max_length=254, blank=True, null=True)
     image_1_comment = models.CharField(max_length=254, blank=True, null=True)

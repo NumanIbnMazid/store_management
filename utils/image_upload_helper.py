@@ -16,8 +16,8 @@ def upload_store_image_path(instance, filename):
     final_filename = '{new_filename}{ext}'.format(
         new_filename=new_filename, ext=ext
     )
-    return "Stores/{store}/Images/{final_filename}".format(
-        store=slugify(instance.name[:50]),
+    return "Stores/{store_name}/Images/{final_filename}".format(
+        store_name=slugify(instance.name[:50]),
         final_filename=final_filename
     )
 
@@ -29,8 +29,8 @@ def upload_space_image_path(instance, filename):
     final_filename = '{new_filename}{ext}'.format(
         new_filename=new_filename, ext=ext
     )
-    return "Spaces/{store}/Images/{final_filename}".format(
-        store=slugify(instance.name[:50]),
+    return "Spaces/{space_name}/Images/{final_filename}".format(
+        space_name=slugify(instance.name[:50]),
         final_filename=final_filename
     )
 
@@ -42,8 +42,8 @@ def upload_plan_image_path(instance, filename):
     final_filename = '{new_filename}{ext}'.format(
         new_filename=new_filename, ext=ext
     )
-    return "Plans/{store}/Images/{final_filename}".format(
-        store=slugify(instance.title[:50]),
+    return "Plans/{plan_title}/Images/{final_filename}".format(
+        plan_title=slugify(instance.title[:50]),
         final_filename=final_filename
     )
 
@@ -55,8 +55,8 @@ def upload_category_image_path(instance, filename):
     final_filename = '{new_filename}{ext}'.format(
         new_filename=new_filename, ext=ext
     )
-    return "Categories/{store}/Images/{final_filename}".format(
-        store=slugify(instance.title[:50]),
+    return "Categories/{category_title}/Images/{final_filename}".format(
+        category_title=slugify(instance.title[:50]),
         final_filename=final_filename
     )
 
@@ -68,7 +68,7 @@ def upload_option_image_path(instance, filename):
     final_filename = '{new_filename}{ext}'.format(
         new_filename=new_filename, ext=ext
     )
-    return "OPtions/{store}/Images/{final_filename}".format(
-        store=slugify(instance.title[:50]),
+    return "OPtions/{option_title}/Images/{final_filename}".format(
+        option_title=slugify(instance.title[:50]),
         final_filename=final_filename
     )
