@@ -1,3 +1,4 @@
+from django.http.response import Http404
 from rest_framework.views import exception_handler
 from rest_framework.response import Response
 from django.core.exceptions import ValidationError
@@ -6,6 +7,7 @@ from django.dispatch import receiver
 from django.utils.text import slugify
 from utils.snippets import simple_random_string, random_string_generator
 import uuid
+from rest_framework import serializers
 
 
 class ResponseWrapper(Response):
@@ -64,18 +66,21 @@ def custom_exception_handler(exc, context):
     """
     Override Django Rest Framework's default exception to adopt system's response object's structure
     """
+    
     response = exception_handler(exc, context)
+    response_parent = {
+        "error": {
+            "code": None,
+            "error_details": None
+        },
+        "data": None,
+        "status": False,
+        "status_code": None,
+        "message": "Failed"
+    }
+    
     try:
-        response_parent = {
-            "error": {
-                "code": None,
-                "error_details": None
-            },
-            "data": None,
-            "status": False,
-            "status_code": None,
-            "message": "Failed"
-        }
+        
         response_parent["error"]["error_details"] = response.data
 
         if response is not None:
@@ -85,8 +90,12 @@ def custom_exception_handler(exc, context):
         response.data = response_parent
 
     except Exception as E:
+        
         if response is not None:
-            response.data['status_code'] = response.status_code
+            response_parent["error"]["error_details"] = str(E)
+            response_parent["error"]["code"] = response.status_code
+            response_parent["status_code"] = response.status_code
+            response.data = response_parent
 
     return response
 
@@ -223,3 +232,83 @@ def autoslugFromUUID():
                     instance.slug = simple_random_string()
         return model
     return decorator
+
+
+def validate_many_to_many_list(value, model, fieldName, allowBlank=False):
+    """[Validates ManyToMany Field id List]
+
+    Args:
+        value ([List]): [mant to mant ids]
+        model ([Django Model Class]): [Django Model Class]
+        fieldName ([String]): [Many to Many Field Name]
+        allowBlank (bool, optional): [If allow blank]. Defaults to False.
+
+    Raises:
+        serializers.ValidationError: [description]
+
+    Returns:
+        [List]: [Validate Value List]
+    """
+    
+    if value == None or value == "":
+        raise serializers.ValidationError({fieldName: "Expected List!"})
+
+    if not type(value) == list:
+        raise serializers.ValidationError({fieldName: "Expected List!"})
+    
+    if allowBlank == False:
+        if type(value) == list and len(value) <= 0:
+            raise serializers.ValidationError({fieldName: f"`{fieldName}` list can't be empty!"})
+    else:
+        if type(value) == list and len(value) <= 0:
+            return value
+
+    qs = model.objects.filter(id__in=value).values_list("id", flat=True)
+    
+    if qs:
+        if not len(qs) == len(value):
+            restricted_ids = []
+            for v in value:
+                if v not in qs:
+                    restricted_ids.append(v)
+            if len(restricted_ids) >= 1:
+                raise serializers.ValidationError(
+                    {fieldName: f"Invalid {fieldName}: {restricted_ids}"})
+    else:
+        raise serializers.ValidationError({fieldName: f"`{fieldName}` ({value}) not found!"})
+    
+    return value
+
+
+def get_exception_error_msg(errorObj, msg=None):
+    """[Populates Exception Message from Exception Object and returns Response]
+
+    Args:
+        errorObj ([Exception]): [ex: E]
+        msg ([String]): [ex: "update"]
+
+    Returns:
+        [Response]
+    """
+    try:
+        error_details = {}
+        if msg:
+            msg = msg
+        else:
+            msg = "Failed!"
+        
+        if isinstance(errorObj, Http404):
+            return ResponseWrapper(error_msg="Object not found!", msg=msg, error_code=404)
+        
+        if hasattr(errorObj, 'detail'):
+            error_details = errorObj.detail
+        else:
+            try:
+                error_details["details"] = errorObj.__str__()
+            except:
+                error_details["details"] = str(errorObj)
+                
+        return ResponseWrapper(error_msg=error_details, msg=msg, error_code=400)
+    
+    except Exception as E:
+        return ResponseWrapper(error_msg=str(E), msg=msg, error_code=400)

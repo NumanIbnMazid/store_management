@@ -2,7 +2,7 @@ from rest_framework_tracking.mixins import LoggingMixin
 from rest_framework import permissions
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
-from utils.helpers import ResponseWrapper
+from utils.helpers import ResponseWrapper, get_exception_error_msg
 from .serializers import (
     CustomerSerializer, CustomerUpdateSerializer
 )
@@ -60,8 +60,8 @@ class AccountManagerViewSet(LoggingMixin, CustomViewSet):
                 customer_instance = serializer.save(user=user_instance)
                 return ResponseWrapper(data=serializer.data, status=200)
             return ResponseWrapper(error_code=400, error_msg=serializer.errors)
-        except AttributeError as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="create", error_code=400)
+        except Exception as E:
+            return get_exception_error_msg(errorObj=E, msg="create")
 
     def update(self, request, *args, **kwargs):
         try:
@@ -74,8 +74,8 @@ class AccountManagerViewSet(LoggingMixin, CustomViewSet):
                 qs.user.save()
                 return ResponseWrapper(data=serializer.data, status=200)
             return ResponseWrapper(error_msg=serializer.errors, error_code=400)
-        except AttributeError as E:
-            return ResponseWrapper(error_msg=serializer.errors if len(serializer.errors) else dict(E), msg="update", error_code=400)
+        except Exception as E:
+            return get_exception_error_msg(errorObj=E, msg="update")
 
 
      

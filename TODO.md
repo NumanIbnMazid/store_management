@@ -70,3 +70,11 @@
 # TODO: Store Moderator Create for System Super Admin => Options: User, Studio, Store (Studio Select API, Stores for Studio (Slug))
 
 # TODO: Permission for System Super Admin (EX: Store Access Permission -> If store selected in other studio's)
+
+# TODO: Image Upload validation with Size, Type
+
+# TODO: Business Hour
+
+# Store Update Validation with Image URL
+
+# This field is required -> Name field is required!

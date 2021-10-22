@@ -6,7 +6,7 @@ from utils.mixins import DynamicMixinModelSerializer
 from django.contrib.auth import get_user_model
 from users.api.serializers import (RegisterSerializer)
 from django.db import transaction
-from utils.helpers import ResponseWrapper
+from utils.helpers import ResponseWrapper, validate_many_to_many_list
 
 """
 ----------------------- * Store * -----------------------
@@ -67,7 +67,7 @@ class StoreUpdateSerializer(DynamicMixinModelSerializer):
     def validate(self, data):
         default_closed_day_of_weeks = data.get("default_closed_day_of_weeks")
         valid_day_of_weeks = [
-            "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
+            'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
         ]
         if not type(default_closed_day_of_weeks) == list:
             raise serializers.ValidationError("Invalid data type received! Expected List/Array.")
@@ -172,33 +172,7 @@ class StoreModeratorSerializer(DynamicMixinModelSerializer):
         model = StoreModerator
         fields = "__all__"
         read_only_fields = ("is_staff", "slug",)
-        
-    def validate_store(self, value):
-        if value == None or value == "":
-            raise serializers.ValidationError({"store": "Expected List!"})
-        
-        if not type(value) == list:
-            raise serializers.ValidationError({"store": "Expected List!"})
-        
-        if type(value) == list and len(value) <= 0:
-            raise serializers.ValidationError({"store": "Store list can't be empty!"})
-        
-        else:
-            store_qs = Store.objects.filter(
-                id__in=value
-            ).values_list("id", flat=True)
-            if store_qs:
-                if not len(store_qs) == len(value):
-                    restricted_stores = []
-                    for v in value:
-                        if v not in store_qs:
-                            restricted_stores.append(v)
-                    if len(restricted_stores) >= 1:
-                        raise serializers.ValidationError({"store": f"Invalid store: {restricted_stores}"})
-            else:
-                raise serializers.ValidationError({"store": f"Store ({value}) not found!"})
 
-        return value
 
     def to_representation(self, instance):
         """ Modify representation of data integrating `user` OneToOne Field """
@@ -222,23 +196,17 @@ class StoreModeratorSerializer(DynamicMixinModelSerializer):
             raise serializers.ValidationError(register_serializer.errors)
         return ResponseWrapper(data=register_serializer.data, status=200)
     
-    # def save(self, validated_data):
-    #     print("******* save is calling from serializer *******")
-    #     stores = validated_data.pop('store')
-    #     print(stores, "xxxxxxxxxxxxxxxxxx")
-    #     moderators = StoreModerator.objects.create(**validated_data)
-    #     for store in stores:
-    #         moderators.tags.add(store)
-    #     return moderators
 
     @transaction.atomic
     def save(self, validated_data, request):
         
         try:
+            store = validated_data.get('store', [])
             user = validated_data.pop('user')
             register_serializer = RegisterSerializer(data=user)
             
-            self.validate_store(value=validated_data.get('store', []))
+            # validate store
+            validate_many_to_many_list(value=store, model=Store, fieldName="store", allowBlank=False)
 
             if register_serializer.is_valid():
                 user_instance = register_serializer.save(request)
@@ -266,7 +234,7 @@ class StoreModeratorUpdateSerializer(DynamicMixinModelSerializer):
     
     class Meta:
         model = StoreModerator
-        fields = ["user", "contact", "address", "store_details"]
+        fields = ["user", "store", "contact", "address", "store_details"]
 
     def to_representation(self, instance):
         """ Modify representation of data integrating `user` OneToOne Field """
@@ -274,3 +242,27 @@ class StoreModeratorUpdateSerializer(DynamicMixinModelSerializer):
         representation['user'] = UserStoreModeratorSerializer(instance.user).data
         representation['store_details'] = [StoreShortInfoSerializer(storeData).data for storeData in instance.user.store_moderator_user.store.all()]
         return representation
+    
+    def update(self, instance, validated_data):
+        store = validated_data.pop('store')
+        user = validated_data.pop('user')
+        
+        # validate data
+        validate_many_to_many_list(value=store, model=Store, fieldName="store", allowBlank=False)
+        
+        instance = super(StoreModeratorUpdateSerializer, self).update(instance, validated_data)
+        
+        # Update name of user
+        instance.user.name = user.get("name", None)
+        instance.user.save()
+        
+        # clear existing many to many fields
+        instance.store.clear()
+        
+        if instance:
+            for each_store in store:
+                instance.store.add(each_store)
+            # save instance
+            instance.save()
+        # return updated instance
+        return instance

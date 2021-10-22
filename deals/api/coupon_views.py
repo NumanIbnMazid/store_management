@@ -3,7 +3,7 @@ from deals.models import Coupon
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
-from utils.helpers import ResponseWrapper
+from utils.helpers import ResponseWrapper, get_exception_error_msg
 from utils.studio_getter_helper import (
     get_studio_id_from_studio
 )
@@ -36,8 +36,8 @@ class CouponManagerViewSet(LoggingMixin, CustomViewSet):
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='list')
-        except AttributeError as E:
-            return ResponseWrapper(error_msg=str(E), msg="list", error_code=400)
+        except Exception as E:
+            return get_exception_error_msg(errorObj=E, msg="list")
 
 
 

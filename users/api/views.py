@@ -4,7 +4,7 @@ from django.core import serializers
 from django.contrib.auth import get_user_model
 import json
 from rest_framework_tracking.mixins import LoggingMixin
-from utils.custom_viewset import CustomViewSet
+from utils.custom_viewset import CustomViewSet, get_exception_error_msg
 from .serializers import UserSerializer, UserUpdateSerializer
 from utils import permissions as custom_permissions
 from utils.helpers import ResponseWrapper
@@ -101,5 +101,5 @@ class UserManagerViewSet(LoggingMixin, CustomViewSet):
             instance = self.request.user
             serializer = self.get_serializer(instance)
             return ResponseWrapper(data=serializer.data, msg="retrieve", status=200)
-        except AttributeError as E:
-            return ResponseWrapper(error_msg=str(E), msg="retrieve", error_code=400)
+        except Exception as E:
+            return get_exception_error_msg(errorObj=E, msg="retrieve")

@@ -90,7 +90,7 @@ class CustomBusinessDay(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name="store_custom_business_day")
     slug = models.SlugField(unique=True)
     date = models.DateField()
-    status = models.PositiveSmallIntegerField(choices=Status.choices, default=1)
+    status = models.PositiveSmallIntegerField(choices=Status.choices)
     details = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

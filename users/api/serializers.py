@@ -65,11 +65,14 @@ class RegisterSerializer(serializers.Serializer):
    
     @transaction.atomic
     def save(self, request):
-        adapter = get_adapter()
-        user = adapter.new_user(request)
-        self.cleaned_data = self.get_cleaned_data()
-        adapter.save_user(request, user, self)
-        setup_user_email(request, user, [])
-        user.name = self.data.get('name') 
-        user.save()
-        return user
+        try:
+            adapter = get_adapter()
+            user = adapter.new_user(request)
+            self.cleaned_data = self.get_cleaned_data()
+            adapter.save_user(request, user, self)
+            setup_user_email(request, user, [])
+            user.name = self.data.get('name') 
+            user.save()
+            return user
+        except Exception as E:
+            raise serializers.ValidationError({"details": [str(E)]})
