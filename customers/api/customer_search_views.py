@@ -7,7 +7,7 @@ from utils.helpers import ResponseWrapper, get_exception_error_msg
 from dateutil import parser
 
 
-class CustomerSearchManagerViewSet(LoggingMixin, CustomViewSet):
+class CustomerSearchManagerViewSet(CustomViewSet):
 
     logging_methods = ["GET", "POST", "PATCH", "DELETE"]
     queryset = Customer.objects.all()
@@ -23,11 +23,11 @@ class CustomerSearchManagerViewSet(LoggingMixin, CustomViewSet):
         return [permission() for permission in permission_classes]
 
     
-    def get_customer_from_range(self, start_date, end_date):
-        start_date = parser.parse(start_date)
-        end_date = parser.parse(end_date)
+    def get_customer_from_range(self, start_date, end_date):   
+        reservati_start_date = start_date
+        reservati_end_date = end_date
+        qs = Customer.objects.get_queryset().search(reservati_start_date, reservati_end_date)
 
-        qs = Customer.objects.get_queryset(created_at__range=[start_date, end_date])
         customer_objects = []
         if qs.exists():
             for instance in qs:
@@ -42,17 +42,15 @@ class CustomerSearchManagerViewSet(LoggingMixin, CustomViewSet):
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(data=request.data, partial=True)
             if serializer.is_valid():
-                start_date = parser.parse(request.data.get("start_date", ""))
-                formatted_start_date_str = start_date.strftime("%Y-%m-%d")
-
-                end_date = parser.parse(request.data.get("end_date", ""))
-                formatted_end_date_str = end_date.strftime("%Y-%m-%d")
+                # status_in = self.request.GET.get('status_in', '')
+                # status_ps = status_in.split(',')
                 
+                start_date = parser.parse(
+                    request.data.get("start_date", "")).date()
+                end_date = parser.parse(request.data.get("end_date", "")).date()
                 result = {
-                    "start_date": formatted_start_date_str,
-                    "end_date": formatted_end_date_str,
-                    "status": False,
-                    "total_customer": 0,
+                    "status":False,
+                    "total_customer":0,
                     "customer": []
                 }
                 
@@ -78,7 +76,8 @@ class CustomerSearchManagerViewSet(LoggingMixin, CustomViewSet):
                     return result
             
                 # filter customer between date range
-                customer_filter_result = self.get_customer_from_range(start_date=formatted_start_date_str, end_date=formatted_end_date_str)
+                customer_filter_result = self.get_customer_from_range(
+                    start_date=start_date, end_date=end_date)
                 
                 # prepare customer response data
                 if customer_filter_result[0] == True:

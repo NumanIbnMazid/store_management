@@ -9,21 +9,10 @@ class CustomerQuerySet(models.query.QuerySet):
 
     def latest(self):
         return self.filter().order_by('-created_at')
-
-    def registrati(self, start_date, end_date):
-        return self.filter(created_at__range=[start_date, end_date])
-    
-    def reservati(self, start_date, end_date):
-        return self.filter(created_at__range=[start_date, end_date])
-
-    def search(self, query):
-        lookups = (Q(user__icontains=query) |
-                   Q(postal_code__icontains=query) |
-                   Q(address__icontains=query) |
-                   Q(building_name__icontains=query) |
-                   Q(contact_address__icontains=query) |
-                   Q(identification__icontains=query))
-        return self.filter(lookups).distinct()
+        
+    def search(self, reservati_start_date, reservati_end_date):
+        lookups = (Q(created_at__range=[reservati_start_date, reservati_end_date]))
+        return self.filter(lookups)
 
 class CustomerManager(models.Manager):
     def get_queryset(self):
