@@ -46,7 +46,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(max_length=254, unique=True)
     """ Additional Fields Starts """
     name = models.CharField(max_length=254, null=True, blank=True)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=254)
     is_customer = models.BooleanField(default=False)
     is_studio_admin = models.BooleanField(default=False)
     is_store_staff = models.BooleanField(default=False)

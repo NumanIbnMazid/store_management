@@ -15,7 +15,7 @@ class Store(models.Model):
     
     name = models.CharField(max_length=150)
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_stores")
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=254)
     default_closed_day_of_weeks = ArrayField(models.CharField(max_length=254), blank=True)
     address = models.CharField(max_length=254, blank=True, null=True)
     contact_1 = models.CharField(max_length=30, blank=True, null=True)
@@ -58,7 +58,7 @@ class StoreModerator(models.Model):
     
     user = models.OneToOneField(get_user_model(), related_name='store_moderator_user', on_delete=models.CASCADE)
     store = models.ManyToManyField(Store, related_name="store_moderators")
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=254)
     contact = models.CharField(max_length=30, blank=True, null=True)
     address = models.CharField(max_length=254, blank=True, null=True)
     is_staff = models.BooleanField(default=True)
@@ -87,7 +87,7 @@ class CustomBusinessDay(models.Model):
         CLOSED = 0, _("Closed")
         OPEN = 1, _("Open")
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name="store_custom_business_day")
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=254)
     date = models.DateField()
     status = models.PositiveSmallIntegerField(choices=Status.choices)
     details = models.TextField(blank=True, null=True)
@@ -128,7 +128,7 @@ class CustomBusinessDay(models.Model):
 @autoslugFromUUID()
 class StoreBusinessHour(models.Model):
     store = models.OneToOneField(Store, on_delete=models.CASCADE, related_name="store_business_hours")
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=254)
     saturday_opening_time = models.TimeField()
     saturday_closing_time = models.TimeField()
     sunday_opening_time = models.TimeField()

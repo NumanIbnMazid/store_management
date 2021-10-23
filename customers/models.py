@@ -32,7 +32,7 @@ class Customer(models.Model):
         YET = 1, _("Yet")
         
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name="customer_user")
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=254)
     furigana = models.CharField(max_length=100, blank=True, null=True)
     name_of_person_in_charge = models.PositiveIntegerField(blank=True, null=True)
     postal_code = models.CharField(max_length=50, blank=True, null=True)

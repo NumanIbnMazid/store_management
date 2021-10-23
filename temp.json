@@ -1,10 +1,22 @@
 {
-  "user":{"name": "Karim", 
-        "email": "karim@example.com", 
-        "password1": "test12345", 
-        "password2": "test12345"
-    }, 
-  "contact": "string", 
-  "address": "string", 
-  "store": []
+  "title": "Test Plan 5",
+  "space": [
+    1,
+    2
+  ],
+  "option": [],
+  "hourly_price": "523.00",
+  "daily_price": "1523.00",
+  "image_1": "http://127.0.0.1:8000/media/Plans/test-plan-5/Images/20211022-203701.png",
+  "image_1_reference": "",
+  "image_1_comment": "",
+  "image_2": null,
+  "image_2_reference": "",
+  "image_2_comment": "",
+  "image_3": null,
+  "image_3_reference": "",
+  "image_3_comment": "",
+  "is_active": true,
+  "explanatory_comment": "",
+  "details": ""
 }

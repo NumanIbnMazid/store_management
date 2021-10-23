@@ -8,6 +8,8 @@ from django.utils.text import slugify
 from utils.snippets import simple_random_string, random_string_generator
 import uuid
 from rest_framework import serializers
+from utils.snippets import url_check
+from middlewares.request_middleware import RequestMiddleware
 
 
 class ResponseWrapper(Response):
@@ -238,7 +240,7 @@ def validate_many_to_many_list(value, model, fieldName, allowBlank=False):
     """[Validates ManyToMany Field id List]
 
     Args:
-        value ([List]): [mant to mant ids]
+        value ([List]): [many to many ids]
         model ([Django Model Class]): [Django Model Class]
         fieldName ([String]): [Many to Many Field Name]
         allowBlank (bool, optional): [If allow blank]. Defaults to False.
@@ -247,7 +249,7 @@ def validate_many_to_many_list(value, model, fieldName, allowBlank=False):
         serializers.ValidationError: [description]
 
     Returns:
-        [List]: [Validate Value List]
+        [List]: [Validated Value List]
     """
     
     if value == None or value == "":
@@ -278,6 +280,33 @@ def validate_many_to_many_list(value, model, fieldName, allowBlank=False):
         raise serializers.ValidationError({fieldName: f"`{fieldName}` ({value}) not found!"})
     
     return value
+
+
+def get_file_representations(representation, instance):
+    """[Populates the file representations]
+
+    Args:
+        representation ([Dictionary]): [representation object of the serializer]
+        instance ([Model Object Instance]): [description]
+
+    Returns:
+        [Dictionary]: [Representation Object]
+    """
+    
+    # get the request object from middleware
+    request = RequestMiddleware(get_response=None)
+    request = request.thread_local.current_request
+    # get the absolute domain of the site
+    ABSOLUTE_DOMAIN = request.build_absolute_uri('/')[:-1]
+    # get the model class
+    MODEL = instance._meta.model
+    # loop through all fields of the model
+    for field in MODEL._meta.fields:
+        if field.get_internal_type() in ['ImageField', 'FileField'] and representation[field.name]:
+            # modify the representation
+            representation[field.name] = ABSOLUTE_DOMAIN + representation[field.name]
+    # return the modified representation
+    return representation
 
 
 def get_exception_error_msg(errorObj, msg=None):
@@ -312,3 +341,41 @@ def get_exception_error_msg(errorObj, msg=None):
     
     except Exception as E:
         return ResponseWrapper(error_msg=str(E), msg=msg, error_code=400)
+
+
+def process_files_data(data: dict, selfObject):
+    """[Processes files data from request]
+
+    Args:
+        data ([Dictionary]): [request data object]
+        selfObject ([instance]): [description]
+
+    Returns:
+        [Dictionary]: [Request data object with processed image data]
+    """
+
+    file_fields = []
+    
+    # MODEL = selfObject.get_object()._meta.model
+    MODEL = selfObject.get_serializer_class().Meta.model
+    
+    # loop through all fields of the model
+    for field in MODEL._meta.fields:
+        if field.get_internal_type() in ['ImageField', 'FileField']:
+            file_fields.append(field.name)
+    
+    # process files if file fields exists
+    if len(file_fields) >= 1:
+        for field in file_fields:
+
+            file = data.get(field, None)
+
+            # remove file if data is null or empty string
+            if file == None or file == "":
+                data.pop(field, None)
+            else:
+                # remove file if data is an URL
+                if url_check(file):
+                    data.pop(field, None)
+
+    return data

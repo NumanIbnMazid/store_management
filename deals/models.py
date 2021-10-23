@@ -8,7 +8,7 @@ from utils.helpers import autoslugFromUUID
 class Coupon(models.Model):
     name = models.CharField(max_length=254)
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_coupons")
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=254)
     start_date = models.DateField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
     anytime = models.BooleanField(default=False)
@@ -44,7 +44,7 @@ class Coupon(models.Model):
 @autoslugFromUUID()
 class PointSetting(models.Model):
     studio = models.OneToOneField(Studio, on_delete=models.CASCADE, related_name="studio_point_setting")
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=254)
     point_per_yen = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='created at')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='updated at')

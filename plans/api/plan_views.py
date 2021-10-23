@@ -1,9 +1,10 @@
 from .serializers import (PlanSerializer, PlanUpdateSerializer)
-from plans.models import Plan
+from plans.models import Plan, Option
+from spaces.models import Space
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
-from utils.helpers import ResponseWrapper, get_exception_error_msg
+from utils.helpers import ResponseWrapper, get_exception_error_msg, process_files_data, validate_many_to_many_list
 from utils.studio_getter_helper import (
     get_studio_id_from_space
 )
@@ -35,51 +36,51 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
     #         ]
     #     return [permission() for permission in permission_classes]
 
+
     def _clean_data(self, data):
         if isinstance(data, bytes):
             data = data.decode(errors='ignore')
         return super(PlanManagerViewSet, self)._clean_data(data)
-
-    # def create(self, request):
-    #     try:
-    #         serializer_class = self.get_serializer_class()
-    #         serializer = serializer_class(data=request.data, partial=True)
-    #         plan = serializer.save(request.data)
-    #         serializer = self.serializer_class(instance=plan)
-    #         return ResponseWrapper(data=serializer.data, status=200, msg="create")
-    #     except Exception as E:
-    #         return get_exception_error_msg(errorObj=E, msg="create")
-
-    # def update(self, request, **kwargs):
-    #     try:
-    #         serializer_class = self.get_serializer_class()
-    #         serializer = serializer_class(data=request.data, partial=True, context={
-    #             "initialObject": self.get_object(), "requestObject": request
-    #         })
-    #         qs = serializer.update(
-    #             instance=self.get_object(), validated_data=request.data)
-    #         if serializer.is_valid(raise_exception=True):
-    #             serializer = self.serializer_class(instance=qs)
-    #             return ResponseWrapper(data=serializer.data, msg="update", status=200)
-    #         return ResponseWrapper(error_msg=serializer.errors, msg="update", error_code=400)
-
-    #     except Exception as E:
-    #         return get_exception_error_msg(errorObj=E, msg="update")
+    
+    def create(self, request):
+        try:
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(data=request.data)
+            
+            # validate many to many list
+            validate_many_to_many_list(value=request.data.get("space", []), model=Space, fieldName="space", allowBlank=False)
+            validate_many_to_many_list(value=request.data.get("option", []), model=Option, fieldName="option", allowBlank=True)
+            
+            if serializer.is_valid():
+                qs = serializer.save()
+                serializer = self.serializer_class(instance=qs)
+                return ResponseWrapper(data=serializer.data, msg="create", status=200)
+            return ResponseWrapper(error_msg=serializer.errors, msg="create", error_code=400)
+        except Exception as E:
+            return get_exception_error_msg(errorObj=E, msg="create")
+    
 
     def update(self, request, **kwargs):
         try:
             serializer_class = self.get_serializer_class()
-            serializer = serializer_class(data=request.data, partial=True, context={
+            # process file data
+            processed_file_data = process_files_data(data=request.data, selfObject=self)
+            serializer = serializer_class(data=processed_file_data, partial=True, context={
                 "initialObject": self.get_object(), "requestObject": request
             })
+            
+            # validate many to many list
+            validate_many_to_many_list(value=request.data.get("space", []), model=Space, fieldName="space", allowBlank=False)
+            validate_many_to_many_list(value=request.data.get("option", []), model=Option, fieldName="option", allowBlank=True)
+            
             if serializer.is_valid():
-                qs = serializer.update(instance=self.get_object(
-                ), validated_data=serializer.validated_data)
+                qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
                 serializer = self.serializer_class(instance=qs)
                 return ResponseWrapper(data=serializer.data, msg="update", status=200)
             return ResponseWrapper(error_msg=serializer.errors, msg="update", error_code=400)
         except Exception as E:
             return get_exception_error_msg(errorObj=E, msg="update")
+
 
     def list(self, request, *args, **kwargs):
         try:

@@ -90,7 +90,7 @@ MIDDLEWARE = [
     # Custom Slash Middleware
     'middlewares.slash_middleware.AppendOrRemoveSlashMiddleware',
     # Request Middleware
-    # 'middlewares.request_middleware.RequestMiddleware',
+    'middlewares.request_middleware.RequestMiddleware',
     # Custom Exception Handler Middleware # Enable in Production Mode
     # 'utils.custom_exception_handler.ExceptionMiddleware',
 ]

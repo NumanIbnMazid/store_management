@@ -2,6 +2,7 @@ import random
 import string
 import time
 from django.utils.text import slugify
+from urllib.parse import urlparse
 
 
 def random_string_generator(size=4, chars=string.ascii_lowercase + string.digits):
@@ -57,3 +58,25 @@ def unique_slug_generator(instance=None, field=None, new_slug=None):
         )
         return unique_slug_generator(instance, new_slug=new_slug)
     return slug
+
+
+def url_check(url):
+    """[Checks if a provided string is URL or Not]
+
+    Args:
+        url ([String]): [URL String]
+
+    Returns:
+        [Boolean]: [returns True if provided string is URL, otherwise returns False]
+    """
+    
+    min_attr = ('scheme' , 'netloc')
+    
+    try:
+        result = urlparse(url)
+        if all([result.scheme, result.netloc]):
+            return True
+        else:
+            return False
+    except:
+        return False

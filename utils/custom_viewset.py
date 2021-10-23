@@ -1,5 +1,5 @@
 from rest_framework import viewsets
-from utils.helpers import ResponseWrapper, get_exception_error_msg
+from utils.helpers import ResponseWrapper, get_exception_error_msg, process_files_data
 from django.db.models import Q
 
 class CustomViewSet(viewsets.ModelViewSet):
@@ -46,7 +46,11 @@ class CustomViewSet(viewsets.ModelViewSet):
     def update(self, request, **kwargs):
         try:
             serializer_class = self.get_serializer_class()
-            serializer = serializer_class(data=request.data, partial=True, context={
+            
+            # process file data
+            processed_file_data = process_files_data(data=request.data, selfObject=self)
+            
+            serializer = serializer_class(data=processed_file_data, partial=True, context={
                 "initialObject": self.get_object(), "requestObject": request
             })
             if serializer.is_valid():

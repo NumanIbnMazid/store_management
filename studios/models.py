@@ -11,7 +11,7 @@ from django.dispatch import receiver
 class Studio(models.Model):
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE, related_name="studio_user")
     name = models.CharField(max_length=254)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=254)
     country = models.CharField(max_length=50, blank=True, null=True)
     zip_code = models.CharField(max_length=15, blank=True, null=True)
     city = models.CharField(max_length=100, blank=True, null=True)
@@ -49,7 +49,7 @@ class Studio(models.Model):
 @autoslugFromUUID()
 class VatTax(models.Model):
     studio = models.OneToOneField(Studio, on_delete=models.CASCADE, related_name="studio_vattax")
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=254)
     vat = models.IntegerField(default=0)
     tax = models.IntegerField(default=0)
     other_service = models.IntegerField(default=0, blank=True, null=True)
@@ -73,7 +73,7 @@ class VatTax(models.Model):
 class Currency(models.Model):
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_currency")
     country = models.CharField(max_length=50)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=254)
     currency = models.CharField(max_length=50, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
