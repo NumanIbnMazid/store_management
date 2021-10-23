@@ -343,27 +343,39 @@ def get_exception_error_msg(errorObj, msg=None):
         return ResponseWrapper(error_msg=str(E), msg=msg, error_code=400)
 
 
-def process_image_data(data: dict, image_fields: list) -> dict:
-    """[Processes image data from request]
+def process_files_data(data: dict, selfObject):
+    """[Processes files data from request]
 
     Args:
         data ([Dictionary]): [request data object]
-        image_fields ([List]): [List of image fields in request]
+        selfObject ([instance]): [description]
 
     Returns:
         [Dictionary]: [Request data object with processed image data]
     """
 
-    for field in image_fields:
+    file_fields = []
+    
+    # MODEL = selfObject.get_object()._meta.model
+    MODEL = selfObject.get_serializer_class().Meta.model
+    
+    # loop through all fields of the model
+    for field in MODEL._meta.fields:
+        if field.get_internal_type() in ['ImageField', 'FileField']:
+            file_fields.append(field.name)
+    
+    # process files if file fields exists
+    if len(file_fields) >= 1:
+        for field in file_fields:
 
-        image = data.get(field, None)
+            file = data.get(field, None)
 
-        # remove image if data is null or empty string
-        if image == None or image == "":
-            data.pop(field, None)
-        else:
-            # remove image if data is an URL
-            if url_check(image):
+            # remove file if data is null or empty string
+            if file == None or file == "":
                 data.pop(field, None)
+            else:
+                # remove file if data is an URL
+                if url_check(file):
+                    data.pop(field, None)
 
     return data

@@ -68,7 +68,7 @@ def upload_option_image_path(instance, filename):
     final_filename = '{new_filename}{ext}'.format(
         new_filename=new_filename, ext=ext
     )
-    return "OPtions/{option_title}/Images/{final_filename}".format(
+    return "Options/{option_title}/Images/{final_filename}".format(
         option_title=slugify(instance.title[:50]),
         final_filename=final_filename
     )

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from utils.helpers import get_file_representations
 
 # Class Custom Model Admin Mixing
 class CustomModelAdminMixin(object):
@@ -51,3 +52,10 @@ class DynamicMixinModelSerializer(serializers.ModelSerializer):
         
     def validate(self, attrs):
         return self.validate_common(attrs=attrs)
+    
+    
+    def to_representation(self, instance):
+        """ Modify representation of data """
+        representation = super(DynamicMixinModelSerializer, self).to_representation(instance)
+        representation = get_file_representations(representation=representation, instance=instance)
+        return representation

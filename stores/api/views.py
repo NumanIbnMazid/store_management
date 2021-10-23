@@ -6,7 +6,7 @@ from stores.models import Store, CustomBusinessDay, StoreModerator
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
-from utils.helpers import ResponseWrapper, get_exception_error_msg, process_image_data, validate_many_to_many_list
+from utils.helpers import ResponseWrapper, get_exception_error_msg, validate_many_to_many_list
 from utils.studio_getter_helper import (
     get_studio_id_from_studio, get_studio_id_from_store
 )
@@ -35,23 +35,24 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
         permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
     
-    def update(self, request, **kwargs):
-        try:
-            serializer_class = self.get_serializer_class()
+    # def update(self, request, **kwargs):
+    #     try:
+    #         serializer_class = self.get_serializer_class()
             
-            # process image data
-            processed_image_data = process_image_data(data=request.data, image_fields=["image_1", "image_2", "image_3"])
-            serializer = serializer_class(data=processed_image_data, partial=True, context={
-                "initialObject": self.get_object(), "requestObject": request
-            })
+    #         # process file data
+    #         processed_file_data = process_files_data(data=request.data, selfObject=self)
             
-            if serializer.is_valid():
-                qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
-                serializer = self.serializer_class(instance=qs)
-                return ResponseWrapper(data=serializer.data, msg="update", status=200)
-            return ResponseWrapper(error_msg=serializer.errors, msg="update", error_code=400)
-        except Exception as E:
-            return get_exception_error_msg(errorObj=E, msg="update")
+    #         serializer = serializer_class(data=processed_file_data, partial=True, context={
+    #             "initialObject": self.get_object(), "requestObject": request
+    #         })
+            
+    #         if serializer.is_valid():
+    #             qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
+    #             serializer = self.serializer_class(instance=qs)
+    #             return ResponseWrapper(data=serializer.data, msg="update", status=200)
+    #         return ResponseWrapper(error_msg=serializer.errors, msg="update", error_code=400)
+    #     except Exception as E:
+    #         return get_exception_error_msg(errorObj=E, msg="update")
 
 
     def list(self, request, *args, **kwargs):

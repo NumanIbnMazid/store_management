@@ -4,7 +4,7 @@ from spaces.models import Space
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
-from utils.helpers import ResponseWrapper, get_exception_error_msg, process_image_data, validate_many_to_many_list
+from utils.helpers import ResponseWrapper, get_exception_error_msg, process_files_data, validate_many_to_many_list
 from utils.studio_getter_helper import (
     get_studio_id_from_space
 )
@@ -63,9 +63,9 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
     def update(self, request, **kwargs):
         try:
             serializer_class = self.get_serializer_class()
-            # process image data
-            processed_image_data = process_image_data(data=request.data, image_fields=["image_1", "image_2", "image_3"])
-            serializer = serializer_class(data=processed_image_data, partial=True, context={
+            # process file data
+            processed_file_data = process_files_data(data=request.data, selfObject=self)
+            serializer = serializer_class(data=processed_file_data, partial=True, context={
                 "initialObject": self.get_object(), "requestObject": request
             })
             
