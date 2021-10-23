@@ -6,7 +6,7 @@ from utils.mixins import DynamicMixinModelSerializer
 from django.contrib.auth import get_user_model
 from users.api.serializers import (RegisterSerializer)
 from django.db import transaction
-from utils.helpers import ResponseWrapper, validate_many_to_many_list
+from utils.helpers import ResponseWrapper, get_file_representations
 from stores.models import StoreBusinessHour
 from utils.mixins import DynamicMixinModelSerializer
 
@@ -29,6 +29,7 @@ class StoreSerializer(DynamicMixinModelSerializer):
     image_1 = HybridImageField(required=False)
     image_2 = HybridImageField(required=False)
     image_3 = HybridImageField(required=False)
+    studio = serializers.PrimaryKeyRelatedField(queryset=Studio.objects.all())
     
     class Meta:
         model = Store
@@ -37,21 +38,27 @@ class StoreSerializer(DynamicMixinModelSerializer):
         extra_kwargs = {'default_closed_day_of_weeks': {'required': True}}
         
     def validate(self, data):
-        default_closed_day_of_weeks = data.get("default_closed_day_of_weeks")
-        valid_day_of_weeks = [
-            "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
-        ]
-        if not type(default_closed_day_of_weeks) == list:
-            raise serializers.ValidationError("Invalid data type received! Expected List/Array.")
-        for day_of_week in default_closed_day_of_weeks:
-            if day_of_week.title() not in valid_day_of_weeks:
-                raise serializers.ValidationError(f"Invalid data received `{day_of_week}`! Available `default_closed_day_of_weeks` are `{valid_day_of_weeks}`")
+        
+        # validate initials
+        self.validate_initials(attrs=data)
+        
+        default_closed_day_of_weeks = data.get("default_closed_day_of_weeks", None)
+        if default_closed_day_of_weeks:
+            valid_day_of_weeks = [
+                "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"
+            ]
+            if not type(default_closed_day_of_weeks) == list:
+                raise serializers.ValidationError("Invalid data type received! Expected List/Array.")
+            for day_of_week in default_closed_day_of_weeks:
+                if day_of_week.title() not in valid_day_of_weeks:
+                    raise serializers.ValidationError(f"Invalid data received `{day_of_week}`! Available `default_closed_day_of_weeks` are `{valid_day_of_weeks}`")
         return data
     
     def to_representation(self, instance):
         """ Modify representation of data integrating `studio` """
         representation = super(StoreSerializer, self).to_representation(instance)
         representation['studio_details'] = StudioShortInfoSerializer(instance.studio).data
+        representation = get_file_representations(representation=representation, instance=instance)
         return representation
 
 class StoreUpdateSerializer(DynamicMixinModelSerializer):
@@ -67,22 +74,28 @@ class StoreUpdateSerializer(DynamicMixinModelSerializer):
         extra_kwargs = {'default_closed_day_of_weeks': {'required': True}}
         
     def validate(self, data):
-        default_closed_day_of_weeks = data.get("default_closed_day_of_weeks")
-        valid_day_of_weeks = [
-            'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
-        ]
-        if not type(default_closed_day_of_weeks) == list:
-            raise serializers.ValidationError("Invalid data type received! Expected List/Array.")
         
-        for day_of_week in default_closed_day_of_weeks:
-            if day_of_week.title() not in valid_day_of_weeks:
-                raise serializers.ValidationError(f"Invalid data received `{day_of_week}`! Available `default_closed_day_of_weeks` are `{valid_day_of_weeks}`")
+        # validate initials
+        self.validate_initials(attrs=data)
+        
+        default_closed_day_of_weeks = data.get("default_closed_day_of_weeks", None)
+        if default_closed_day_of_weeks:
+            valid_day_of_weeks = [
+                'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'
+            ]
+            if not type(default_closed_day_of_weeks) == list:
+                raise serializers.ValidationError("Invalid data type received! Expected List/Array.")
+            
+            for day_of_week in default_closed_day_of_weeks:
+                if day_of_week.title() not in valid_day_of_weeks:
+                    raise serializers.ValidationError(f"Invalid data received `{day_of_week}`! Available `default_closed_day_of_weeks` are `{valid_day_of_weeks}`")
         return data
     
     def to_representation(self, instance):
         """ Modify representation of data integrating `studio` """
         representation = super(StoreUpdateSerializer, self).to_representation(instance)
         representation['studio_details'] = StudioShortInfoSerializer(instance.studio).data
+        representation = get_file_representations(representation=representation, instance=instance)
         return representation
     
 
@@ -99,6 +112,10 @@ class CustomBusinessDaySerializer(DynamicMixinModelSerializer):
         read_only_fields = ("slug",)
         
     def validate(self, data):
+        
+        # validate initials
+        self.validate_initials(attrs=data)
+        
         date = data.get("date", None)
         store = data.get('store', None)
         status = data.get('status', None)
@@ -131,6 +148,30 @@ class CustomBusinessDayUpdateSerializer(DynamicMixinModelSerializer):
         model = CustomBusinessDay
         fields = "__all__"
         read_only_fields = ("slug", "store",)
+        
+    def validate(self, data):
+        
+        # validate initials
+        self.validate_initials(attrs=data)
+        
+        date = data.get("date", None)
+        store = data.get('store', None)
+        status = data.get('status', None)
+        
+        store_qs = Store.objects.filter(id=int(store.id))
+        if store_qs:
+            store_default_closed_day_of_weeks = store_qs.first().default_closed_day_of_weeks
+            if date.strftime("%A") in store_default_closed_day_of_weeks and int(status) == 0:
+                raise serializers.ValidationError(f"Date `{date} - {date.strftime('%A')}` is alerady exists in Store Default Closed Day of Weeks!")
+            if date.strftime("%A") not in store_default_closed_day_of_weeks and int(status) == 1:
+                raise serializers.ValidationError(f"Date `{date} - {date.strftime('%A')}` is alerady a Business Day!")
+        else:
+            raise serializers.ValidationError("Store not found!")
+        
+        custom_business_day_qs = CustomBusinessDay.objects.filter(store__id=store.id, date=date)
+        if custom_business_day_qs:
+            raise serializers.ValidationError(f"Date `{date}` is alerady exists in Custom Closed Day!")
+        return data
         
     def to_representation(self, instance):
         """ Modify representation of data integrating `studio` """
@@ -199,37 +240,6 @@ class StoreModeratorSerializer(DynamicMixinModelSerializer):
         return ResponseWrapper(data=register_serializer.data, status=200)
     
 
-    @transaction.atomic
-    def save(self, validated_data, request):
-        
-        try:
-            store = validated_data.get('store', [])
-            user = validated_data.pop('user')
-            register_serializer = RegisterSerializer(data=user)
-            
-            # validate store
-            validate_many_to_many_list(value=store, model=Store, fieldName="store", allowBlank=False)
-
-            if register_serializer.is_valid():
-                user_instance = register_serializer.save(request)
-                
-                # alter is_store_staff = True
-                user_instance.is_store_staff = True
-                user_instance.save()
-                store = validated_data.pop('store')
-                store_moderator = StoreModerator.objects.create(**validated_data, user=user_instance)
-                for each_store in store:
-                    store_moderator.store.add(each_store)
-                store_moderator.save()
-                return store_moderator
-            if register_serializer.errors:
-                raise serializers.ValidationError(register_serializer.errors)
-            return ResponseWrapper(data=register_serializer.data, status=200)
-        
-        except AttributeError as E:
-            raise serializers.ValidationError(str(E))
-
-
 class StoreModeratorUpdateSerializer(DynamicMixinModelSerializer):
     user = UserStoreModeratorUpdateSerializer(read_only=True)
     store_details = serializers.CharField(read_only=True)
@@ -244,30 +254,6 @@ class StoreModeratorUpdateSerializer(DynamicMixinModelSerializer):
         representation['user'] = UserStoreModeratorSerializer(instance.user).data
         representation['store_details'] = [StoreShortInfoSerializer(storeData).data for storeData in instance.user.store_moderator_user.store.all()]
         return representation
-    
-    def update(self, instance, validated_data):
-        store = validated_data.pop('store')
-        user = validated_data.pop('user')
-        
-        # validate data
-        validate_many_to_many_list(value=store, model=Store, fieldName="store", allowBlank=False)
-        
-        instance = super(StoreModeratorUpdateSerializer, self).update(instance, validated_data)
-        
-        # Update name of user
-        instance.user.name = user.get("name", None)
-        instance.user.save()
-        
-        # clear existing many to many fields
-        instance.store.clear()
-        
-        if instance:
-            for each_store in store:
-                instance.store.add(each_store)
-            # save instance
-            instance.save()
-        # return updated instance
-        return instance
 
 
 class StoreBusinessHourSerializer(serializers.ModelSerializer):

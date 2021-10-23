@@ -6,7 +6,7 @@ from stores.models import Store, CustomBusinessDay, StoreModerator
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
-from utils.helpers import ResponseWrapper, get_exception_error_msg
+from utils.helpers import ResponseWrapper, get_exception_error_msg, process_image_data, validate_many_to_many_list
 from utils.studio_getter_helper import (
     get_studio_id_from_studio, get_studio_id_from_store
 )
@@ -38,10 +38,13 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
     def update(self, request, **kwargs):
         try:
             serializer_class = self.get_serializer_class()
-            print(request.data, "*** Request Data from Viewset ***")
-            serializer = serializer_class(data=request.data, partial=True, context={
+            
+            # process image data
+            processed_image_data = process_image_data(data=request.data, image_fields=["image_1", "image_2", "image_3"])
+            serializer = serializer_class(data=processed_image_data, partial=True, context={
                 "initialObject": self.get_object(), "requestObject": request
             })
+            
             if serializer.is_valid():
                 qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
                 serializer = self.serializer_class(instance=qs)
@@ -172,10 +175,25 @@ class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
     def create_staff(self, request, *args, **kwargs):
         try:
             serializer_class = self.get_serializer_class()
-            serializer = serializer_class(data=request.data, partial=True)
-            studio_modarator = serializer.save(request.data, request)
-            serializer = self.serializer_class(instance=studio_modarator)
-            return ResponseWrapper(data=serializer.data, status=200, msg="create")
+            serializer = serializer_class(data=request.data)
+            
+            # validate store many to many list
+            validate_many_to_many_list(value=request.data.get("store", []), model=Store, fieldName="store", allowBlank=False)
+            
+            if serializer.is_valid(raise_exception=True):
+                user_instance = serializer.save_base_user(request)
+                # update is_store_staff in user model
+                user_instance.is_store_staff = True
+                user_instance.save()
+                # save studio moderator
+                moderator_instance = serializer.save(user=user_instance)
+                # update is_staff = True to make user studio staff
+                moderator_instance.is_staff = True
+                # save moderator instacne
+                moderator_instance.save()
+                
+                return ResponseWrapper(data=serializer.data, msg="create", status=200)
+            return ResponseWrapper(error_msg=serializer.errors, msg="create", error_code=400)
         except Exception as E:
             return get_exception_error_msg(errorObj=E, msg="create")
 
@@ -189,21 +207,27 @@ class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
         except Exception as E:
             return get_exception_error_msg(errorObj=E, msg="delete")
         
+        
     def update(self, request, **kwargs):
         try:
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(data=request.data, partial=True, context={
                 "initialObject": self.get_object(), "requestObject": request
             })
-            qs = serializer.update(instance=self.get_object(), validated_data=request.data)
-            if serializer.is_valid(raise_exception=True):
+            
+            # validate store many to many list
+            validate_many_to_many_list(value=request.data.get("store", []), model=Store, fieldName="store", allowBlank=False)
+            
+            if serializer.is_valid():
+                qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
                 serializer = self.serializer_class(instance=qs)
+                qs.user.name = request.data.get('user', {}).get("name", None)
+                qs.user.save()
                 return ResponseWrapper(data=serializer.data, msg="update", status=200)
             return ResponseWrapper(error_msg=serializer.errors, msg="update", error_code=400)
-        
         except Exception as E:
             return get_exception_error_msg(errorObj=E, msg="update")
-
+        
     
     def list(self, request, *args, **kwargs):
         try:

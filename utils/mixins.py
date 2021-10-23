@@ -17,10 +17,37 @@ class CustomModelAdminMixin(object):
 
 
 class DynamicMixinModelSerializer(serializers.ModelSerializer):
+    def __init__(self, *args, **kwargs):
+        super(DynamicMixinModelSerializer, self).__init__(*args, **kwargs)
+        
+    def validate_common(self, attrs):
+        instance = None
 
-    def validate(self, attrs):
         initialObject = self.context.get("initialObject", None)
         requestObject = self.context.get("requestObject", None)
-        instance = self.Meta.model(**attrs)
-        instance.clean(initialObject=initialObject, requestObject=requestObject)
+
+        if len(self.Meta.model._meta.many_to_many) >= 1:
+            attrsCopy = attrs.copy()
+            # modelAllFields = self.Meta.model._meta.fields + self.Meta.model._meta.many_to_many
+            for field in self.Meta.model._meta.many_to_many:
+                # remove many to many field from attrs
+                many_field_name = attrs.pop(field.name)
+            instance = self.Meta.model(**attrs)
+            # return back the original attrs
+            attrs = attrsCopy
+        else:
+            instance = self.Meta.model(**attrs)
+
+        # call the models clean method if exists
+        models_clean = getattr(instance, "clean", None)
+        if callable(models_clean):
+            instance.clean(initialObject=initialObject,
+                           requestObject=requestObject)
+
         return attrs
+        
+    def validate_initials(self, attrs):
+        return self.validate_common(attrs=attrs)
+        
+    def validate(self, attrs):
+        return self.validate_common(attrs=attrs)
