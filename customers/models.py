@@ -9,7 +9,7 @@ class CustomerQuerySet(models.query.QuerySet):
 
     def latest(self):
         return self.filter().order_by('-created_at')
-        
+
     def search(self, reservati_start_date, reservati_end_date):
         lookups = (Q(created_at__range=[reservati_start_date, reservati_end_date]))
         return self.filter(lookups)

@@ -1,4 +1,4 @@
-from deals.models import Coupon, PointSetting
+from deals.models import Coupon, PointSetting, PeriodicalDiscount, EarlyBirdDiscount
 from utils.mixins import DynamicMixinModelSerializer
 
 
@@ -29,5 +29,37 @@ class PointSettingUpdateSerializer(DynamicMixinModelSerializer):
     
     class Meta:
         model = PointSetting
+        fields = "__all__"
+        read_only_fields = ("slug", "studio",)
+
+
+class PeriodicalDiscountSerializer(DynamicMixinModelSerializer):
+
+    class Meta:
+        model = PeriodicalDiscount
+        fields = "__all__"
+        read_only_fields = ("slug",)
+
+
+class PeriodicalDiscountUpdateSerializer(DynamicMixinModelSerializer):
+
+    class Meta:
+        model = PeriodicalDiscount
+        fields = "__all__"
+        read_only_fields = ("slug", "studio",)
+
+
+class EarlyBirdDiscountSerializer(DynamicMixinModelSerializer):
+
+    class Meta:
+        model = EarlyBirdDiscount
+        fields = "__all__"
+        read_only_fields = ("slug",)
+
+
+class EarlyBirdDiscountUpdateSerializer(DynamicMixinModelSerializer):
+
+    class Meta:
+        model = EarlyBirdDiscount
         fields = "__all__"
         read_only_fields = ("slug", "studio",)

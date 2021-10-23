@@ -2,7 +2,7 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 from .views import StoreManagerViewSet, CustomBusinessDayManagerViewSet, StoreModeratorManagerViewSet
 from .business_day_views import BusinessDayManagerViewSet
-from .store_business_hours import StoreBusinessHourManagerViewSet
+from .business_hour_views import StoreBusinessHourManagerViewSet
 
 
 router = DefaultRouter()
