@@ -15,6 +15,7 @@ urlpatterns = [
     path("delete/<slug>", StudioViewSet.as_view({"delete": "destroy"}, name="delete_studio")),
     path("list", StudioViewSet.as_view({"get": "list"}, name="list_studio")),
     path("list-with-short-info", StudioViewSet.as_view({"get": "list_with_short_info"}, name="studio_list_with_short_info")),
+    path("studio-list-for-vattax", StudioViewSet.as_view({"get": "get_studio_list_for_vattax"}, name="get_studio_list_for_vattax")),
 
     # ==============================*** Vat Tax URLS ***==============================
     path("vattax/create", VatTaxManagerViewSet.as_view({'post': 'create'}, name='create_vat_tax')),

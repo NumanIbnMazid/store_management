@@ -34,7 +34,7 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
             self.serializer_class = StudioSerializer
         elif self.action in ["update", "put"]:
             self.serializer_class = StudioUpdateSerializer
-        elif self.action in ["list_with_short_info"]:
+        elif self.action in ["list_with_short_info", "get_studio_list_for_vattax"]:
             self.serializer_class = StudioShortInfoSerializer
         else:
             self.serializer_class = StudioSerializer
@@ -105,5 +105,14 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg="list", status=200)
+        except Exception as E:
+            return get_exception_error_msg(errorObj=E, msg="list")
+        
+    def get_studio_list_for_vattax(self, request, *args, **kwargs):
+        try:
+            qs = self.get_queryset().filter(studio_vattax=None)
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(instance=qs, many=True)
+            return ResponseWrapper(data=serializer.data, msg='success')
         except Exception as E:
             return get_exception_error_msg(errorObj=E, msg="list")

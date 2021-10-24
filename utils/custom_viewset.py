@@ -34,6 +34,10 @@ class CustomViewSet(viewsets.ModelViewSet):
     def create(self, request):
         try:
             serializer_class = self.get_serializer_class()
+            
+            # process file data
+            process_files_data(data=request.data, selfObject=self)
+            
             serializer = serializer_class(data=request.data)
             if serializer.is_valid():
                 qs = serializer.save()

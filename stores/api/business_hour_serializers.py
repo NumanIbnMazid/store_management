@@ -22,3 +22,7 @@ class StoreBusinessHourUpdateSerializer(serializers.ModelSerializer):
         model = StoreBusinessHour
         fields = "__all__"
         read_only_fields = ("slug", "store",)
+
+
+class BusinessHourFromWeekNameCheckerSerializer(serializers.Serializer):
+    week_name = serializers.CharField()
