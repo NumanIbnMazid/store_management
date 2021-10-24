@@ -50,7 +50,7 @@ class BusinessDay(models.Model):
         return "Open"
     
 class BusinessHour(models.Model):
-    store = models.OneToOneField(Store, on_delete=models.CASCADE, related_name="store_business_hour")
+    store = models.OneToOneField(Store, on_delete=models.CASCADE, related_name="store_custom_business_hour")
     slug = models.UUIDField(editable=False, default=uuid.uuid4, unique=True)
     saturday_opening_time = models.TimeField()
     saturday_closing_time = models.TimeField()

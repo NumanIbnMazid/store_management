@@ -10,6 +10,7 @@ import uuid
 from rest_framework import serializers
 from utils.snippets import url_check
 from middlewares.request_middleware import RequestMiddleware
+from django.conf import settings
 
 
 class ResponseWrapper(Response):
@@ -303,8 +304,11 @@ def get_file_representations(representation, instance):
     # loop through all fields of the model
     for field in MODEL._meta.fields:
         if field.get_internal_type() in ['ImageField', 'FileField'] and representation[field.name]:
+            field_value = getattr(instance, field.name).url
             # modify the representation
-            representation[field.name] = ABSOLUTE_DOMAIN + representation[field.name]
+            # and request.method.lower() in ["post", "put", "patch"]
+            if not url_check(field_value):
+                representation[field.name] = ABSOLUTE_DOMAIN + field_value
     # return the modified representation
     return representation
 

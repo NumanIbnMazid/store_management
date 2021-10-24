@@ -25,7 +25,7 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
     def get_serializer_class(self):
         if self.action in ["update"]:
             self.serializer_class = StoreUpdateSerializer
-        elif self.action in ["list_with_short_info"]:
+        elif self.action in ["list_with_short_info", "business_hour_store_get_from_studio"]:
             self.serializer_class = StoreShortInfoSerializer
         else:
             self.serializer_class = StoreSerializer
@@ -35,26 +35,7 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
         permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
     
-    # def update(self, request, **kwargs):
-    #     try:
-    #         serializer_class = self.get_serializer_class()
-            
-    #         # process file data
-    #         processed_file_data = process_files_data(data=request.data, selfObject=self)
-            
-    #         serializer = serializer_class(data=processed_file_data, partial=True, context={
-    #             "initialObject": self.get_object(), "requestObject": request
-    #         })
-            
-    #         if serializer.is_valid():
-    #             qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
-    #             serializer = self.serializer_class(instance=qs)
-    #             return ResponseWrapper(data=serializer.data, msg="update", status=200)
-    #         return ResponseWrapper(error_msg=serializer.errors, msg="update", error_code=400)
-    #     except Exception as E:
-    #         return get_exception_error_msg(errorObj=E, msg="update")
-
-
+    
     def list(self, request, *args, **kwargs):
         try:
             studio_slug = kwargs.get("studio_slug")
@@ -69,6 +50,17 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
         try:
             studio_slug = kwargs.get("studio_slug")
             qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(instance=qs, many=True)
+            return ResponseWrapper(data=serializer.data, msg='success')
+        except Exception as E:
+            return get_exception_error_msg(errorObj=E, msg="list")
+
+
+    def get_store_for_business_hour_from_studio(self, request, *args, **kwargs):
+        try:
+            studio_slug = kwargs.get("studio_slug")
+            qs = self.get_queryset().filter(studio__slug__iexact=studio_slug, store_business_hour=None)
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='success')

@@ -1,7 +1,14 @@
 from rest_framework import serializers
 from stores.models import Store
+from studios.models import Studio
 import datetime
 from dateutil import parser
+
+
+class StudioShortInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Studio
+        fields = ["id", "name", "slug"]
 
 
 class BusinessDaySerializer(serializers.Serializer):

@@ -86,7 +86,7 @@ class CustomBusinessDay(models.Model):
     class Status(models.IntegerChoices):
         CLOSED = 0, _("Closed")
         OPEN = 1, _("Open")
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name="store_custom_business_day")
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name="store_custom_business_days")
     slug = models.SlugField(unique=True, max_length=254)
     date = models.DateField()
     status = models.PositiveSmallIntegerField(choices=Status.choices)
@@ -127,7 +127,7 @@ class CustomBusinessDay(models.Model):
 
 @autoslugFromUUID()
 class StoreBusinessHour(models.Model):
-    store = models.OneToOneField(Store, on_delete=models.CASCADE, related_name="store_business_hours")
+    store = models.OneToOneField(Store, on_delete=models.CASCADE, related_name="store_business_hour")
     slug = models.SlugField(unique=True, max_length=254)
     saturday_opening_time = models.TimeField()
     saturday_closing_time = models.TimeField()

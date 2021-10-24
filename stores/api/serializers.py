@@ -5,24 +5,26 @@ from drf_extra_fields.fields import HybridImageField
 from utils.mixins import DynamicMixinModelSerializer
 from django.contrib.auth import get_user_model
 from users.api.serializers import (RegisterSerializer)
+from studios.api.serializers import StudioShortInfoSerializer
 from django.db import transaction
 from utils.helpers import ResponseWrapper, get_file_representations
-from stores.models import StoreBusinessHour
 from utils.mixins import DynamicMixinModelSerializer
 
 """
 ----------------------- * Store * -----------------------
 """
 
-class StudioShortInfoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Studio
-        fields = ["id", "name", "slug"]
 
 class StoreShortInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Store
         fields = ["id", "name", "slug"]
+        
+    def to_representation(self, instance):
+        """ Modify representation of data """
+        representation = super(StoreShortInfoSerializer, self).to_representation(instance)
+        representation['studio_details'] = StudioShortInfoSerializer(instance.studio).data
+        return representation
 
 class StoreSerializer(DynamicMixinModelSerializer):
     studio_details = serializers.CharField(read_only=True)
@@ -144,6 +146,7 @@ class CustomBusinessDaySerializer(DynamicMixinModelSerializer):
 
 class CustomBusinessDayUpdateSerializer(DynamicMixinModelSerializer):
     store_details = serializers.CharField(read_only=True)
+    
     class Meta:
         model = CustomBusinessDay
         fields = "__all__"
@@ -204,12 +207,12 @@ class StoreIDSerializer(DynamicMixinModelSerializer):
         model = Store
         fields = ["id"]
         extra_kwargs = {'id': {'required': True}}
-
+        
 
 class StoreModeratorSerializer(DynamicMixinModelSerializer):
     user = RegisterSerializer(read_only=True)
-    store_details = serializers.CharField(read_only=True)
     store = serializers.PrimaryKeyRelatedField(queryset=Store.objects.all(), many=True)
+    store_details = serializers.CharField(read_only=True)
 
     class Meta:
         model = StoreModerator
