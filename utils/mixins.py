@@ -28,9 +28,9 @@ class DynamicMixinModelSerializer(serializers.ModelSerializer):
             # populate field name
             field_name = (''.join(field.split('_'))).title()
             # customize error message
-            self.fields[field].error_messages['required'] = f"`{field_name}` field is required"
-            self.fields[field].error_messages['null'] = f"`{field_name}` field may not be null"
-            self.fields[field].error_messages['blank'] = f"`{field_name}` field may not be blank"
+            self.fields[field].error_messages['required'] = f"{field_name} field is required"
+            self.fields[field].error_messages['null'] = f"{field_name} field may not be null"
+            self.fields[field].error_messages['blank'] = f"{field_name} field may not be blank"
             
     def validate_files(self, attrs):
         # get model name
@@ -51,14 +51,14 @@ class DynamicMixinModelSerializer(serializers.ModelSerializer):
                     # validate file
                     if not file:
                         raise serializers.ValidationError({
-                            field_name: "Invalid file!"
+                            field_name: f"{field_name}: Invalid file!"
                         })
 
                     extension = os.path.splitext(file.name)[1]
                     # validate file extension
                     if not extension:
                         raise serializers.ValidationError({
-                            field_name: "Invalid file extension!"
+                            field_name: f"{field_name}: Invalid file extension!"
                         })
                     # get allowed file types from settings
                     ALLOWED_FILE_TYPES = settings.ALLOWED_FILE_TYPES
@@ -70,13 +70,13 @@ class DynamicMixinModelSerializer(serializers.ModelSerializer):
                         request_file_type = "document"
                     else:
                         raise serializers.ValidationError(
-                            {field_name: f"Invalid file type received! Allowed file types are: {ALLOWED_FILE_TYPES}"}
+                            {field_name: f"{field_name}: Invalid file type received! Allowed file types are: {ALLOWED_FILE_TYPES}"}
                         )
 
                     if request_file_type:
                         if file.size > settings.FILE_SIZE_LIMIT_IN_BYTES:
                             raise serializers.ValidationError(
-                                {field_name: f"Please keep filesize under {filesizeformat(settings.FILE_SIZE_LIMIT_IN_BYTES)}. Current filesize {filesizeformat(file.size)}"}
+                                {field_name: f"{field_name}: Please keep filesize under {filesizeformat(settings.FILE_SIZE_LIMIT_IN_BYTES)}. Current filesize {filesizeformat(file.size)}"}
                             )
         return attrs
         
