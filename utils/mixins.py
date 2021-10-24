@@ -46,19 +46,20 @@ class DynamicMixinModelSerializer(serializers.ModelSerializer):
                     
                     # define field name
                     field_name = field.name
+                    visible_field_name = (''.join(field_name.split('_'))).title()
 
                     file = file_in_request
                     # validate file
                     if not file:
                         raise serializers.ValidationError({
-                            field_name: f"{field_name}: Invalid file!"
+                            field_name: f"{visible_field_name}: Invalid file!"
                         })
 
                     extension = os.path.splitext(file.name)[1]
                     # validate file extension
                     if not extension:
                         raise serializers.ValidationError({
-                            field_name: f"{field_name}: Invalid file extension!"
+                            field_name: f"{visible_field_name}: Invalid file extension!"
                         })
                     # get allowed file types from settings
                     ALLOWED_FILE_TYPES = settings.ALLOWED_FILE_TYPES
@@ -70,13 +71,13 @@ class DynamicMixinModelSerializer(serializers.ModelSerializer):
                         request_file_type = "document"
                     else:
                         raise serializers.ValidationError(
-                            {field_name: f"{field_name}: Invalid file type received! Allowed file types are: {ALLOWED_FILE_TYPES}"}
+                            {field_name: f"{visible_field_name}: Invalid file type received! Allowed file types are: {ALLOWED_FILE_TYPES}"}
                         )
 
                     if request_file_type:
                         if file.size > settings.FILE_SIZE_LIMIT_IN_BYTES:
                             raise serializers.ValidationError(
-                                {field_name: f"{field_name}: Please keep filesize under {filesizeformat(settings.FILE_SIZE_LIMIT_IN_BYTES)}. Current filesize {filesizeformat(file.size)}"}
+                                {field_name: f"{visible_field_name}: Please keep filesize under {filesizeformat(settings.FILE_SIZE_LIMIT_IN_BYTES)}. Current filesize {filesizeformat(file.size)}"}
                             )
         return attrs
         
