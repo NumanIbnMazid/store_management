@@ -21,6 +21,11 @@ class DynamicMixinModelSerializer(serializers.ModelSerializer):
     def __init__(self, *args, **kwargs):
         super(DynamicMixinModelSerializer, self).__init__(*args, **kwargs)
         
+        for field in self.fields:
+            self.fields[field].error_messages['required'] = f"`{(''.join(field.split('_'))).title()}` field is required"
+            self.fields[field].error_messages['null'] = f"`{(''.join(field.split('_'))).title()}` field may not be null"
+            self.fields[field].error_messages['blank'] = f"`{(''.join(field.split('_'))).title()}` field may not be blank"
+        
     def validate_common(self, attrs):
         instance = None
 
@@ -42,8 +47,7 @@ class DynamicMixinModelSerializer(serializers.ModelSerializer):
         # call the models clean method if exists
         models_clean = getattr(instance, "clean", None)
         if callable(models_clean):
-            instance.clean(initialObject=initialObject,
-                           requestObject=requestObject)
+            instance.clean(initialObject=initialObject, requestObject=requestObject)
 
         return attrs
         
