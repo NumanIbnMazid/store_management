@@ -25,7 +25,7 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
     def get_serializer_class(self):
         if self.action in ["update"]:
             self.serializer_class = StoreUpdateSerializer
-        elif self.action in ["list_with_short_info", "business_hour_store_get_from_studio"]:
+        elif self.action in ["list_with_short_info", "get_store_list_for_business_hour_from_studio"]:
             self.serializer_class = StoreShortInfoSerializer
         else:
             self.serializer_class = StoreSerializer
@@ -57,7 +57,7 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
             return get_exception_error_msg(errorObj=E, msg="list")
 
 
-    def get_store_for_business_hour_from_studio(self, request, *args, **kwargs):
+    def get_store_list_for_business_hour_from_studio(self, request, *args, **kwargs):
         try:
             studio_slug = kwargs.get("studio_slug")
             qs = self.get_queryset().filter(studio__slug__iexact=studio_slug, store_business_hour=None)
