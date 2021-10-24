@@ -1,5 +1,8 @@
 from rest_framework import serializers
 from utils.helpers import get_file_representations
+import os
+from django.conf import settings
+from django.template.defaultfilters import filesizeformat
 
 # Class Custom Model Admin Mixing
 class CustomModelAdminMixin(object):
@@ -22,15 +25,70 @@ class DynamicMixinModelSerializer(serializers.ModelSerializer):
         super(DynamicMixinModelSerializer, self).__init__(*args, **kwargs)
         
         for field in self.fields:
-            self.fields[field].error_messages['required'] = f"`{(''.join(field.split('_'))).title()}` field is required"
-            self.fields[field].error_messages['null'] = f"`{(''.join(field.split('_'))).title()}` field may not be null"
-            self.fields[field].error_messages['blank'] = f"`{(''.join(field.split('_'))).title()}` field may not be blank"
+            # populate field name
+            field_name = (''.join(field.split('_'))).title()
+            # customize error message
+            self.fields[field].error_messages['required'] = f"`{field_name}` field is required"
+            self.fields[field].error_messages['null'] = f"`{field_name}` field may not be null"
+            self.fields[field].error_messages['blank'] = f"`{field_name}` field may not be blank"
+            
+    def validate_files(self, attrs):
+        # get model name
+        MODEL = self.Meta.model
+        # loop through all fields of the model
+        for field in MODEL._meta.fields:
+            if field.get_internal_type() in ['ImageField', 'FileField']:
+
+                # get files and field name
+                file_in_request = attrs.get(field.name, None)
+
+                if file_in_request:
+                    
+                    # define field name
+                    field_name = field.name
+
+                    file = file_in_request
+                    # validate file
+                    if not file:
+                        raise serializers.ValidationError({
+                            field_name: "Invalid file!"
+                        })
+
+                    extension = os.path.splitext(file.name)[1]
+                    # validate file extension
+                    if not extension:
+                        raise serializers.ValidationError({
+                            field_name: "Invalid file extension!"
+                        })
+                    # get allowed file types from settings
+                    ALLOWED_FILE_TYPES = settings.ALLOWED_FILE_TYPES
+
+                    request_file_type = None
+                    if extension in settings.ALLOWED_IMAGE_TYPES:
+                        request_file_type = "image"
+                    elif extension in settings.ALLOWED_DOCUMENT_TYPES:
+                        request_file_type = "document"
+                    else:
+                        raise serializers.ValidationError(
+                            {field_name: f"Invalid file type received! Allowed file types are: {ALLOWED_FILE_TYPES}"}
+                        )
+
+                    if request_file_type:
+                        if file.size > settings.FILE_SIZE_LIMIT_IN_BYTES:
+                            raise serializers.ValidationError(
+                                {field_name: f"Please keep filesize under {filesizeformat(settings.FILE_SIZE_LIMIT_IN_BYTES)}. Current filesize {filesizeformat(file.size)}"}
+                            )
+        return attrs
+        
         
     def validate_common(self, attrs):
         instance = None
 
         initialObject = self.context.get("initialObject", None)
         requestObject = self.context.get("requestObject", None)
+        
+        # validate files
+        self.validate_files(attrs=attrs)
 
         if len(self.Meta.model._meta.many_to_many) >= 1:
             attrsCopy = attrs.copy()

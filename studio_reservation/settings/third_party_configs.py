@@ -140,3 +140,15 @@ SWAGGER_SETTINGS = {
 
 FAKER_LOCALE = None     # settings.LANGUAGE_CODE is loaded
 FAKER_PROVIDERS = None  # faker.DEFAULT_PROVIDERS is loaded (all)
+
+
+"""
+----------------------- * File Configurations * -----------------------
+"""
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880 # Django Default 2.5 MB | 5 MB
+
+FILE_SIZE_LIMIT_IN_BYTES = 1572864
+ALLOWED_IMAGE_TYPES = ['.jpg', '.jpeg', '.png']
+ALLOWED_DOCUMENT_TYPES = ['.doc', '.docx', '.pdf']
+MAX_UPLOAD_SIZE = 2621440 # KB
+ALLOWED_FILE_TYPES = ALLOWED_IMAGE_TYPES + ALLOWED_DOCUMENT_TYPES

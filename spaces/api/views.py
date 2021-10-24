@@ -8,7 +8,7 @@ from utils.studio_getter_helper import (
     get_studio_id_from_store
 )
 
-class SpaceManagerViewSet(LoggingMixin, CustomViewSet):
+class SpaceManagerViewSet(CustomViewSet):
     logging_methods = ["GET", "POST", "PATCH", "DELETE"]
     queryset = Space.objects.all()
     lookup_field = "slug"
@@ -25,9 +25,9 @@ class SpaceManagerViewSet(LoggingMixin, CustomViewSet):
             self.serializer_class = SpaceSerializer
         return self.serializer_class
     
-    def get_permissions(self):
-        permission_classes = [custom_permissions.IsStudioAdmin]
-        return [permission() for permission in permission_classes]
+    # def get_permissions(self):
+    #     permission_classes = [custom_permissions.IsStudioAdmin]
+    #     return [permission() for permission in permission_classes]
     
     def _clean_data(self, data):
         if isinstance(data, bytes):

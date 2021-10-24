@@ -80,3 +80,5 @@
 # This field is required -> Name field is required!
 
 # Currency Foreign Key Where Used In this project
+
+# Uncomment: Permission Class: Space, Require LogginMixin
