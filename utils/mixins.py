@@ -26,7 +26,7 @@ class DynamicMixinModelSerializer(serializers.ModelSerializer):
         
         for field in self.fields:
             # populate field name
-            field_name = (''.join(field.split('_'))).title()
+            field_name = (' '.join(field.split('_'))).title()
             # customize error message
             self.fields[field].error_messages['required'] = f"{field_name} field is required"
             self.fields[field].error_messages['null'] = f"{field_name} field may not be null"
@@ -46,7 +46,7 @@ class DynamicMixinModelSerializer(serializers.ModelSerializer):
                     
                     # define field name
                     field_name = field.name
-                    visible_field_name = (''.join(field_name.split('_'))).title()
+                    visible_field_name = (' '.join(field_name.split('_'))).title()
 
                     file = file_in_request
                     # validate file
