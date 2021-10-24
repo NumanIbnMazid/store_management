@@ -6,7 +6,7 @@ from stores.models import Store, CustomBusinessDay, StoreModerator
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions
 from utils.custom_viewset import CustomViewSet
-from utils.helpers import ResponseWrapper, get_exception_error_msg, validate_many_to_many_list
+from utils.helpers import ResponseWrapper, get_exception_error_msg, validate_many_to_many_list, process_files_data
 from utils.studio_getter_helper import (
     get_studio_id_from_studio, get_studio_id_from_store
 )
@@ -98,11 +98,17 @@ class CustomBusinessDayManagerViewSet(LoggingMixin, CustomViewSet):
         
         try:
             serializer_class = self.get_serializer_class()
-            serializer = serializer_class(data=request.data, partial=True)
+            
+            # process file data
+            processed_file_data = process_files_data(data=request.data, selfObject=self)
+            
+            serializer = serializer_class(data=processed_file_data, partial=True, context={
+                "initialObject": self.get_object(), "requestObject": request
+            })
+            
             if serializer.is_valid():
                 date = request.data.get("date", None)
                 status = request.data.get('status', None)
-                
                 store_custom_business_day_qs = CustomBusinessDay.objects.filter(
                     date=date, store=self.get_object().store
                 ).exclude(slug__iexact=kwargs["slug"])
@@ -121,8 +127,8 @@ class CustomBusinessDayManagerViewSet(LoggingMixin, CustomViewSet):
                 
                 qs = serializer.update(instance=self.get_object(), validated_data=serializer.validated_data)
                 serializer = self.serializer_class(instance=qs)
-                return ResponseWrapper(data=serializer.data)
-            return ResponseWrapper(error_msg=serializer.errors, error_code=400)
+                return ResponseWrapper(data=serializer.data, msg="update", status=200)
+            return ResponseWrapper(error_msg=serializer.errors, error_code=400, msg="update")
         
         except Exception as E:
             return get_exception_error_msg(errorObj=E, msg="update")

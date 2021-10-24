@@ -157,23 +157,26 @@ class CustomBusinessDayUpdateSerializer(DynamicMixinModelSerializer):
         # validate initials
         self.validate_initials(attrs=data)
         
-        date = data.get("date", None)
-        store = data.get('store', None)
-        status = data.get('status', None)
+        if self.context.get("initialObject", None):
         
-        store_qs = Store.objects.filter(id=int(store.id))
-        if store_qs:
-            store_default_closed_day_of_weeks = store_qs.first().default_closed_day_of_weeks
-            if date.strftime("%A") in store_default_closed_day_of_weeks and int(status) == 0:
-                raise serializers.ValidationError(f"Date `{date} - {date.strftime('%A')}` is alerady exists in Store Default Closed Day of Weeks!")
-            if date.strftime("%A") not in store_default_closed_day_of_weeks and int(status) == 1:
-                raise serializers.ValidationError(f"Date `{date} - {date.strftime('%A')}` is alerady a Business Day!")
-        else:
-            raise serializers.ValidationError("Store not found!")
-        
-        custom_business_day_qs = CustomBusinessDay.objects.filter(store__id=store.id, date=date)
-        if custom_business_day_qs:
-            raise serializers.ValidationError(f"Date `{date}` is alerady exists in Custom Closed Day!")
+            date = data.get("date", None)
+            store = self.context.get("initialObject", {}).store
+            status = data.get('status', None)
+            
+            store_qs = Store.objects.filter(id=int(store.id))
+            if store_qs:
+                store_default_closed_day_of_weeks = store_qs.first().default_closed_day_of_weeks
+                if date.strftime("%A") in store_default_closed_day_of_weeks and int(status) == 0:
+                    raise serializers.ValidationError(f"Date `{date} - {date.strftime('%A')}` is alerady exists in Store Default Closed Day of Weeks!")
+                if date.strftime("%A") not in store_default_closed_day_of_weeks and int(status) == 1:
+                    raise serializers.ValidationError(f"Date `{date} - {date.strftime('%A')}` is alerady a Business Day!")
+            else:
+                raise serializers.ValidationError("Store not found!")
+            
+            custom_business_day_qs = CustomBusinessDay.objects.filter(store__id=store.id, date=date).exclude(date=date)
+            if custom_business_day_qs:
+                raise serializers.ValidationError(f"Date `{date}` is alerady exists in Custom Business Day!")
+            
         return data
         
     def to_representation(self, instance):
