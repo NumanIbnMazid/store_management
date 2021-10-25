@@ -80,7 +80,7 @@ class Currency(models.Model):
     
     class Meta:
         verbose_name = 'Currency'
-        verbose_name_plural = 'Currency'
+        verbose_name_plural = 'Currencies'
         ordering = ["-created_at"]
 
     def __str__(self):
