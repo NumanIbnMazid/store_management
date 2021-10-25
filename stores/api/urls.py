@@ -65,4 +65,8 @@ urlpatterns = [
             {"post": "get_business_hour_from_day_of_week_name"}, name="get_business_hour_from_day_of_week_name"
         )
     ),
+    path("get-business-hour-from-date", StoreBusinessHourManagerViewSet.as_view(
+            {"post": "get_business_hour_from_date"}, name="get_business_hour_from_date"
+        )
+    ),
 ]

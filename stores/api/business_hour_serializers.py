@@ -99,3 +99,7 @@ class BusinessHourFromWeekNameCheckerSerializer(serializers.Serializer):
         else:
             raise serializers.ValidationError("Day of Week Name is required!")
         return data
+
+class BusinessHourFromDateCheckerSerializer(serializers.Serializer):
+    date = serializers.DateField(required=True)
+    store = serializers.PrimaryKeyRelatedField(queryset=Store.objects.all())

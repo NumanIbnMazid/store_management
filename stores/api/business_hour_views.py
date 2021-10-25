@@ -1,5 +1,5 @@
 from .business_hour_serializers import (
-    StoreBusinessHourSerializer, StoreBusinessHourUpdateSerializer, BusinessHourFromWeekNameCheckerSerializer
+    StoreBusinessHourSerializer, StoreBusinessHourUpdateSerializer, BusinessHourFromWeekNameCheckerSerializer, BusinessHourFromDateCheckerSerializer
 )
 from stores.models import StoreBusinessHour, Store
 from rest_framework_tracking.mixins import LoggingMixin
@@ -9,6 +9,7 @@ from utils.helpers import ResponseWrapper, get_exception_error_msg
 from utils.studio_getter_helper import (
     get_studio_id_from_store
 )
+from dateutil import parser
 
 
 class StoreBusinessHourManagerViewSet(LoggingMixin, CustomViewSet):
@@ -25,6 +26,8 @@ class StoreBusinessHourManagerViewSet(LoggingMixin, CustomViewSet):
             self.serializer_class = StoreBusinessHourUpdateSerializer
         elif self.action in ["get_business_hour_from_day_of_week_name"]:
             self.serializer_class = BusinessHourFromWeekNameCheckerSerializer
+        elif self.action in ["get_business_hour_from_date"]:
+            self.serializer_class = BusinessHourFromDateCheckerSerializer
         else:
             self.serializer_class = StoreBusinessHourSerializer
         return self.serializer_class
@@ -68,6 +71,40 @@ class StoreBusinessHourManagerViewSet(LoggingMixin, CustomViewSet):
                 
                 result = {
                     "store": store_obj.name,
+                    "day_of_week": day_of_week,
+                    "opening_time": store_obj.store_business_hour.get_business_hour_from_day_of_week(day_of_week=day_of_week).get("opening_time", ""),
+                    "closing_time": store_obj.store_business_hour.get_business_hour_from_day_of_week(day_of_week=day_of_week).get("closing_time", "")
+                }
+                
+                return ResponseWrapper(data=result, status=200)
+            return ResponseWrapper(error_msg=serializer.errors, error_code=400)
+                
+        except Exception as E:
+            return get_exception_error_msg(errorObj=E, msg="Failed to get the result!")
+        
+    def get_business_hour_from_date(self, request, *args, **kwargs):
+        try:
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(data=request.data, partial=True)
+
+            if serializer.is_valid():
+                store_id = int(request.data.get("store", None))
+                store_qs = Store.objects.filter(id=store_id)
+
+                store_obj = None
+
+                if store_qs.exists():
+                    store_obj = store_qs.first()
+                else:
+                    return ResponseWrapper(error_code=400, error_msg=f"Store {store_id} does not exists!", msg="Failed to get the result!", status=400)
+                
+                date_obj = parser.parse(request.data.get("date", ""))
+                
+                day_of_week = date_obj.strftime("%A")
+                
+                result = {
+                    "store": store_obj.name,
+                    "date": request.data.get("date", ""),
                     "day_of_week": day_of_week,
                     "opening_time": store_obj.store_business_hour.get_business_hour_from_day_of_week(day_of_week=day_of_week).get("opening_time", ""),
                     "closing_time": store_obj.store_business_hour.get_business_hour_from_day_of_week(day_of_week=day_of_week).get("closing_time", "")
