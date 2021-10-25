@@ -52,14 +52,14 @@ class VatTax(models.Model):
     slug = models.SlugField(unique=True, max_length=254)
     vat = models.IntegerField(default=0)
     tax = models.IntegerField(default=0)
-    other_service = models.IntegerField(default=0, blank=True, null=True)
+    other_service = models.IntegerField(default=0)
     is_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         verbose_name = 'Vat Tax'
-        verbose_name_plural = 'Vat Tax'
+        verbose_name_plural = 'Vat Taxes'
         ordering = ["-created_at"]
 
     def __str__(self):
