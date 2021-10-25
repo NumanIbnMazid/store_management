@@ -150,9 +150,7 @@ class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
         return get_studio_id_from_store(selfObject=self, slug=self.kwargs.get("store_slug"))
 
     def get_serializer_class(self):
-        if self.action in ["create_admin"]:
-            self.serializer_class = StoreModeratorSerializer
-        elif self.action in ["update"]:
+        if self.action in ["update"]:
             self.serializer_class = StoreModeratorUpdateSerializer
         else:
             self.serializer_class = StoreModeratorSerializer
@@ -178,7 +176,6 @@ class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
             
             # validate store many to many list
             validate_many_to_many_list(value=request.data.get("store", []), model=Store, fieldName="store", allowBlank=False)
-            
             if serializer.is_valid(raise_exception=True):
                 user_instance = serializer.save_base_user(request)
                 # update is_store_staff in user model

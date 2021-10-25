@@ -82,6 +82,12 @@ class StoreBusinessHourUpdateSerializer(DynamicMixinModelSerializer):
                 )
        
         return data
+    
+    def to_representation(self, instance):
+        """ Modify representation of data """
+        representation = super(StoreBusinessHourUpdateSerializer, self).to_representation(instance)
+        representation['store_details'] = StoreShortInfoSerializer(instance.store).data
+        return representation
 
 
 class BusinessHourFromWeekNameCheckerSerializer(serializers.Serializer):

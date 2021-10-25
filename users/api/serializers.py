@@ -33,7 +33,7 @@ class LoginSerializer(RestAuthLoginSerializer):
     
 
 class RegisterSerializer(serializers.Serializer):
-    name = serializers.CharField(required=False)
+    name = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     email = serializers.EmailField(required=allauth_settings.EMAIL_REQUIRED)
     password1 = serializers.CharField(required=True, write_only=True)
     password2 = serializers.CharField(required=True, write_only=True)
@@ -71,7 +71,7 @@ class RegisterSerializer(serializers.Serializer):
             self.cleaned_data = self.get_cleaned_data()
             adapter.save_user(request, user, self)
             setup_user_email(request, user, [])
-            user.name = self.data.get('name') 
+            user.name = self.data.get("name", None)
             user.save()
             return user
         except Exception as E:
