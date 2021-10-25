@@ -82,6 +82,11 @@ class VatTaxSerializer(DynamicMixinModelSerializer):
         model = VatTax
         fields = "__all__"
         read_only_fields = ("slug",)
+        extra_kwargs = {
+            'vat': {'required': True},
+            'tax': {'required': True},
+            'other_service': {'required': True}
+        }
     
     def to_representation(self, instance):
         """ Modify representation of data integrating `studio` """
@@ -94,6 +99,11 @@ class VatTaxUpdateSerializer(DynamicMixinModelSerializer):
         model = VatTax
         fields = "__all__"
         read_only_fields = ("slug","studio",)
+        extra_kwargs = {
+            'vat': {'required': True},
+            'tax': {'required': True},
+            'other_service': {'required': True}
+        }
 
 class StudioVatTaxSerializer(serializers.Serializer):
     studio = serializers.IntegerField()
