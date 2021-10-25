@@ -53,7 +53,7 @@ class BusinessDayManagerViewSet(CustomViewSet):
                 if store_qs.exists():
                     store_obj = store_qs.first()
                 else:
-                    return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg=f"Store {store_id} does not exists!", status=400)
+                    return ResponseWrapper(error_code=400, error_msg=f"Store {store_id} does not exists!", msg="Failed to get the result!", status=400)
 
                 date_obj = parser.parse(request.data.get("date", ""))
                 formatted_date_str = date_obj.strftime("%Y-%m-%d")
@@ -68,6 +68,7 @@ class BusinessDayManagerViewSet(CustomViewSet):
                 
                 # get store default closed days
                 store_default_closed_day_of_weeks = store_obj.default_closed_day_of_weeks
+                
                 # query in custom closed days
                 store_custom_business_days = CustomBusinessDay.objects.filter(store=store_obj, date=date_obj)
                 
@@ -196,7 +197,7 @@ class BusinessDayManagerViewSet(CustomViewSet):
                 if store_qs.exists():
                     store_obj = store_qs.first()
                 else:
-                    return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg=f"Store {store_id} does not exists!", status=400)
+                    return ResponseWrapper(error_code=400, error_msg=f"Store {store_id} does not exists!", msg="Failed to get the result!", status=400)
 
                 year = request.data.get("year", None)
 
@@ -236,7 +237,7 @@ class BusinessDayManagerViewSet(CustomViewSet):
                 if store_qs.exists():
                     store_obj = store_qs.first()
                 else:
-                    return ResponseWrapper(error_code=400, error_msg=serializer.errors, msg=f"Store {store_id} does not exists!", status=400)
+                    return ResponseWrapper(error_code=400, error_msg=f"Store {store_id} does not exists!", msg="Failed to get the result!", status=400)
 
                 start_date = request.data.get("start_date", None)
                 end_date = request.data.get("end_date", None)

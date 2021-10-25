@@ -61,4 +61,8 @@ urlpatterns = [
         {"delete": "destroy"}, name="delete_store_business_hour")),
     path("store-business-hour/dynamic-list", StoreBusinessHourManagerViewSet.as_view(
         {"get": "dynamic_list"}, name="custom_store_business_hour")),
+    path("get-business-hour-from-day-of-week", StoreBusinessHourManagerViewSet.as_view(
+            {"post": "get_business_hour_from_day_of_week_name"}, name="get_business_hour_from_day_of_week_name"
+        )
+    ),
 ]

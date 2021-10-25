@@ -8,7 +8,6 @@ from users.api.serializers import (RegisterSerializer)
 from studios.api.serializers import StudioShortInfoSerializer
 from django.db import transaction
 from utils.helpers import ResponseWrapper, get_file_representations
-from utils.mixins import DynamicMixinModelSerializer
 
 """
 ----------------------- * Store * -----------------------
