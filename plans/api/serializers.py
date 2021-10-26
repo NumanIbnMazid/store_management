@@ -5,6 +5,7 @@ from utils.mixins import DynamicMixinModelSerializer
 from utils.base64_image_field import Base64ImageField
 from utils.helpers import get_file_representations
 from studios.api.serializers import StudioShortInfoSerializer
+from spaces.api.serializers import SpaceShortInfoSerializer
 
 
 class OptionCategoryShortInfoSerializer(serializers.ModelSerializer):
@@ -105,9 +106,10 @@ class PlanSerializer(DynamicMixinModelSerializer):
         read_only_fields = ("slug",)
         
     def to_representation(self, instance):
-        """ Modify representation of data integrating `user` OneToOne Field """
+        """ Modify representation of data """
         representation = super(PlanSerializer, self).to_representation(instance)
-        representation['space_details'] = [OptionUpdateSerializer(storeData).data for storeData in instance.store.all()]
+        representation['space_details'] = [SpaceShortInfoSerializer(spaceData).data for spaceData in instance.space.all()]
+        representation['option_details'] = [OptionShortInfoSerializer(optionData).data for optionData in instance.option.all()]
         return representation
 
 class PlanUpdateSerializer(DynamicMixinModelSerializer):
@@ -121,3 +123,10 @@ class PlanUpdateSerializer(DynamicMixinModelSerializer):
             "title", "slug", "space", "option", "hourly_price", "daily_price", "image_1", "image_1_reference", "image_1_comment", "image_2", "image_2_reference", "image_2_comment", "image_3", "image_3_reference", "image_3_comment", "is_active", "explanatory_comment", "details"
         ]
         read_only_fields = ("slug",)
+        
+    def to_representation(self, instance):
+        """ Modify representation of data """
+        representation = super(PlanUpdateSerializer, self).to_representation(instance)
+        representation['space_details'] = [SpaceShortInfoSerializer(spaceData).data for spaceData in instance.space.all()]
+        representation['option_details'] = [OptionShortInfoSerializer(optionData).data for optionData in instance.option.all()]
+        return representation

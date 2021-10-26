@@ -28,6 +28,7 @@ urlpatterns = [
     path("update/<slug>", PlanManagerViewSet.as_view({"patch": "update"}, name="update_plan")),
     path("delete/<slug>", PlanManagerViewSet.as_view({"delete": "destroy"}, name="delete_plan")),
     path("list/<space_slug>", PlanManagerViewSet.as_view({"get": "list"}, name="list_plan")),
+    path("dynamic-list", PlanManagerViewSet.as_view({"get": "dynamic_list"}, name="plan_dynamic_list")),
 ]
 
 
