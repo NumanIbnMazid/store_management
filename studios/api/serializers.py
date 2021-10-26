@@ -107,6 +107,7 @@ class VatTaxUpdateSerializer(DynamicMixinModelSerializer):
 
 class StudioVatTaxSerializer(serializers.Serializer):
     studio = serializers.IntegerField()
+    
 
 class CurrencySerializer(DynamicMixinModelSerializer):
     

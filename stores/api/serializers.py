@@ -261,4 +261,10 @@ class StoreModeratorUpdateSerializer(DynamicMixinModelSerializer):
         return representation
 
 
+"""
+----------------------- * Store BusinessDay * -----------------------
+"""
 
+class BusinessDayFromDateTimeCheckerSerializer(serializers.Serializer):
+    datetime = serializers.DateTimeField()
+    store = serializers.PrimaryKeyRelatedField(queryset=Store.objects.all())

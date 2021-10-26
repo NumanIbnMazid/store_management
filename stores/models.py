@@ -8,6 +8,8 @@ from utils.helpers import autoslugFromUUID
 from django.contrib.auth import get_user_model
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+from django.db.models import Q
+import datetime
 
 
 @autoslugFromUUID()
@@ -52,6 +54,51 @@ class Store(models.Model):
         ]
         model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList, initialObject=initialObject)
         
+    def get_business_day_status_from_datetime(self, datetimeInReq):
+        result = {
+            "store": self.name,
+            "datetime": datetimeInReq.strftime("%Y-%m-%d %H:%M:%S"),
+            "day_of_week": datetimeInReq.strftime("%A"),
+            "status": "closed"
+        }
+        
+        dateStr = datetimeInReq.strftime("%Y-%m-%d")
+        dateObj = datetimeInReq.date()
+        timeObj = datetimeInReq.time()
+        day_of_week = datetimeInReq.strftime("%A")
+        
+        store_close_qs = CustomBusinessDay.objects.filter(
+            Q(
+                Q(date=dateStr, status=0) |
+                Q(
+                    Q(store__default_closed_day_of_weeks__contains=[datetimeInReq.strftime("%A")]) &
+                    ~Q(date=dateStr, status=1)
+                )
+            ) &
+            Q(store__slug__iexact=self.slug)
+        ).values_list("date", flat=True)
+        
+        
+        if not dateObj in store_close_qs:
+            store_business_hour_from_day_of_week = self.store_business_hour.get_business_hour_from_day_of_week(
+                day_of_week=day_of_week
+            )
+            opening_time = store_business_hour_from_day_of_week["opening_time"]
+            closing_time = store_business_hour_from_day_of_week["closing_time"]
+            
+            is_open = False
+            
+            if opening_time <= closing_time:
+                is_open =  opening_time <= timeObj <= closing_time
+            else:
+                is_open = opening_time <= timeObj or timeObj <= closing_time
+            
+            # alter is open status
+            if is_open:
+                result["status"] = "open"
+        
+        return result
+        
 
 @autoslugFromUUID()
 class StoreModerator(models.Model):
@@ -79,7 +126,7 @@ class StoreModerator(models.Model):
     def get_stores(self):
         store_ids = [st.id for st in self.store.all()]
         return store_ids
-
+    
 
 @autoslugFromUUID()
 class CustomBusinessDay(models.Model):
@@ -191,6 +238,42 @@ class StoreBusinessHour(models.Model):
             result["closing_time"] = self.friday_closing_time
         
         return result
+    
+    # def get_business_hour_status_from_day_of_week_and_time(self, day_of_week, time):
+    #     is_open = False
+    #     result = {
+    #         "opening_time": None,
+    #         "closing_time": None
+    #     }
+    #     if day_of_week == "Saturday":
+    #         result["opening_time"] = self.saturday_opening_time
+    #         result["closing_time"] = self.saturday_closing_time
+        
+    #     if day_of_week == "Sunday":
+    #         result["opening_time"] = self.sunday_opening_time
+    #         result["closing_time"] = self.sunday_closing_time
+        
+    #     if day_of_week == "Monday":
+    #         result["opening_time"] = self.monday_opening_time
+    #         result["closing_time"] = self.monday_closing_time
+        
+    #     if day_of_week == "Tuesday":
+    #         result["opening_time"] = self.tuesday_opening_time
+    #         result["closing_time"] = self.tuesday_closing_time
+        
+    #     if day_of_week == "Wednesday":
+    #         result["opening_time"] = self.wednesday_opening_time
+    #         result["closing_time"] = self.wednesday_closing_time
+        
+    #     if day_of_week == "Thursday":
+    #         result["opening_time"] = self.thursday_opening_time
+    #         result["closing_time"] = self.thursday_closing_time
+        
+    #     if day_of_week == "Friday":
+    #         result["opening_time"] = self.friday_opening_time
+    #         result["closing_time"] = self.friday_closing_time
+        
+    #     return result
 
 
 """

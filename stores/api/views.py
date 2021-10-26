@@ -1,6 +1,6 @@
 from .serializers import (
     StoreSerializer, StoreUpdateSerializer, CustomBusinessDaySerializer, CustomBusinessDayUpdateSerializer, StoreModeratorSerializer,
-    StoreModeratorUpdateSerializer, StoreShortInfoSerializer
+    StoreModeratorUpdateSerializer, StoreShortInfoSerializer, BusinessDayFromDateTimeCheckerSerializer
 )
 from stores.models import Store, CustomBusinessDay, StoreModerator
 from rest_framework_tracking.mixins import LoggingMixin
@@ -13,7 +13,7 @@ from utils.studio_getter_helper import (
 from dateutil import parser
 
 
-class StoreManagerViewSet(LoggingMixin, CustomViewSet):
+class StoreManagerViewSet(CustomViewSet):
     
     logging_methods = ["GET", "POST", "PATCH", "DELETE"]
     queryset = Store.objects.all()
@@ -27,6 +27,8 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
             self.serializer_class = StoreUpdateSerializer
         elif self.action in ["list_with_short_info", "get_store_list_for_business_hour_from_studio"]:
             self.serializer_class = StoreShortInfoSerializer
+        elif self.action in ["get_filtered_business_day_status_from_datetime"]:
+            self.serializer_class = BusinessDayFromDateTimeCheckerSerializer
         else:
             self.serializer_class = StoreSerializer
         return self.serializer_class
@@ -72,6 +74,44 @@ class StoreManagerViewSet(LoggingMixin, CustomViewSet):
         if isinstance(data, bytes):
             data = data.decode(errors='ignore')
         return super(StoreManagerViewSet, self)._clean_data(data)
+    
+    def get_filtered_business_day_status_from_datetime(self, request, *args, **kwargs):
+        """ *** Parent Method for getting business days by datetime *** """
+        
+        try:
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(data=request.data, partial=True)
+
+            if serializer.is_valid():
+                store_id = int(request.data.get("store", None))
+                store_qs = Store.objects.filter(id=store_id)
+
+                store_obj = None
+
+                if store_qs.exists():
+                    store_obj = store_qs.first()
+                else:
+                    return ResponseWrapper(error_code=400, error_msg=f"Store {store_id} does not exists!", msg="Failed to get the result!", status=400)
+
+                datetime_in_req = request.data.get("datetime", None)
+                
+                datetimeobj = parser.parse(datetime_in_req)
+
+                try:
+                    result = store_obj.get_business_day_status_from_datetime(datetimeInReq=datetimeobj)
+                except Exception as E:
+                    result = {
+                        "store": self.name,
+                        "datetime": datetimeobj.strftime("%Y-%m-%d %H:%M:%S"),
+                        "day_of_week": datetimeobj.strftime("%A"),
+                        "status": f"Undefined! Exception: {str(E)}"
+                    }
+                
+                return ResponseWrapper(data=result, status=200)
+            return ResponseWrapper(error_msg=serializer.errors, error_code=400)
+        
+        except Exception as E:
+            return get_exception_error_msg(errorObj=E, msg="Failed to get the result!")
 
 
 class CustomBusinessDayManagerViewSet(LoggingMixin, CustomViewSet):

@@ -18,6 +18,10 @@ urlpatterns = [
     path("list-with-short-info/<studio_slug>", StoreManagerViewSet.as_view({"get": "list_with_short_info"}, name="store_list_with_short_info")),
     path("get-store-list-for-business-hour-from-studio/<studio_slug>", StoreManagerViewSet.as_view(
         {"get": "get_store_list_for_business_hour_from_studio"}, name="get_store_list_for_business_hour_from_studio")),
+    path("get-filtered-business-day-status-from-datetime", StoreManagerViewSet.as_view(
+            {"post": "get_filtered_business_day_status_from_datetime"}, name="get_filtered_business_day_status_from_datetime"
+        )
+    ),
     
      # ==============================*** StudioModerator URLS ***==============================
     # path("moderator/create/admin", StoreModeratorManagerViewSet.as_view({'post': 'create_admin'}, name='create_studio_admin')),
