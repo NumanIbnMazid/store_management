@@ -63,23 +63,35 @@ class Store(models.Model):
         }
         
         dateStr = datetimeInReq.strftime("%Y-%m-%d")
-        dateObj = datetimeInReq.date()
         timeObj = datetimeInReq.time()
         day_of_week = datetimeInReq.strftime("%A")
         
-        store_close_qs = CustomBusinessDay.objects.filter(
-            Q(
-                Q(date=dateStr, status=0) |
-                Q(
-                    Q(store__default_closed_day_of_weeks__contains=[datetimeInReq.strftime("%A")]) &
-                    ~Q(date=dateStr, status=1)
-                )
-            ) &
-            Q(store__slug__iexact=self.slug)
-        ).values_list("date", flat=True)
+        IS_BUSINESS_DAY = False
         
+        custom_business_day_qs = CustomBusinessDay.objects.filter(
+            date=dateStr, status=0, store__slug=self.slug
+        )
         
-        if not dateObj in store_close_qs:
+        # case 1: Exists in default closed day but open in custom business day :-> open
+        if day_of_week in self.default_closed_day_of_weeks:
+            custom_business_day_qs = CustomBusinessDay.objects.filter(
+                date=dateStr, status=1, store__slug=self.slug
+            )
+            if custom_business_day_qs:
+                IS_BUSINESS_DAY = True
+        
+        # case 2: Not exists in default closed day and not exists in custom business day :-> open
+        elif day_of_week not in self.default_closed_day_of_weeks:
+            custom_business_day_qs = CustomBusinessDay.objects.filter(
+                date=dateStr, status=0, store__slug=self.slug
+            )
+            if not custom_business_day_qs:
+                IS_BUSINESS_DAY = True
+        
+        else:
+            pass
+        
+        if IS_BUSINESS_DAY:
             store_business_hour_from_day_of_week = self.store_business_hour.get_business_hour_from_day_of_week(
                 day_of_week=day_of_week
             )
