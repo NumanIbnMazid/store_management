@@ -13,12 +13,14 @@ urlpatterns = [
     path("option-category/update/<slug>", OptionCategoryManagerViewSet.as_view({"patch": "update"}, name="update_option_category")),
     path("option-category/delete/<slug>", OptionCategoryManagerViewSet.as_view({"delete": "destroy"}, name="delete_option_category")),
     path("option-category/list/<studio_slug>", OptionCategoryManagerViewSet.as_view({"get": "list"}, name="list_option_category")),
+    path("option-category/dynamic-list", OptionCategoryManagerViewSet.as_view({"get": "dynamic_list"}, name="option_category_dynamic_list")),
     # ==============================*** Option URLS ***==============================
     path("option/create", OptionManagerViewSet.as_view({'post': 'create'}, name='create_option')),
     path("option/retrieve/<slug>", OptionManagerViewSet.as_view({"get": "retrieve"}, name="retrieve_option")),
     path("option/update/<slug>", OptionManagerViewSet.as_view({"patch": "update"}, name="update_option")),
     path("option/delete/<slug>", OptionManagerViewSet.as_view({"delete": "destroy"}, name="delete_option")),
     path("option/list/<option_category_slug>", OptionManagerViewSet.as_view({"get": "list"}, name="list_option")),
+    path("option/dynamic-list", OptionManagerViewSet.as_view({"get": "dynamic_list"}, name="option_dynamic_list")),
 
     # ==============================*** Plan URLS ***==============================
     path("create", PlanManagerViewSet.as_view({'post': 'create'}, name='create_plan')),

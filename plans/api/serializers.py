@@ -3,6 +3,20 @@ from plans.models import OptionCategory, Option, Plan
 from drf_extra_fields.fields import HybridImageField
 from utils.mixins import DynamicMixinModelSerializer
 from utils.base64_image_field import Base64ImageField
+from utils.helpers import get_file_representations
+from studios.api.serializers import StudioShortInfoSerializer
+
+
+class OptionCategoryShortInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OptionCategory
+        fields = ["id", "number", "title", "slug"]
+        
+    def to_representation(self, instance):
+        """ Modify representation of data """
+        representation = super(OptionCategoryShortInfoSerializer, self).to_representation(instance)
+        representation['studio_details'] = StudioShortInfoSerializer(instance.studio).data
+        return representation
 
 
 class OptionCategorySerializer(DynamicMixinModelSerializer):
@@ -12,6 +26,13 @@ class OptionCategorySerializer(DynamicMixinModelSerializer):
         model = OptionCategory
         fields = ("number", "title", "studio", "icon", "slug")
         read_only_fields = ("slug",)
+        
+    def to_representation(self, instance):
+        """ Modify representation of data """
+        representation = super(OptionCategorySerializer, self).to_representation(instance)
+        representation['studio_details'] = StudioShortInfoSerializer(instance.studio).data
+        representation = get_file_representations(representation=representation, instance=instance)
+        return representation
 
 
 class OptionCategoryUpdateSerializer(DynamicMixinModelSerializer):
@@ -21,6 +42,13 @@ class OptionCategoryUpdateSerializer(DynamicMixinModelSerializer):
         model = OptionCategory
         fields = "__all__"
         read_only_fields = ("slug", "number", "studio",)
+        
+    def to_representation(self, instance):
+        """ Modify representation of data """
+        representation = super(OptionCategoryUpdateSerializer, self).to_representation(instance)
+        representation['studio_details'] = StudioShortInfoSerializer(instance.studio).data
+        representation = get_file_representations(representation=representation, instance=instance)
+        return representation
 
 
 class OptionSerializer(DynamicMixinModelSerializer):
@@ -30,6 +58,12 @@ class OptionSerializer(DynamicMixinModelSerializer):
         model = Option
         fields = "__all__"
         read_only_fields = ("slug",)
+        
+    def to_representation(self, instance):
+        """ Modify representation of data """
+        representation = super(OptionSerializer, self).to_representation(instance)
+        representation['studio_details'] = StudioShortInfoSerializer(instance.option_category.studio).data
+        return representation
 
 
 class OptionUpdateSerializer(DynamicMixinModelSerializer):
@@ -39,6 +73,13 @@ class OptionUpdateSerializer(DynamicMixinModelSerializer):
         model = Option
         fields = "__all__"
         read_only_fields = ("slug", "option_category", "number",)
+        
+    def to_representation(self, instance):
+        """ Modify representation of data """
+        representation = super(OptionUpdateSerializer, self).to_representation(instance)
+        representation['studio_details'] = StudioShortInfoSerializer(instance.option_category.studio).data
+        return representation
+    
         
 class PlanSerializer(DynamicMixinModelSerializer):
     image_1 = Base64ImageField(max_length=None, use_url=True, required=False)
