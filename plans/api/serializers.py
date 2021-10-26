@@ -51,6 +51,17 @@ class OptionCategoryUpdateSerializer(DynamicMixinModelSerializer):
         return representation
 
 
+class OptionShortInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OptionCategory
+        fields = ["id", "number", "title", "slug"]
+        
+    def to_representation(self, instance):
+        """ Modify representation of data """
+        representation = super(OptionShortInfoSerializer, self).to_representation(instance)
+        representation['option_category_details'] = OptionCategoryShortInfoSerializer(instance.option_category).data
+        return representation
+
 class OptionSerializer(DynamicMixinModelSerializer):
     icon = HybridImageField(required=False)
 
@@ -62,7 +73,7 @@ class OptionSerializer(DynamicMixinModelSerializer):
     def to_representation(self, instance):
         """ Modify representation of data """
         representation = super(OptionSerializer, self).to_representation(instance)
-        representation['studio_details'] = StudioShortInfoSerializer(instance.option_category.studio).data
+        representation['option_category_details'] = OptionCategoryShortInfoSerializer(instance.option_category).data
         return representation
 
 
@@ -77,7 +88,7 @@ class OptionUpdateSerializer(DynamicMixinModelSerializer):
     def to_representation(self, instance):
         """ Modify representation of data """
         representation = super(OptionUpdateSerializer, self).to_representation(instance)
-        representation['studio_details'] = StudioShortInfoSerializer(instance.option_category.studio).data
+        representation['option_category_details'] = OptionCategoryShortInfoSerializer(instance.option_category).data
         return representation
     
         
@@ -92,6 +103,12 @@ class PlanSerializer(DynamicMixinModelSerializer):
             "title", "slug", "space", "option", "hourly_price", "daily_price", "image_1", "image_1_reference", "image_1_comment", "image_2", "image_2_reference", "image_2_comment", "image_3", "image_3_reference", "image_3_comment", "is_active", "explanatory_comment", "details"
         ]
         read_only_fields = ("slug",)
+        
+    def to_representation(self, instance):
+        """ Modify representation of data integrating `user` OneToOne Field """
+        representation = super(PlanSerializer, self).to_representation(instance)
+        representation['space_details'] = [OptionUpdateSerializer(storeData).data for storeData in instance.store.all()]
+        return representation
 
 class PlanUpdateSerializer(DynamicMixinModelSerializer):
     image_1 = Base64ImageField(max_length=None, use_url=True, required=False)
