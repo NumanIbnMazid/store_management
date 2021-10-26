@@ -258,42 +258,6 @@ class StoreBusinessHour(models.Model):
         
         return result
     
-    # def get_business_hour_status_from_day_of_week_and_time(self, day_of_week, time):
-    #     is_open = False
-    #     result = {
-    #         "opening_time": None,
-    #         "closing_time": None
-    #     }
-    #     if day_of_week == "Saturday":
-    #         result["opening_time"] = self.saturday_opening_time
-    #         result["closing_time"] = self.saturday_closing_time
-        
-    #     if day_of_week == "Sunday":
-    #         result["opening_time"] = self.sunday_opening_time
-    #         result["closing_time"] = self.sunday_closing_time
-        
-    #     if day_of_week == "Monday":
-    #         result["opening_time"] = self.monday_opening_time
-    #         result["closing_time"] = self.monday_closing_time
-        
-    #     if day_of_week == "Tuesday":
-    #         result["opening_time"] = self.tuesday_opening_time
-    #         result["closing_time"] = self.tuesday_closing_time
-        
-    #     if day_of_week == "Wednesday":
-    #         result["opening_time"] = self.wednesday_opening_time
-    #         result["closing_time"] = self.wednesday_closing_time
-        
-    #     if day_of_week == "Thursday":
-    #         result["opening_time"] = self.thursday_opening_time
-    #         result["closing_time"] = self.thursday_closing_time
-        
-    #     if day_of_week == "Friday":
-    #         result["opening_time"] = self.friday_opening_time
-    #         result["closing_time"] = self.friday_closing_time
-        
-    #     return result
-
 
 """
 *** Pre-Save, Post-Save and Pre-Delete Hooks ***
