@@ -107,8 +107,8 @@ class StoreManagerViewSet(CustomViewSet):
                         "status": f"Undefined! Exception: {str(E)}"
                     }
                 
-                return ResponseWrapper(data=result, status=200)
-            return ResponseWrapper(error_msg=serializer.errors, error_code=400)
+                return ResponseWrapper(data=result, status=200, msg="Result fetched successfully!")
+            return ResponseWrapper(error_msg=serializer.errors, error_code=400, msg="Failed to fetch the result!")
         
         except Exception as E:
             return get_exception_error_msg(errorObj=E, msg="Failed to get the result!")
