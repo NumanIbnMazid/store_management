@@ -53,6 +53,15 @@ class Store(models.Model):
         model_cleaner(selfObj=self, qsFieldObjectList=qsFieldObjectList, initialObject=initialObject)
         
     def get_business_day_status_from_datetime(self, datetimeInReq):
+        """[Checks business day status by checking Default Business Day, Custom Business Day and Business Hour]
+
+        Args:
+            datetimeInReq ([DateTime]): [DateTime Object from request]
+
+        Returns:
+            [object]: [Object containing business day status]
+        """
+        
         result = {
             "store": self.name,
             "datetime": datetimeInReq.strftime("%Y-%m-%d %H:%M:%S"),
