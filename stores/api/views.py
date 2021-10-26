@@ -97,15 +97,8 @@ class StoreManagerViewSet(CustomViewSet):
                 
                 datetimeobj = parser.parse(datetime_in_req)
 
-                try:
-                    result = store_obj.get_business_day_status_from_datetime(datetimeInReq=datetimeobj)
-                except Exception as E:
-                    result = {
-                        "store": self.name,
-                        "datetime": datetimeobj.strftime("%Y-%m-%d %H:%M:%S"),
-                        "day_of_week": datetimeobj.strftime("%A"),
-                        "status": f"Undefined! Exception: {str(E)}"
-                    }
+                # get the result
+                result = store_obj.get_business_day_status_from_datetime(datetimeInReq=datetimeobj)
                 
                 return ResponseWrapper(data=result, status=200, msg="Result fetched successfully!")
             return ResponseWrapper(error_msg=serializer.errors, error_code=400, msg="Failed to fetch the result!")
