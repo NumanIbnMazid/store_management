@@ -14,6 +14,7 @@ urlpatterns = [
     path("coupon/update/<slug>", CouponManagerViewSet.as_view({"patch": "update"}, name="update_coupon")),
     path("coupon/delete/<slug>", CouponManagerViewSet.as_view({"delete": "destroy"}, name="delete_coupon")),
     path("coupon/list/<studio_slug>", CouponManagerViewSet.as_view({"get": "list"}, name="list_coupon")),
+    path("coupon/dynamic-list", CouponManagerViewSet.as_view({"get": "dynamic_list"}, name="coupon_dynamic_list")),
 
     # ==============================*** PointSetting URLS ***==============================
     path("point-setting/create", PointSettingManagerViewSet.as_view({'post': 'create'}, name='create_point_setting')),
@@ -21,6 +22,7 @@ urlpatterns = [
     path("point-setting/update/<slug>", PointSettingManagerViewSet.as_view({"patch": "update"}, name="update_point_setting")),
     path("point-setting/delete/<slug>", PointSettingManagerViewSet.as_view({"delete": "destroy"}, name="delete_point_setting")),
     path("point-setting/list/<studio_slug>", PointSettingManagerViewSet.as_view({"get": "list"}, name="list_point_setting")),
+    path("point-setting/dynamic-list", PointSettingManagerViewSet.as_view({"get": "dynamic_list"}, name="point_setting_dynamic_list")),
 
     # ==============================*** Early Bird Discount URLS ***==============================
     path("earlybird-discount/create", EarlyBirdDiscountManagerViewSet.as_view(
@@ -31,8 +33,8 @@ urlpatterns = [
         {"patch": "update"}, name="update_earlybird_discount")),
     path("earlybird-discount/delete/<slug>", EarlyBirdDiscountManagerViewSet.as_view(
         {"delete": "destroy"}, name="delete_earlybird_discount")),
-    path("earlybird-discount/list/<studio_slug>",
-         PointSettingManagerViewSet.as_view({"get": "list"}, name="list_earlybird_discount")),
+    path("earlybird-discount/list/<studio_slug>", PointSettingManagerViewSet.as_view({"get": "list"}, name="list_earlybird_discount")),
+    path("earlybird-discount/dynamic-list", PointSettingManagerViewSet.as_view({"get": "dynamic_list"}, name="earlybird_discount_dynamic_list")),
 
     # ==============================*** Periodical Discount URLS ***==============================
     path("periodical-discount/create", PeriodicalDiscountManagerViewSet.as_view(
@@ -43,7 +45,6 @@ urlpatterns = [
         {"patch": "update"}, name="update_periodical-discount")),
     path("periodical-discount/delete/<slug>", PeriodicalDiscountManagerViewSet.as_view(
         {"delete": "destroy"}, name="delete_periodical-discount")),
-    path("periodical-discount/list/<studio_slug>",
-         PointSettingManagerViewSet.as_view({"get": "list"}, name="list_periodical-discount")),
-
+    path("periodical-discount/list/<studio_slug>", PeriodicalDiscountManagerViewSet.as_view({"get": "list"}, name="list_periodical_discount")),
+    path("periodical-discount/dynamic-list", PeriodicalDiscountManagerViewSet.as_view({"get": "dynamic_list"}, name="periodical_discount_dynamic_list")),
 ]

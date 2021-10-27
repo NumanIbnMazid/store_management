@@ -1,5 +1,4 @@
-from .serializers import (PeriodicalDiscountSerializer,
-                          PeriodicalDiscountUpdateSerializer)
+from .serializers import (PeriodicalDiscountSerializer, PeriodicalDiscountUpdateSerializer)
 from deals.models import PeriodicalDiscount
 from rest_framework_tracking.mixins import LoggingMixin
 from utils import permissions as custom_permissions

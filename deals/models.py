@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models.fields import PositiveIntegerField, PositiveSmallIntegerField
 from utils.helpers import model_cleaner
 from studios.models import Studio
 from utils.helpers import autoslugFromUUID
@@ -44,15 +43,12 @@ class Coupon(models.Model):
 
 @autoslugFromUUID()
 class PeriodicalDiscount(models.Model):
-    studio = models.ForeignKey(
-        Studio, on_delete=models.CASCADE, related_name="studio_periodical_discounts")
+    studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_periodical_discounts")
     slug = models.SlugField(unique=True, max_length=254)
     reservation_day_ago = models.PositiveSmallIntegerField()
-    discount_percentage = models.DecimalField(
-        max_digits=10, decimal_places=2, default=0)
+    discount_percentage = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name='created at')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='created at')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='updated at')
 
     class Meta:
@@ -69,15 +65,12 @@ class PeriodicalDiscount(models.Model):
 
 @autoslugFromUUID()
 class EarlyBirdDiscount(models.Model):
-    studio = models.ForeignKey(
-        Studio, on_delete=models.CASCADE, related_name="studio_earlybird_discounts")
+    studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_earlybird_discounts")
     slug = models.SlugField(unique=True, max_length=254)
     period = models.DateTimeField()
-    discount_percentage = models.DecimalField(
-        max_digits=10, decimal_places=2, default=0)
+    discount_percentage = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(
-        auto_now_add=True, verbose_name='created at')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='created at')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='updated at')
 
     class Meta:
