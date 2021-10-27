@@ -9,7 +9,7 @@ from utils.studio_getter_helper import (
 )
 from django.db.models import Q
 
-class OptionManagerViewSet(LoggingMixin, CustomViewSet):
+class OptionManagerViewSet(CustomViewSet):
     
     logging_methods = ["GET", "POST", "PATCH", "DELETE"]
     queryset = Option.objects.all()
@@ -59,6 +59,16 @@ class OptionManagerViewSet(LoggingMixin, CustomViewSet):
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='list', status=200)
+        except Exception as E:
+            return get_exception_error_msg(errorObj=E, msg="list")
+        
+    def option_list_from_studio_slug(self, request, *args, **kwargs):
+        try:
+            studio_slug = kwargs.get("studio_slug")
+            qs = self.get_queryset().filter(option_category__studio__slug__iexact=studio_slug)
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(instance=qs, many=True)
+            return ResponseWrapper(data=serializer.data, msg='list')
         except Exception as E:
             return get_exception_error_msg(errorObj=E, msg="list")
 

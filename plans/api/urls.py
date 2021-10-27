@@ -20,6 +20,7 @@ urlpatterns = [
     path("option/update/<slug>", OptionManagerViewSet.as_view({"patch": "update"}, name="update_option")),
     path("option/delete/<slug>", OptionManagerViewSet.as_view({"delete": "destroy"}, name="delete_option")),
     path("option/list/<option_category_slug>", OptionManagerViewSet.as_view({"get": "list"}, name="list_option")),
+    path("studio/option/list/<studio_slug>", OptionManagerViewSet.as_view({"get": "option_list_from_studio_slug"}, name="option_list_from_studio_slug")),
     path("option/dynamic-list", OptionManagerViewSet.as_view({"get": "dynamic_list"}, name="option_dynamic_list")),
 
     # ==============================*** Plan URLS ***==============================
