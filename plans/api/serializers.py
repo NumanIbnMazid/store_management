@@ -25,7 +25,7 @@ class OptionCategorySerializer(DynamicMixinModelSerializer):
 
     class Meta:
         model = OptionCategory
-        fields = ("number", "title", "studio", "icon", "slug")
+        fields = "__all__"
         read_only_fields = ("slug",)
         
     def to_representation(self, instance):
@@ -101,7 +101,7 @@ class PlanSerializer(DynamicMixinModelSerializer):
     class Meta:
         model = Plan
         fields = [
-            "title", "slug", "space", "option", "hourly_price", "daily_price", "image_1", "image_1_reference", "image_1_comment", "image_2", "image_2_reference", "image_2_comment", "image_3", "image_3_reference", "image_3_comment", "is_active", "explanatory_comment", "details"
+            "id", "title", "slug", "space", "option", "hourly_price", "daily_price", "image_1", "image_1_reference", "image_1_comment", "image_2", "image_2_reference", "image_2_comment", "image_3", "image_3_reference", "image_3_comment", "is_active", "explanatory_comment", "details"
         ]
         read_only_fields = ("slug",)
         
@@ -120,7 +120,7 @@ class PlanUpdateSerializer(DynamicMixinModelSerializer):
     class Meta:
         model = Plan
         fields = [
-            "title", "slug", "space", "option", "hourly_price", "daily_price", "image_1", "image_1_reference", "image_1_comment", "image_2", "image_2_reference", "image_2_comment", "image_3", "image_3_reference", "image_3_comment", "is_active", "explanatory_comment", "details"
+            "id", "title", "slug", "space", "option", "hourly_price", "daily_price", "image_1", "image_1_reference", "image_1_comment", "image_2", "image_2_reference", "image_2_comment", "image_3", "image_3_reference", "image_3_comment", "is_active", "explanatory_comment", "details"
         ]
         read_only_fields = ("slug",)
         
