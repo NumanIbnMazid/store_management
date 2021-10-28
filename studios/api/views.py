@@ -6,7 +6,7 @@ from .serializers import (
     StudioSerializer,
     StudioUpdateSerializer,
     StudioShortInfoSerializer
-    )
+)
 from studios.models import Studio
 from allauth.utils import email_address_exists
 
