@@ -243,7 +243,7 @@ class IsStoreStaff(permissions.BasePermission):
             if hasattr(view, 'get_studio_id'):
                 # get studio id from viewset
                 studio_id = view.get_studio_id()
-
+                
                 if studio_id[0] == True:
                     # query studio from studio_id passed by viewset
                     studio_qs = Studio.objects.filter(id=int(studio_id[-1]))

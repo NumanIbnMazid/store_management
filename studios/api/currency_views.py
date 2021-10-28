@@ -7,7 +7,6 @@ from utils.helpers import ResponseWrapper, get_exception_error_msg
 from utils.studio_getter_helper import (
     get_studio_id_from_studio
 )
-from django.db.models import Q
 
 """
     ----------------------- * Currency * -----------------------
@@ -31,7 +30,7 @@ class CurrencyManagerViewSet(LoggingMixin, CustomViewSet):
     
     def get_permissions(self):
         if self.action in ["dynamic_list"]:
-            permission_classes = [custom_permissions.IsStudioStaff]
+            permission_classes = [custom_permissions.IsStudioAdmin]
         else:
             permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]

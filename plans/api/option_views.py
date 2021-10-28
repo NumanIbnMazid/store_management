@@ -47,15 +47,20 @@ class OptionManagerViewSet(CustomViewSet):
         
     def dynamic_list(self, request, *args, **kwargs):
         try:
+            
             if request.user.is_superuser or request.user.is_staff:
                 qs = self.get_queryset()
-            elif request.user.is_studio_admin or request.user.is_store_staff:
+            elif request.user.is_studio_admin:
                 qs = self.get_queryset().filter(
-                    Q(option_category__studio__slug__iexact=request.user.studio_user.slug) |
-                    Q(option_category__studio__slug__iexact=request.user.store_moderator_user.store.all()[0].studio.slug)
+                    option_category__studio__slug__iexact=request.user.studio_user.slug
+                )
+            elif request.user.store_moderator_user:
+                qs = self.get_queryset().filter(
+                    option_category__studio__slug__iexact=request.user.store_moderator_user.store.all()[0].studio.slug
                 )
             else:
                 qs = None
+          
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(instance=qs, many=True)
             return ResponseWrapper(data=serializer.data, msg='list', status=200)

@@ -24,10 +24,12 @@ def get_custom_permission(selfObject):
 
 def get_studio_id_from_studio(selfObject, slug=None):
     try:
-        return True, selfObject.get_object().studio.id
-    except Exception as E:
+        if slug and selfObject.get_object():
+            return True, selfObject.get_object().studio.id
+        elif selfObject.get_queryset():
+            return True, selfObject.get_queryset().first().studio.id
         # get related object id
-        if not slug and selfObject.request.data.get("studio"):
+        elif not slug and selfObject.request.data.get("studio"):
             related_object = populate_related_object_id(
                 request=selfObject.request, related_data_name="studio"
             )
@@ -44,16 +46,20 @@ def get_studio_id_from_studio(selfObject, slug=None):
                 return False, "Failed to get `Studio`! Thus failed to provide required permissions for Studio Management."
         else:
             return True, selfObject.request.user.studio_user.id if selfObject.request.user.studio_user.id else selfObject.request.user.store_moderator_user.store.all()[0].studio.id
+    except Exception as E:
+        return False, "Failed to get `Studio`! Thus failed to provide required permissions for Studio Management."
 
 
 """ *** Get Studio ID | Key : `store` """
 
 def get_studio_id_from_store(selfObject, slug=None):
     try:
-        return True, selfObject.get_object().store.studio.id
-    except Exception as E:
+        if slug and selfObject.get_object():
+            return True, selfObject.get_object().store.studio.id
+        elif selfObject.get_queryset():
+            return True, selfObject.get_queryset().first().store.studio.id
         # get related object id
-        if not slug and selfObject.request.data.get("store"):
+        elif not slug and selfObject.request.data.get("store"):
             related_object = populate_related_object_id(
                 request=selfObject.request, related_data_name="store"
             )
@@ -78,6 +84,8 @@ def get_studio_id_from_store(selfObject, slug=None):
                 return False, "Failed to get `Store`! Thus failed to provide required permissions for Studio Management."
         else:
             return True, selfObject.request.user.studio_user.id if selfObject.request.user.studio_user.id else selfObject.request.user.store_moderator_user.store.all()[0].studio.id
+    except Exception as E:
+        return False, "Failed to get `Store`! Thus failed to provide required permissions for Studio Management."
 
 
 
@@ -86,10 +94,12 @@ def get_studio_id_from_store(selfObject, slug=None):
 
 def get_studio_id_from_space(selfObject, slug=None):
     try:
-        return True, selfObject.get_object().space.all().first().store.studio.id
-    except Exception as E:
+        if slug and selfObject.get_object():
+            return True, selfObject.get_object().space.all().first().store.studio.id
+        elif selfObject.get_queryset():
+            return True, selfObject.get_queryset().first().space.all().first().store.studio.id
         # get related object id
-        if not slug and selfObject.request.data.get("space"):
+        elif not slug and selfObject.request.data.get("space"):
             # get related object id
             related_object = populate_related_object_id(
                 request=selfObject.request, related_data_name="space"
@@ -115,6 +125,8 @@ def get_studio_id_from_space(selfObject, slug=None):
                 return False, "Failed to get `Space`! Thus failed to provide required permissions for Studio Management."
         else:
             return True, selfObject.request.user.studio_user.id if selfObject.request.user.studio_user.id else selfObject.request.user.store_moderator_user.store.all()[0].studio.id
+    except Exception as E:
+        return False, "Failed to get `Space`! Thus failed to provide required permissions for Studio Management."
 
 
 """ *** Get Studio ID | Key : `option_category` """
@@ -122,10 +134,12 @@ def get_studio_id_from_space(selfObject, slug=None):
 
 def get_studio_id_from_option_category(selfObject, slug=None):
     try:
-        return True, selfObject.get_object().option_category.studio.id
-    except Exception as E:
+        if slug and selfObject.get_object():
+            return True, selfObject.get_object().option_category.studio.id
+        elif selfObject.get_queryset():
+            return True, selfObject.get_queryset().first().option_category.studio.id
         # check if slug is None
-        if not slug and selfObject.request.data.get("option_category"):
+        elif not slug and selfObject.request.data.get("option_category"):
             # get related object id
             related_object = populate_related_object_id(
                 request=selfObject.request, related_data_name="option_category"
@@ -150,5 +164,7 @@ def get_studio_id_from_option_category(selfObject, slug=None):
                 return False, "Failed to get `OptionCategory`! Thus failed to provide required permissions for Studio Management."
         else:
             return True, selfObject.request.user.studio_user.id if selfObject.request.user.studio_user.id else selfObject.request.user.store_moderator_user.store.all()[0].studio.id
+    except Exception as E:
+        False, "Failed to get `OptionCategory`! Thus failed to provide required permissions for Studio Management."
 
 

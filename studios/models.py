@@ -74,7 +74,7 @@ class Currency(models.Model):
     studio = models.ForeignKey(Studio, on_delete=models.CASCADE, related_name="studio_currency")
     country = models.CharField(max_length=50)
     slug = models.SlugField(unique=True, max_length=254)
-    currency = models.CharField(max_length=50, blank=True)
+    currency = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
