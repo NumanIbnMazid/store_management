@@ -127,6 +127,26 @@ class CustomBusinessDayManagerViewSet(LoggingMixin, CustomViewSet):
         permission_classes = [custom_permissions.IsStudioAdmin]
         return [permission() for permission in permission_classes]
     
+    def dynamic_list(self, request, *args, **kwargs):
+        try:
+            if request.user.is_superuser or request.user.is_staff:
+                qs = self.get_queryset()
+            elif request.user.is_studio_admin:
+                qs = self.get_queryset().filter(
+                    store__studio__slug__iexact=request.user.studio_user.slug
+                )
+            elif request.user.store_moderator_user:
+                qs = self.get_queryset().filter(
+                    store__studio__slug__iexact=request.user.store_moderator_user.store.all()[0].studio.slug
+                )
+            else:
+                qs = None
+            serializer_class = self.get_serializer_class()
+            serializer = serializer_class(instance=qs, many=True)
+            return ResponseWrapper(data=serializer.data, msg='list', status=200)
+        except Exception as E:
+            return get_exception_error_msg(errorObj=E, msg="list")
+    
     def update(self, request, **kwargs):
         
         try:

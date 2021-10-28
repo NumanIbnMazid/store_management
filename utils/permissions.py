@@ -110,6 +110,7 @@ class IsStudioAdmin(permissions.BasePermission):
         try:
             # if view function has get_studio_id method
             if hasattr(view, 'get_studio_id'):
+                
                 # get studio id from viewset
                 studio_id = view.get_studio_id()
 

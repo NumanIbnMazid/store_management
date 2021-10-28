@@ -23,17 +23,14 @@ def get_custom_permission(selfObject):
 
 """ *** Get Studio ID | Key : `studio` """
 
+# True, selfObject.get_object().space.all().first().store.studio.id
 
 def get_studio_id_from_studio(selfObject, slug=None):
     try:
         defaultSlug = selfObject.kwargs.get("slug", None)
-
-        if defaultSlug:
-            studio_qs = Studio.objects.filter(slug__iexact=defaultSlug)
-            if studio_qs.exists():
-                return True, studio_qs.first().id
-            else:
-                return False, "Failed to get `Studio`! Thus failed to provide required permissions for Studio Management."
+        
+        if defaultSlug and selfObject.get_object():
+            return True, selfObject.get_object().studio.id
 
         elif slug:
             studio_qs = Studio.objects.filter(slug__iexact=slug)
@@ -64,7 +61,6 @@ def get_studio_id_from_studio(selfObject, slug=None):
 
 def get_studio_id_from_store(selfObject, slug=None):
     try:
-
         defaultSlug = selfObject.kwargs.get("slug", None)
 
         if defaultSlug:
