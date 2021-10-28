@@ -50,7 +50,7 @@ class StoreManagerViewSet(CustomViewSet):
 
     def list_with_short_info(self, request, *args, **kwargs):
         try:
-            studio_slug = kwargs.get("studio_slug")
+            studio_slug = kwargs.get("studio_slug", None)
             qs = self.get_queryset().filter(studio__slug__iexact=studio_slug)
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(instance=qs, many=True)
