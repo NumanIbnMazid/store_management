@@ -1,9 +1,10 @@
 from rest_framework import permissions
 from django.db.models import Q
+from django.http import Http404
 from spaces.models import Space
 from studios.models import Studio
 from plans.models import Plan, OptionCategory, Option
-from stores.models import Store, StoreModerator
+from stores.models import Store
 from studio_calendar.models import StudioCalendar, BusinessDay, BusinessHour
 
 
@@ -128,8 +129,11 @@ class IsStudioAdmin(permissions.BasePermission):
                         self.message = f"Studio {studio_id[-1]} not found! Thus failed to provide required permissions for Studio Management."
                         return False
                 else:
-                    self.message = studio_id[-1]
-                    return False
+                    if type(studio_id[-1]) == Http404:
+                        return True
+                    else:
+                        self.message = str(studio_id[-1])
+                        return False
             # if not view function has get_studio_id method
             else:
                 # *** Check Base Permission ***
@@ -138,6 +142,7 @@ class IsStudioAdmin(permissions.BasePermission):
                 else:
                     return False
         except Exception as E:
+            print(E)
             return False
         
         return False
@@ -196,8 +201,11 @@ class IsStudioStaff(permissions.BasePermission):
                         self.message = f"Studio {studio_id[-1]} not found! Thus failed to provide required permissions for Studio Management."
                         return False
                 else:
-                    self.message = studio_id[-1]
-                    return False
+                    if type(studio_id[-1]) == Http404:
+                        return True
+                    else:
+                        self.message = str(studio_id[-1])
+                        return False
             # if not view function has get_studio_id method
             else:
                 # *** Check Base Permission ***
@@ -266,8 +274,11 @@ class IsStoreStaff(permissions.BasePermission):
                         self.message = f"Studio {studio_id[-1]} not found! Thus failed to provide required permissions for Studio Management."
                         return False
                 else:
-                    self.message = studio_id[-1]
-                    return False
+                    if type(studio_id[-1]) == Http404:
+                        return True
+                    else:
+                        self.message = str(studio_id[-1])
+                        return False
             # if not view function has get_studio_id method
             else:
                 # *** Check Base Permission ***
