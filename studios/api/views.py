@@ -41,7 +41,7 @@ class StudioViewSet(LoggingMixin, CustomViewSet):
         return self.serializer_class
 
     def get_permissions(self):
-        if self.action in ["create", "destroy", "list"]:
+        if self.action in ["create", "destroy", "list", "list_with_short_info"]:
             permission_classes = [custom_permissions.IsSuperUser]
         else:
             permission_classes = [custom_permissions.IsStudioAdmin]
