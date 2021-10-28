@@ -23,7 +23,6 @@ def get_custom_permission(selfObject):
 
 """ *** Get Studio ID | Key : `studio` """
 
-# True, selfObject.get_object().space.all().first().store.studio.id
 
 def get_studio_id_from_studio(selfObject, slug=None):
     try:
@@ -53,7 +52,7 @@ def get_studio_id_from_studio(selfObject, slug=None):
             return True, selfObject.request.user.studio_user.id if selfObject.request.user.studio_user.id else selfObject.request.user.store_moderator_user.store.all()[0].studio.id
 
     except Exception as E:
-        return False, f"Failed to get `Studio`! Thus failed to provide required permissions for Studio Management. Exception: {str(E)}"
+        return False, E
 
 
 """ *** Get Studio ID | Key : `store` """
@@ -62,16 +61,10 @@ def get_studio_id_from_studio(selfObject, slug=None):
 def get_studio_id_from_store(selfObject, slug=None):
     try:
         defaultSlug = selfObject.kwargs.get("slug", None)
-
-        if defaultSlug:
-            # store queryset
-            store_qs = Store.objects.filter(slug__iexact=defaultSlug)
-            # check if store exists
-            if store_qs.exists():
-                return True, store_qs.first().studio.id
-            else:
-                return False, "Failed to get `Store`! Thus failed to provide required permissions for Studio Management."
-
+        
+        if defaultSlug and selfObject.get_object():
+            return True, selfObject.get_object().store.studio.id
+        
         elif slug:
             # store queryset
             store_qs = Store.objects.filter(slug__iexact=slug)
@@ -95,7 +88,7 @@ def get_studio_id_from_store(selfObject, slug=None):
             return True, selfObject.request.user.studio_user.id if selfObject.request.user.studio_user.id else selfObject.request.user.store_moderator_user.store.all()[0].studio.id
 
     except Exception as E:
-        return False, f"Failed to get `Store`! Thus failed to provide required permissions for Studio Management. Exception: {str(E)}"
+        return False, E
 
 
 """ *** Get Studio ID | Key : `space` """
@@ -105,15 +98,9 @@ def get_studio_id_from_space(selfObject, slug=None):
     try:
 
         defaultSlug = selfObject.kwargs.get("slug", None)
-
-        if defaultSlug:
-            # space queryset
-            space_qs = Space.objects.filter(slug__iexact=defaultSlug)
-            # check if space is exists
-            if space_qs.exists():
-                return True, space_qs.first().store.studio.id
-            else:
-                return False, "Failed to get `Space`! Thus failed to provide required permissions for Studio Management."
+        
+        if defaultSlug and selfObject.get_object():
+            return True, selfObject.get_object().space.all().first().store.studio.id
 
         elif slug:
             # space queryset
@@ -138,7 +125,7 @@ def get_studio_id_from_space(selfObject, slug=None):
             return True, selfObject.request.user.studio_user.id if selfObject.request.user.studio_user.id else selfObject.request.user.store_moderator_user.store.all()[0].studio.id
         
     except Exception as E:
-        return False, f"Failed to get `Space`! Thus failed to provide required permissions for Studio Management. Exception: {str(E)}"
+        return False, E
 
 
 """ *** Get Studio ID | Key : `option_category` """
@@ -149,13 +136,8 @@ def get_studio_id_from_option_category(selfObject, slug=None):
         
         defaultSlug = selfObject.kwargs.get("slug", None)
 
-        if defaultSlug:
-            # query option category
-            option_category_qs = OptionCategory.objects.filter(slug__iexact=defaultSlug)
-            if option_category_qs.exists():
-                return True, option_category_qs.first().studio.id
-            else:
-                return False, "Failed to get `OptionCategory`! Thus failed to provide required permissions for Studio Management."
+        if defaultSlug and selfObject.get_object():
+            return True, selfObject.get_object().option_category.all().first().studio.id
 
         elif slug:
             # query option category
@@ -177,4 +159,4 @@ def get_studio_id_from_option_category(selfObject, slug=None):
             return True, selfObject.request.user.studio_user.id if selfObject.request.user.studio_user.id else selfObject.request.user.store_moderator_user.store.all()[0].studio.id
         
     except Exception as E:
-        False, "Failed to get `OptionCategory`! Thus failed to provide required permissions for Studio Management."
+        return False, E
