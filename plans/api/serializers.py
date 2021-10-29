@@ -2,7 +2,7 @@ from rest_framework import serializers
 from plans.models import OptionCategory, Option, Plan
 from drf_extra_fields.fields import HybridImageField
 from utils.mixins import DynamicMixinModelSerializer
-from utils.base64_image_field import Base64ImageField
+from drf_extra_fields.fields import HybridImageField
 from utils.helpers import get_file_representations
 from studios.api.serializers import StudioShortInfoSerializer
 from spaces.api.serializers import SpaceShortInfoSerializer
@@ -94,9 +94,9 @@ class OptionUpdateSerializer(DynamicMixinModelSerializer):
     
         
 class PlanSerializer(DynamicMixinModelSerializer):
-    image_1 = Base64ImageField(max_length=None, use_url=True, required=False)
-    image_2 = Base64ImageField(max_length=None, use_url=True, required=False)
-    image_3 = Base64ImageField(max_length=None, use_url=True, required=False)
+    image_1 = HybridImageField(required=False)
+    image_2 = HybridImageField(required=False)
+    image_3 = HybridImageField(required=False)
 
     class Meta:
         model = Plan
@@ -113,9 +113,9 @@ class PlanSerializer(DynamicMixinModelSerializer):
         return representation
 
 class PlanUpdateSerializer(DynamicMixinModelSerializer):
-    image_1 = Base64ImageField(max_length=None, use_url=True, required=False)
-    image_2 = Base64ImageField(max_length=None, use_url=True, required=False)
-    image_3 = Base64ImageField(max_length=None, use_url=True, required=False)
+    image_1 = HybridImageField(required=False)
+    image_2 = HybridImageField(required=False)
+    image_3 = HybridImageField(required=False)
 
     class Meta:
         model = Plan

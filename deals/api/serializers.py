@@ -1,6 +1,8 @@
 from deals.models import Coupon, PointSetting, PeriodicalDiscount, EarlyBirdDiscount
 from utils.mixins import DynamicMixinModelSerializer
 from studios.api.serializers import StudioShortInfoSerializer
+from rest_framework import serializers
+from dateutil import parser
 
 
 class CouponSerializer(DynamicMixinModelSerializer):
@@ -15,6 +17,26 @@ class CouponSerializer(DynamicMixinModelSerializer):
         representation = super(CouponSerializer, self).to_representation(instance)
         representation['studio_details'] = StudioShortInfoSerializer(instance.studio).data
         return representation
+    
+    def validate(self, data):
+        
+        # validate initials
+        self.validate_initials(attrs=data)
+        
+        start_date = data.get("start_date", None)
+        end_date = data.get("end_date", None)
+        
+        if (start_date and not end_date) or (end_date and not start_date):
+            raise serializers.ValidationError("You must provide both start date and end date!")
+        
+        if start_date and end_date:
+            # check if start date and end date is in valid format
+            start_date_obj = parser.parse(str(start_date))
+            end_date_obj = parser.parse(str(end_date))
+            
+            if not end_date_obj > start_date_obj:
+                raise serializers.ValidationError("End Date must be greater than Start Date!")
+        return data
         
 
 class CouponUpdateSerializer(DynamicMixinModelSerializer):
@@ -29,6 +51,26 @@ class CouponUpdateSerializer(DynamicMixinModelSerializer):
         representation = super(CouponUpdateSerializer, self).to_representation(instance)
         representation['studio_details'] = StudioShortInfoSerializer(instance.studio).data
         return representation
+    
+    def validate(self, data):
+        
+        # validate initials
+        self.validate_initials(attrs=data)
+        
+        start_date = data.get("start_date", None)
+        end_date = data.get("end_date", None)
+        
+        if (start_date and not end_date) or (end_date and not start_date):
+            raise serializers.ValidationError("You must provide both start date and end date!")
+        
+        if start_date and end_date:
+            # check if start date and end date is in valid format
+            start_date_obj = parser.parse(str(start_date))
+            end_date_obj = parser.parse(str(end_date))
+            
+            if not end_date_obj > start_date_obj:
+                raise serializers.ValidationError("End Date must be greater than Start Date!")
+        return data
         
 class PointSettingSerializer(DynamicMixinModelSerializer):
       
