@@ -257,7 +257,7 @@ class StoreModeratorUpdateSerializer(DynamicMixinModelSerializer):
         """ Modify representation of data integrating `user` OneToOne Field """
         representation = super(StoreModeratorUpdateSerializer, self).to_representation(instance)
         representation['user'] = UserStoreModeratorSerializer(instance.user).data
-        representation['store_details'] = [StoreShortInfoSerializer(storeData).data for storeData in instance.user.store_moderator_user.store.all()]
+        representation['store_details'] = [StoreShortInfoSerializer(storeData).data for storeData in instance.store.all()]
         return representation
 
 
