@@ -80,7 +80,13 @@ def get_studio_id_from_store(selfObject, slug=None):
             )
             # check related object status
             if related_object[0] == True:
-                return True, related_object[-1]
+                # store queryset
+                store_qs = Store.objects.filter(id=int(related_object[-1]))
+                # check if store exists
+                if store_qs.exists():
+                    return True, store_qs.first().studio.id
+                else:
+                    return False, "Failed to get `Store`! Thus failed to provide required permissions for Studio Management."
             else:
                 return False, related_object[-1]
 
@@ -117,7 +123,13 @@ def get_studio_id_from_space(selfObject, slug=None):
             )
             # check related object status
             if related_object[0] == True:
-                return True, related_object[-1]
+                # space queryset
+                space_qs = Space.objects.filter(id=int(related_object[-1]))
+                # check if space is exists
+                if space_qs.exists():
+                    return True, space_qs.first().store.studio.id
+                else:
+                    return False, "Failed to get `Space`! Thus failed to provide required permissions for Studio Management."
             else:
                 return False, related_object[-1]
 
@@ -151,7 +163,12 @@ def get_studio_id_from_option_category(selfObject, slug=None):
             related_object = populate_related_object_id(request=selfObject.request, related_data_name="option_category")
             # check related object status
             if related_object[0] == True:
-                return True, related_object[-1]
+                # query option category
+                option_category_qs = OptionCategory.objects.filter(id=int(related_object[-1]))
+                if option_category_qs.exists():
+                    return True, option_category_qs.first().studio.id
+                else:
+                    return False, "Failed to get `OptionCategory`! Thus failed to provide required permissions for Studio Management."
             else:
                 return False, related_object[-1]
 
