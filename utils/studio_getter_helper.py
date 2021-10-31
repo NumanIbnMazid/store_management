@@ -63,7 +63,13 @@ def get_studio_id_from_store(selfObject, slug=None):
         defaultSlug = selfObject.kwargs.get("slug", None)
         
         if defaultSlug and selfObject.get_object():
-            return True, selfObject.get_object().store.studio.id
+            try:
+                return True, selfObject.get_object().store.studio.id
+            except Exception as ex:
+                if 'ManyRelatedManager' in ex.__str__():
+                    return True, selfObject.get_object().store.first().studio.id
+                return False, str(ex)
+
         
         elif slug:
             # store queryset
@@ -106,7 +112,13 @@ def get_studio_id_from_space(selfObject, slug=None):
         defaultSlug = selfObject.kwargs.get("slug", None)
         
         if defaultSlug and selfObject.get_object():
-            return True, selfObject.get_object().space.all().first().store.studio.id
+            try:
+                return True, selfObject.get_object().space.store.studio.id
+            except Exception as ex:
+                if 'ManyRelatedManager' in ex.__str__():
+                    return True, selfObject.get_object().space.first().store.studio.id
+                return False, str(ex)
+        
 
         elif slug:
             # space queryset
@@ -147,9 +159,14 @@ def get_studio_id_from_option_category(selfObject, slug=None):
     try:
         
         defaultSlug = selfObject.kwargs.get("slug", None)
-
+        
         if defaultSlug and selfObject.get_object():
-            return True, selfObject.get_object().option_category.all().first().studio.id
+            try:
+                return True, selfObject.get_object().option_category.studio.id
+            except Exception as ex:
+                if 'ManyRelatedManager' in ex.__str__():
+                    return True, selfObject.get_object().option_category.first().studio.id
+                return False, str(ex)
 
         elif slug:
             # query option category

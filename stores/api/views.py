@@ -193,7 +193,7 @@ class CustomBusinessDayManagerViewSet(LoggingMixin, CustomViewSet):
 """
 
 
-class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
+class StoreModeratorManagerViewSet(CustomViewSet):
     
     logging_methods = ['GET', 'POST', 'PATCH', 'DELETE']
     queryset = StoreModerator.objects.all()
@@ -307,3 +307,11 @@ class StoreModeratorManagerViewSet(LoggingMixin, CustomViewSet):
             return ResponseWrapper(data=serializer.data, msg='list', status=200)
         except Exception as E:
             return get_exception_error_msg(errorObj=E, msg="list")
+        
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return ResponseWrapper(data=serializer.data, msg="retrieve", status=200)
+        except Exception as E:
+            return get_exception_error_msg(errorObj=E, msg="retrieve")
