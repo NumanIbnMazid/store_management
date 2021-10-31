@@ -48,6 +48,9 @@ class PlanManagerViewSet(LoggingMixin, CustomViewSet):
             serializer_class = self.get_serializer_class()
             serializer = serializer_class(data=request.data)
             
+            # process file data
+            process_files_data(data=request.data, selfObject=self)
+            
             # validate many to many list
             validate_many_to_many_list(value=request.data.get("space", []), model=Space, fieldName="space", allowBlank=False)
             validate_many_to_many_list(value=request.data.get("option", []), model=Option, fieldName="option", allowBlank=True)
