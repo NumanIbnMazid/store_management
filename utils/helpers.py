@@ -376,7 +376,7 @@ def process_files_data(data: dict, selfObject):
 
             # remove file if data is null or empty string
             if file == None or file == "":
-                data.pop(field, None)
+                data[field] = ""
             else:
                 # remove file if data is an URL
                 if url_check(file):

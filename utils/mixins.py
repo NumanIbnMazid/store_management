@@ -79,6 +79,7 @@ class DynamicMixinModelSerializer(serializers.ModelSerializer):
                             raise serializers.ValidationError(
                                 {field_name: f"{visible_field_name}: Please keep filesize under {filesizeformat(settings.FILE_SIZE_LIMIT_IN_BYTES)}. Current filesize {filesizeformat(file.size)}"}
                             )
+                            
         return attrs
         
         
