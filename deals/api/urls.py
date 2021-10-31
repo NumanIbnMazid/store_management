@@ -33,8 +33,8 @@ urlpatterns = [
         {"patch": "update"}, name="update_earlybird_discount")),
     path("earlybird-discount/delete/<slug>", EarlyBirdDiscountManagerViewSet.as_view(
         {"delete": "destroy"}, name="delete_earlybird_discount")),
-    path("earlybird-discount/list/<studio_slug>", PointSettingManagerViewSet.as_view({"get": "list"}, name="list_earlybird_discount")),
-    path("earlybird-discount/dynamic-list", PointSettingManagerViewSet.as_view({"get": "dynamic_list"}, name="earlybird_discount_dynamic_list")),
+    path("earlybird-discount/list/<studio_slug>", EarlyBirdDiscountManagerViewSet.as_view({"get": "list"}, name="list_earlybird_discount")),
+    path("earlybird-discount/dynamic-list", EarlyBirdDiscountManagerViewSet.as_view({"get": "dynamic_list"}, name="earlybird_discount_dynamic_list")),
 
     # ==============================*** Periodical Discount URLS ***==============================
     path("periodical-discount/create", PeriodicalDiscountManagerViewSet.as_view(
