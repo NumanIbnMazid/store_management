@@ -8,7 +8,6 @@ from utils.helpers import ResponseWrapper, get_exception_error_msg, process_file
 from utils.studio_getter_helper import (
     get_studio_id_from_space
 )
-from django.db.models import Q
 
 
 class PlanManagerViewSet(LoggingMixin, CustomViewSet):
